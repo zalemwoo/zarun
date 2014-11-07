@@ -35,6 +35,13 @@ vars = {
   # and V8 without interference from each other.
   'v8_revision': '11b7b24c91c903ee08b2b6b94f0bbb17b966dd92', # from svn revision 25090
   # Three lines of non-changing comments so that
+  # the commit queue can handle CLs rolling WebRTC
+  # and V8 without interference from each other.
+  # Three lines of non-changing comments so that
+  # the commit queue can handle CLs rolling swarming_client
+  # and whatever else without interference from each other.
+  'swarming_revision': '1f8ba359e84dc7f26b1ba286dfb4e28674efbff4',
+  # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling ANGLE
   # and whatever else without interference from each other.
   "angle_revision": "657cd684a615da648df6a851a916f11bb6f9a70e",
@@ -104,6 +111,9 @@ deps = {
 
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + '487c0b6ae8b44932e45347211bca0e8387718436', # from svn revision 1998
+
+  'src/tools/swarming_client':
+   Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
 
   'src/tools/clang':
     Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + 'a7bf977931de9c904335bd0e0ae2b11860dc510b',
