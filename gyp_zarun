@@ -247,7 +247,7 @@ if __name__ == '__main__':
       # path separators even on Windows due to the use of shlex.split().
       args.extend(shlex.split(gyp_file))
     else:
-      args.append(os.path.join(script_dir, 'all.gyp'))
+      args.append(os.path.join(current_dir, 'zarun.gyp'))
 
   # There shouldn't be a circular dependency relationship between .gyp files,
   # but in Chromium's .gyp files, on non-Mac platforms, circular relationships
