@@ -417,6 +417,7 @@ v8.log
 /tools/swarming_client
 /tools/tryserver
 /tools/win/link_limiter/build
+/tools/clang
 /ui/surface/surface.xml
 /ui/surface/surface_gpu_tests.xml
 /ui/keyboard/keyboard_mojom_bindings.xml
@@ -434,3 +435,8 @@ v8.log
 /win8/metro_driver/metro_driver_version_resources.xml
 /x86-generic_out/
 /xcodebuild
+
+/base
+/gin
+/net
+/third_party/zlib
