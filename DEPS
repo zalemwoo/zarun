@@ -27,7 +27,7 @@ vars = {
   'build_revision': 'f5c4ee02a4636aed10427f20760a03cd2d5d0917',
   'base_revision': '9d848f042c13d3d45d2b5f7766a739532faf99f8',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
-  'gin_revision': 'dc48ed5a90b98d567dbf7f50f991b61eedddcb72',
+  'gin_revision': '58b32347e16b5e8ca6b845b6152e619a4350f421',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
   # Three lines of non-changing comments so that
