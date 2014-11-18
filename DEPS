@@ -22,10 +22,10 @@ vars = {
   'libcxx_revision': '48198f9110397fff47fe7c37cbfa296be7d44d3d',
   'libcxxabi_revision': '4ad1009ab3a59fa7a6896d74d5e4de5885697f95',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
-  'skia_revision': '7a10fb6bead0f63623307a7ff71b1dd323534a7f',
+  'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
   'build_revision': 'f5c4ee02a4636aed10427f20760a03cd2d5d0917',
-  'base_revision': '9d848f042c13d3d45d2b5f7766a739532faf99f8',
+  'base_revision': 'b4c7409cb72749c491680849af1ae80e5cda9302',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
   'gin_revision': 'dc48ed5a90b98d567dbf7f50f991b61eedddcb72',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
@@ -33,7 +33,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling Skia
   # and V8 without interference from each other.
-  'v8_revision': '11b7b24c91c903ee08b2b6b94f0bbb17b966dd92', # from svn revision 25090
+  'v8_revision': '43ced1bd1528ea8b4d9299d2c8f7c6a81921457b',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling WebRTC
   # and V8 without interference from each other.
@@ -44,11 +44,11 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling ANGLE
   # and whatever else without interference from each other.
-  "angle_revision": "657cd684a615da648df6a851a916f11bb6f9a70e",
+  "angle_revision": "560eef1627abdef65f71021b906e57dc609f47fa",
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling build tools
   # and whatever else without interference from each other.
-  'buildtools_revision': '51ca1f25a2ecea34069cb3ff35394dc53b6fd657',
+  'buildtools_revision': '6ea835db27479b9a5742e48b5e4466af7c2534ff',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling PDFium
   # and whatever else without interference from each other.
@@ -56,7 +56,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling BoringSSL
   # and whatever else without interference from each other.
-  'boringssl_revision': '03a739d8d2cdc2560531a7446ead0f705409670a',
+  'boringssl_revision': '2f3ba910a2bdb9e7d19e712a827cdc80c8d8c777',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling lss
   # and whatever else without interference from each other.
@@ -64,7 +64,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling nss
   # and whatever else without interference from each other.
-  'nss_revision': '87b96db4268293187d7cf741907a6d5d1d8080e0',
+  'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
