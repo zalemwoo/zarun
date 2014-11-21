@@ -37,7 +37,6 @@
         'libraries': [
           '-L<(PRODUCT_DIR)',
           '-lreadline',
-          '-lhistory',
           '-ldl',
         ],
       },
