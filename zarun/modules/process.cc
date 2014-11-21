@@ -25,8 +25,14 @@
 #include "gin/public/wrapper_info.h"
 #include "v8/include/v8.h"
 
-#ifdef OS_POSIX
+#if defined(OS_POSIX)
 #include <unistd.h>
+#if defined(OS_MACOSX)
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#elif !defined(COMPILER_MSVC)
+extern char** environ;
+#endif
 #endif
 
 #include "zarun/zarun_version.h"
@@ -136,7 +142,7 @@ void EnvDeleter(v8::Local<v8::String> property,
 
 void EnvEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
   v8::Isolate* isolate = info.GetIsolate();
-#ifdef OS_POSIX
+#if defined(OS_POSIX)
   int size = 0;
   while (environ[size]) size++;
 
