@@ -49,6 +49,32 @@ struct SystemEnvironment : public base::SupportsUserData::Data {
   scoped_ptr<base::Environment> environment;
 };
 
+#if defined(OS_MACOSX)
+#define PLATFORM "darwin"
+#elif defined(OS_LINUX)
+#define PLATFORM "linux"
+#elif defined(OS_FREEBSD)
+#define PLATFORM "freebsd"
+#elif defined(OS_ANDROID)
+#define PLATFORM "android"
+#elif defined(OS_WIN)
+#define PLATFORM "windows"
+#endif
+
+#if defined(ARCH_CPU_X86_FAMILY)
+#if defined(ARCH_CPU_X86_64)
+#define ARCH "x86_64"
+#elif defined(ARCH_CPU_X86)
+#define ARCH "x86"
+#else
+#error "unknown arch"
+#endif
+#elif defined(ARCH_CPU_ARM_FAMILY)
+#define ARCH "arm"
+#else
+#error "unknown arch"
+#endif
+
 v8::Handle<v8::Value> VersionCallback(gin::Arguments* args) {
   return gin::Converter<std::string>::ToV8(args->isolate(),
                                            std::string(ZARUN_VERSION_FULL));
@@ -209,9 +235,8 @@ v8::Local<v8::Value> Process::GetModule(v8::Isolate* isolate) {
     templ = gin::ObjectTemplateBuilder(isolate)
                 .SetProperty("version", &VersionCallback)
                 .SetValue("versions", SetVersions(isolate))
-                .SetValue("platform", base::StringToLowerASCII(
-                                          base::SysInfo::OperatingSystemName()))
-                .SetValue("arch", base::SysInfo::OperatingSystemArchitecture())
+                .SetValue("platform", std::string(PLATFORM))
+                .SetValue("arch", std::string(ARCH))
                 .SetProperty("moduleLoadList", &ModuleListCallback)
                 .SetValue("env", SetEnvironment(isolate))
                 .Build();
