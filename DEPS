@@ -19,21 +19,21 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'libcxx_revision': '48198f9110397fff47fe7c37cbfa296be7d44d3d',
-  'libcxxabi_revision': '4ad1009ab3a59fa7a6896d74d5e4de5885697f95',
+  'libcxx_revision': 'eb01278922dfc49a6a0497cc29a4b7c799c204f2',
+  'libcxxabi_revision': 'fea8e327e2faf47f3314670322b8a1ffd2c4bd3a',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
-  'build_revision': 'f5c4ee02a4636aed10427f20760a03cd2d5d0917',
-  'base_revision': 'b4c7409cb72749c491680849af1ae80e5cda9302',
+  'build_revision': '543ed203fe082033239602b0c7bfff18d3b6859a',
+  'base_revision': '20113b4986f359ee0676638964fecfa618f12a0a',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
   'gin_revision': '58b32347e16b5e8ca6b845b6152e619a4350f421',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
   # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling Skia
+  # the commit queue can handle CLs rolling V8 
   # and V8 without interference from each other.
-  'v8_revision': '43ced1bd1528ea8b4d9299d2c8f7c6a81921457b',
+  'v8_revision': 'e097fd0c891fbcf55a218db3ce928e06d90b85ff', # 3.31.16
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling WebRTC
   # and V8 without interference from each other.
@@ -48,7 +48,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling build tools
   # and whatever else without interference from each other.
-  'buildtools_revision': '6ea835db27479b9a5742e48b5e4466af7c2534ff',
+  'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling PDFium
   # and whatever else without interference from each other.
