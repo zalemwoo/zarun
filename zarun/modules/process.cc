@@ -10,13 +10,21 @@
 // found in the LICENSE file.
 #include "zarun/modules/process.h"
 
+#include <stdlib.h>
+
 #include <set>
 #include <vector>
 #include <string>
 
+#include "base/logging.h"
+#include "base/command_line.h"
 #include "base/sys_info.h"
 #include "base/environment.h"
 #include "base/strings/string_util.h"
+#include "base/process/process.h"
+#include "base/process/process_handle.h"
+#include "base/process/kill.h"
+#include "base/files/file_util.h"
 #include "gin/arguments.h"
 #include "gin/converter.h"
 #include "gin/object_template_builder.h"
@@ -59,36 +67,55 @@ struct SystemEnvironment : public base::SupportsUserData::Data {
 #define PLATFORM "android"
 #elif defined(OS_WIN)
 #define PLATFORM "windows"
+#else
+#error unknown platform
 #endif
 
 #if defined(ARCH_CPU_X86_FAMILY)
 #if defined(ARCH_CPU_X86_64)
-#define ARCH "x86_64"
+#define ARCH "x64"
 #elif defined(ARCH_CPU_X86)
 #define ARCH "x86"
 #else
-#error "unknown arch"
+#error unknown arch
 #endif
 #elif defined(ARCH_CPU_ARM_FAMILY)
 #define ARCH "arm"
 #else
-#error "unknown arch"
+#error unknown arch
 #endif
 
-v8::Handle<v8::Value> VersionCallback(gin::Arguments* args) {
-  return gin::Converter<std::string>::ToV8(args->isolate(),
-                                           std::string(ZARUN_VERSION_FULL));
+// process.version
+v8::Handle<v8::String> GetVersion(v8::Isolate* isolate) {
+  return v8::String::NewFromUtf8(isolate, ZARUN_VERSION_FULL);
 }
 
-v8::Handle<v8::Object> SetVersions(v8::Isolate* isolate) {
-  v8::Local<v8::ObjectTemplate> versions_templ =
-      gin::ObjectTemplateBuilder(isolate)
-          .SetValue("v8", std::string(v8::V8::GetVersion()))
-          .Build();
+// process.versions
+v8::Handle<v8::Object> GetVersions(v8::Isolate* isolate) {
+  v8::Local<v8::Object> versions_obj = v8::Object::New(isolate);
+  versions_obj->ForceSet(
+      gin::StringToV8(isolate, "v8"),
+      gin::StringToV8(isolate, std::string(v8::V8::GetVersion())),
+      v8::ReadOnly);
 
-  return versions_templ->NewInstance();
+  return versions_obj;
 }
 
+// process.argv
+std::vector<std::string> GetArgv() {
+  std::vector<std::string> argv =
+      base::CommandLine::ForCurrentProcess()->argv();
+  return argv;
+}
+
+// process.execPath
+std::string GetExecutablePath() {
+  base::FilePath executablePath =
+      base::CommandLine::ForCurrentProcess()->GetProgram();
+  return base::MakeAbsoluteFilePath(executablePath).AsUTF8Unsafe();
+}
+
+// process.moduleLoadList
 std::vector<std::string> ModuleListCallback(gin::Arguments* args) {
   v8::Local<v8::Context> context = args->isolate()->GetCurrentContext();
   ModuleRegistry* module_registry = ModuleRegistry::From(context);
@@ -96,7 +123,75 @@ std::vector<std::string> ModuleListCallback(gin::Arguments* args) {
   return std::vector<std::string>(modules.begin(), modules.end());
 }
 
-// Environment
+// process.pid
+base::ProcessId ProcessIdCallback() { return base::GetCurrentProcId(); }
+
+// process.features
+v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
+  v8::EscapableHandleScope scope(isolate);
+  v8::Local<v8::Object> features = v8::Object::New(isolate);
+
+  v8::Handle<v8::Value> debug = gin::ConvertToV8(isolate,
+#if !defined(NDEBUG)
+                                                 true
+#else
+                                                 false
+#endif
+                                                 );
+  features->Set(gin::StringToV8(isolate, "debug"), debug);
+
+  return scope.Escape(features);
+}
+
+// process.reallyExit
+void ExitCallback(gin::Arguments* args) {
+  int exit_code = 0;
+  args->GetNext(&exit_code);
+  fclose(stdout);
+  fclose(stderr);
+  exit(exit_code);
+}
+
+// process.kill
+int KillCallback(gin::Arguments* args) {
+  int pid;
+  if (args->Length() != 2 || !args->GetNext(&pid)) {
+    args->ThrowTypeError("Bad argument.");
+    return -1;
+  }
+  if (!base::KillProcess(pid, 0, false)) {
+    return -::logging::GetLastSystemErrorCode();
+  }
+  return 0;
+}
+
+// process.abort
+void AbortCallback() { abort(); }
+
+// process.chdir
+void ChdirCallback(gin::Arguments* args) {
+  std::string path;
+  if (args->Length() != 1 || !args->GetNext(&path)) {
+    args->ThrowTypeError("Bad argument.");
+    return;
+  }
+
+  if (!base::SetCurrentDirectory(base::FilePath(path))) {
+    args->ThrowError();
+  }
+}
+
+// process.cwd
+std::string CwdCallback(gin::Arguments* args) {
+  base::FilePath cwd;
+  if (!base::GetCurrentDirectory(&cwd)) {
+    args->ThrowError();
+    return std::string();
+  }
+  return cwd.AsUTF8Unsafe();
+}
+
+// process.env
 // static
 base::Environment* GetSystemEnvironment(v8::Handle<v8::Context> context) {
   gin::PerContextData* per_context_data = gin::PerContextData::From(context);
@@ -125,7 +220,7 @@ void EnvGetter(v8::Local<v8::String> property,
   bool ret = env->GetVar(prop.c_str(), &env_value);
 
   if (ret) {
-    info.GetReturnValue().Set(gin::StringToSymbol(isolate, env_value));
+    info.GetReturnValue().Set(gin::StringToV8(isolate, env_value));
     return;
   }
   // Not found.  Fetch from prototype.
@@ -214,13 +309,14 @@ void EnvEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
   info.GetReturnValue().Set(envarr);
 }
 
-v8::Handle<v8::Object> SetEnvironment(v8::Isolate* isolate) {
+v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   v8::Local<v8::ObjectTemplate> env_templ = v8::ObjectTemplate::New();
 
   env_templ->SetNamedPropertyHandler(EnvGetter, EnvSetter, EnvQuery, EnvDeleter,
                                      EnvEnumerator, v8::Object::New(isolate));
   return env_templ->NewInstance();
 }
+
 gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
 
 }  // namespace
@@ -232,14 +328,28 @@ v8::Local<v8::Value> Process::GetModule(v8::Isolate* isolate) {
   v8::Local<v8::ObjectTemplate> templ =
       data->GetObjectTemplate(&g_wrapper_info);
   if (templ.IsEmpty()) {
+    v8::Handle<v8::Value> eventsObject = v8::Object::New(isolate);
     templ = gin::ObjectTemplateBuilder(isolate)
-                .SetProperty("version", &VersionCallback)
-                .SetValue("versions", SetVersions(isolate))
+                .SetValue("versions", GetVersions(isolate))
+                .SetValue("argv", GetArgv())
+                .SetValue("execPath", GetExecutablePath())
                 .SetValue("platform", std::string(PLATFORM))
                 .SetValue("arch", std::string(ARCH))
                 .SetProperty("moduleLoadList", &ModuleListCallback)
-                .SetValue("env", SetEnvironment(isolate))
+                .SetValue("env", GetEnvironment(isolate))
+                .SetProperty("pid", &ProcessIdCallback)
+                .SetValue("features", GetFeatures(isolate))
+                .SetMethod("reallyExit", &ExitCallback)
+                .SetMethod("abort", &AbortCallback)
+                .SetMethod("_kill", &KillCallback)
+                .SetMethod("chdir", &ChdirCallback)
+                .SetMethod("cwd", &CwdCallback)
+                .SetValue("_events", eventsObject)
                 .Build();
+
+    templ->Set(
+        gin::StringToV8(isolate, "version"), GetVersion(isolate),
+        static_cast<v8::PropertyAttribute>(v8::ReadOnly | v8::DontDelete));
 
     data->SetObjectTemplate(&g_wrapper_info, templ);
   }

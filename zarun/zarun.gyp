@@ -24,6 +24,7 @@
         './modules/module_registry.cc',
         './modules/console.cc',
         './modules/process.cc',
+        './modules/gc.cc',
         
         './switches.cc',
         './readline_editor.cc',
@@ -36,7 +37,7 @@
       'link_settings': {
         'libraries': [
           '-L<(PRODUCT_DIR)',
-          '-lreadline',
+#          '-lreadline',
           '-ldl',
         ],
       },

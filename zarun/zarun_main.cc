@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  zarun::ZarunShell zarunShell;
-  zarunShell.Init(command_line);
-  zarunShell.Run();
+  zarun::ZarunShell& zarun_shell = zarun::ZarunShell::GetZarunShell();
+  zarun_shell.Init(command_line);
+  zarun_shell.Run();
 
   return 0;
 }

@@ -15,11 +15,11 @@ namespace backend {
 BackendThread::BackendThread(
     const std::string& name,
     const base::Callback<void(BackendThread*)>& termination_callback,
-    zarun::ScriptRunnerDelegate* runnerDelegate)
+    zarun::ScriptRunnerDelegate* runner_delegate)
     : base::Thread(name),
       termination_callback_(termination_callback),
-      runnerDelegate_(runnerDelegate) {
-  CHECK(runnerDelegate_.get());
+      runner_delegate_(runner_delegate) {
+  CHECK(runner_delegate_.get());
 }
 
 BackendThread::~BackendThread() { base::Thread::Stop(); }
@@ -28,9 +28,9 @@ void BackendThread::Init() {
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::ArrayBufferAllocator::SharedInstance());
 
-  isolateHolder_.reset(new gin::IsolateHolder());
-  runner_.reset(new zarun::ScriptRunner(runnerDelegate_.get(),
-                                        isolateHolder_->isolate()));
+  isolate_holder_.reset(new gin::IsolateHolder());
+  runner_.reset(new zarun::ScriptRunner(runner_delegate_.get(),
+                                        isolate_holder_->isolate()));
 
   {
     gin::Runner::Scope scope(runner_.get());
@@ -39,9 +39,9 @@ void BackendThread::Init() {
 }
 
 void BackendThread::CleanUp() {
-  runnerDelegate_.reset();
+  runner_delegate_.reset();
   runner_.reset();
-  isolateHolder_.reset();
+  isolate_holder_.reset();
   termination_callback_.Run(this);
 }
 }

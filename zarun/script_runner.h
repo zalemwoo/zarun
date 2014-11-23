@@ -9,7 +9,6 @@
 #define ZARUN_SCRIPT_RUNNER_H_
 
 #include "gin/runner.h"
-
 #include "zarun/zarun_export.h"
 
 namespace gin {
@@ -38,8 +37,6 @@ class ZARUN_EXPORT ScriptRunnerDelegate {
   virtual void DidRunScript(ScriptRunner* runner);
   virtual void UnhandledException(ScriptRunner* runner,
                                   gin::TryCatch& try_catch);
-
-  virtual void ProcessResult(ScriptRunner* runner, v8::Local<v8::Value> result);
 };
 
 // ScriptRunner executes the script/functions directly in a v8::Context.
@@ -61,6 +58,8 @@ class ZARUN_EXPORT ScriptRunner : public gin::Runner {
                              v8::Handle<v8::Value> receiver, int argc,
                              v8::Handle<v8::Value> argv[]) override;
   gin::ContextHolder* GetContextHolder() override;
+
+  static const std::string kReplResultVariableName;
 
  private:
   friend class gin::Runner::Scope;

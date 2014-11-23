@@ -34,21 +34,30 @@ void Log(gin::Arguments* args) {
   std::cout << JoinString(strs, ' ') << std::endl;
 }
 
-gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
 
 }  // namespace
 
 const char Console::kModuleName[] = "console";
+gin::WrapperInfo Console::kWrapperInfo = {gin::kEmbedderNativeGin};
 
+// static
+gin::Handle<Console> Console::Create(v8::Isolate* isolate) {
+  return gin::CreateHandle(isolate, new Console());
+}
+
+Console::Console() {}
+
+Console::~Console() {}
+
+// static
 v8::Local<v8::Value> Console::GetModule(v8::Isolate* isolate) {
-  gin::PerIsolateData* data = gin::PerIsolateData::From(isolate);
-  v8::Local<v8::ObjectTemplate> templ =
-      data->GetObjectTemplate(&g_wrapper_info);
-  if (templ.IsEmpty()) {
-    templ = gin::ObjectTemplateBuilder(isolate).SetMethod("log", Log).Build();
-    data->SetObjectTemplate(&g_wrapper_info, templ);
-  }
-  return templ->NewInstance();
+  return Create(isolate)->GetWrapper(isolate);
+}
+
+gin::ObjectTemplateBuilder Console::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
+  return Wrappable<Console>::GetObjectTemplateBuilder(isolate)
+      .SetMethod("log", Log);
 }
 
 }  // namespace zarun

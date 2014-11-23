@@ -4,10 +4,14 @@
 
 #include <stdio.h>              // NOLINT
 #include <string.h>             // NOLINT
+
+#ifdef READLINE_EDITOR
 #include <readline/readline.h>  // NOLINT
 #include <readline/history.h>   // NOLINT
+#endif
 
 #include <string>
+#include <iostream>
 
 // The readline includes leaves RETURN defined which breaks V8 compilation.
 #undef RETURN
@@ -29,8 +33,9 @@ LineEditor::LineEditor(Type type, const char* name) : type_(type), name_(name) {
 }
 
 bool LineEditor::Open() { return true; }
-
 bool LineEditor::Close() { return true; }
+
+#ifdef READLINE_EDITOR
 
 static ReadLineEditor read_line_editor;
 char ReadLineEditor::kWordBreakCharacters[] = {
@@ -47,7 +52,7 @@ bool ReadLineEditor::Open() {
   rl_bind_key('\t', rl_complete);
   using_history();
   stifle_history(kMaxHistoryEntries);
-  return read_history(kHistoryFileName) == 0;
+  //  return read_history(kHistoryFileName) == 0;
   return true;
 }
 
@@ -63,7 +68,7 @@ std::string ReadLineEditor::Prompt(const char* prompt) {
   if (result == NULL) return std::string();
   std::string str(result);
   free(result);
-  AddHistory(str.c_str());
+  //  AddHistory(str.c_str());
   return str;
 }
 
@@ -82,5 +87,32 @@ void ReadLineEditor::AddHistory(const char* str) {
   }
   add_history(str);
 }
+
+#else
+
+std::string DumbLineEditor::Prompt(const char* prompt) {
+  printf("%s", prompt);
+  static const int kBufferSize = 256;
+  char buffer[kBufferSize];
+  int length;
+  while (true) {
+    // Continue reading if the line ends with an escape '\\' or the line has
+    // not been fully read into the buffer yet (does not end with '\n').
+    // If fgets gets an error, just give up.
+    char* input = NULL;
+    input = fgets(buffer, kBufferSize, stdin);
+    if (input == NULL) return std::string();
+    length = static_cast<int>(strlen(buffer));
+    if (length == 0) {
+      return std::string();
+    } else if (buffer[0] == '\n') {
+      return std::string();
+    } else {
+      return std::string(buffer, length - 1);
+    }
+  }
+}
+
+#endif
 
 }  // namespace zarun

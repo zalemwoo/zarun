@@ -17,6 +17,8 @@
 
 #include "zarun/modules/module_registry.h"
 
+#include "zarun/zarun_shell.h"
+
 using v8::Context;
 using v8::HandleScope;
 using v8::Isolate;
@@ -50,8 +52,7 @@ void ScriptRunnerDelegate::UnhandledException(ScriptRunner* runner,
   CHECK(false) << try_catch.GetStackTrace();
 }
 
-void ScriptRunnerDelegate::ProcessResult(ScriptRunner* runner,
-                                         v8::Local<v8::Value>) {}
+const std::string ScriptRunner::kReplResultVariableName = "__repl_result__";
 
 ScriptRunner::ScriptRunner(ScriptRunnerDelegate* delegate, Isolate* isolate)
     : delegate_(delegate) {
@@ -108,14 +109,22 @@ void ScriptRunner::Run(v8::Handle<Script> script) {
   TryCatch try_catch;
   delegate_->WillRunScript(this);
 
-  v8::Local<v8::Value> result = script->Run();
+  v8::Handle<v8::Value> result = script->Run();
 
-  delegate_->DidRunScript(this);
-  if (try_catch.HasCaught()) {
-    delegate_->UnhandledException(this, try_catch);
-  } else {
-    delegate_->ProcessResult(this, result);
+  if (result.IsEmpty()) {
+    if (try_catch.HasCaught()) {
+      delegate_->UnhandledException(this, try_catch);
+    }
+    return;
   }
+
+  if (ZarunShell::Mode() == ShellMode::Repl) {
+    v8::Isolate* isolate = GetContextHolder()->isolate();
+    global()->Set(
+        gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName),
+        result);
+  }
+  delegate_->DidRunScript(this);
 }
 
 }  // namespace zarun

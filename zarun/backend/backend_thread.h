@@ -20,7 +20,7 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
   BackendThread(
       const std::string& name,
       const base::Callback<void(BackendThread*)>& termination_callback,
-      zarun::ScriptRunnerDelegate* runnerDelegate);
+      zarun::ScriptRunnerDelegate* runner_delegate);
 
   ~BackendThread();
 
@@ -35,9 +35,9 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
 
  private:
   base::Callback<void(BackendThread*)> termination_callback_;
-  scoped_ptr<gin::IsolateHolder> isolateHolder_;
+  scoped_ptr<gin::IsolateHolder> isolate_holder_;
   scoped_ptr<zarun::ScriptRunner> runner_;
-  scoped_ptr<zarun::ScriptRunnerDelegate> runnerDelegate_;
+  scoped_ptr<zarun::ScriptRunnerDelegate> runner_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);
 };

@@ -34,6 +34,12 @@ class LineEditor {
   static LineEditor* current_;
 };
 
+class DumbLineEditor : public LineEditor {
+ public:
+  explicit DumbLineEditor() : LineEditor(LineEditor::DUMB, "dumb") {}
+  virtual std::string Prompt(const char* prompt) override;
+};
+
 class ReadLineEditor : public LineEditor {
  public:
   ReadLineEditor() : LineEditor(LineEditor::READLINE, "readline") {}

@@ -23,6 +23,10 @@ enum ShellMode {
 
 class ZarunShell {
  public:
+  static ZarunShell& GetZarunShell();
+  static ShellMode Mode() { return GetZarunShell().shell_mode_; }
+
+ public:
   ZarunShell();
   ~ZarunShell();
   void Init(const base::CommandLine* args);

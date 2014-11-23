@@ -4,12 +4,11 @@
 #include "zarun/backend/backend_runner_delegate.h"
 
 #include "base/bind.h"
+#include "base/lazy_instance.h"
 #include "base/callback_helpers.h"
 #include "base/files/file_path.h"
 #include "base/location.h"
 #include "base/logging.h"
-
-#include "v8/include/v8.h"
 
 #include <iostream>
 
@@ -17,12 +16,16 @@ namespace zarun {
 
 namespace {
 
-void ProcessScriptResult(v8::Handle<v8::Value> result) {
-  std::cerr << *v8::String::Utf8Value(result) << std::endl;
-  std::cout << "> " << std::flush;
+base::LazyInstance<zarun::ZarunShell> zarun_shell = LAZY_INSTANCE_INITIALIZER;
+
+void ProcessScriptResult(std::string result) {
+  std::cerr << result << std::endl << "> " << std::flush;
 }
 
 }  // namespace
+
+// static
+ZarunShell& ZarunShell::GetZarunShell() { return zarun_shell.Get(); }
 
 ZarunShell::ZarunShell()
     : cmd_line_args_(NULL), shell_mode_(ShellMode::Batch) {}
@@ -69,6 +72,7 @@ void ZarunShell::Run() {
 }
 
 void ZarunShell::Repl() {
+  DumbLineEditor editor;
   LineEditor* console = LineEditor::Get();
   console->Open();
   std::string script;
@@ -90,5 +94,5 @@ void ZarunShell::OnBackendApplicationEnd(
     zarun::backend::BackendApplication* backendApplication) {
   task_runner_->PostTask(FROM_HERE, quit_closure_);
 }
-}
-// namespace zarun
+
+}  // namespace zarun

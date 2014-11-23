@@ -22,7 +22,7 @@ namespace backend {
 typedef v8::Local<v8::Value>(*ModuleGetter)(v8::Isolate* isolate);
 typedef base::Callback<v8::Local<v8::Value>(v8::Isolate*)> ModuleGetterCallback;
 
-typedef base::Callback<void(v8::Handle<v8::Value>)> RunScriptCallback;
+typedef base::Callback<void(std::string)> RunScriptCallback;
 
 class ZARUN_EXPORT BackendScriptRunnerDelegate : public ScriptRunnerDelegate {
  public:
@@ -31,8 +31,6 @@ class ZARUN_EXPORT BackendScriptRunnerDelegate : public ScriptRunnerDelegate {
   ~BackendScriptRunnerDelegate() override;
   void UnhandledException(zarun::ScriptRunner* runner,
                           gin::TryCatch& try_catch) override;
-  void ProcessResult(ScriptRunner* runner,
-                     v8::Local<v8::Value> result) override;
 
   void AddBuiltinModule(const std::string& id, ModuleGetter getter);
   void AddBuiltinModule(const std::string& id,

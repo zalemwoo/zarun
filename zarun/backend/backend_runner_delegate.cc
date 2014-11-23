@@ -10,14 +10,15 @@
 #include "base/logging.h"
 #include "base/bind.h"
 #include "base/files/file_util.h"
-#include "gin/modules/console.h"
 #include "gin/object_template_builder.h"
 #include "gin/converter.h"
 #include "v8/include/v8.h"
 
+#include "zarun/zarun_shell.h"
 #include "zarun/modules/module_registry.h"
 #include "zarun/modules/console.h"
 #include "zarun/modules/process.h"
+#include "zarun/modules/gc.h"
 
 namespace zarun {
 namespace backend {
@@ -27,9 +28,8 @@ namespace {
 void InstallGlobalModule(zarun::ScriptRunner* runner, std::string id,
                          v8::Handle<v8::Value> module) {
   gin::ContextHolder* context_holder = runner->GetContextHolder();
-  v8::Handle<v8::Context> context = context_holder->context();
   v8::Isolate* isolate = context_holder->isolate();
-  v8::Handle<v8::Object> globalObj = context->Global();
+  v8::Handle<v8::Object> globalObj = runner->global();
 
   globalObj->Set(gin::StringToSymbol(isolate, id), module);
 }
@@ -39,6 +39,7 @@ void InstallGlobalModule(zarun::ScriptRunner* runner, std::string id,
 BackendScriptRunnerDelegate::BackendScriptRunnerDelegate() {
   AddBuiltinModule(zarun::Console::kModuleName, zarun::Console::GetModule);
   AddBuiltinModule(zarun::Process::kModuleName, zarun::Process::GetModule);
+  AddBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
 }
 
 BackendScriptRunnerDelegate::BackendScriptRunnerDelegate(
@@ -85,6 +86,10 @@ void BackendScriptRunnerDelegate::DidCreateContext(
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, runner, zarun::Process::kModuleName));
+
+  registry->LoadModule(
+      isolate, zarun::GC::kModuleName,
+      base::Bind(&InstallGlobalModule, runner, zarun::GC::kModuleName));
 }
 
 void BackendScriptRunnerDelegate::UnhandledException(
@@ -92,12 +97,16 @@ void BackendScriptRunnerDelegate::UnhandledException(
   LOG(ERROR) << try_catch.GetStackTrace();
 }
 
-void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {}
-
-void BackendScriptRunnerDelegate::ProcessResult(ScriptRunner* runner,
-                                                v8::Local<v8::Value> result) {
-  if (!runscript_callback_.is_null()) {
-    runscript_callback_.Run(result);
+void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
+  if ((ZarunShell::Mode() == ShellMode::Repl) &&
+      (!runscript_callback_.is_null())) {
+    v8::Isolate* isolate = runner->GetContextHolder()->isolate();
+    v8::Local<v8::Value> result = runner->global()->Get(
+        gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName));
+    if (result.IsEmpty()) return;
+    v8::String::Utf8Value utf8_value(result);
+    std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
+    runscript_callback_.Run(str);
   }
 }
 }
