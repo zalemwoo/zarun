@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "zarun/modules/gc.h"
+#include "zarun/modules/cpp/gc.h"
 
 #include "gin/converter.h"
 #include "gin/function_template.h"

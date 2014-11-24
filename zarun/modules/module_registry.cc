@@ -82,6 +82,17 @@ void ModuleRegistry::LoadModule(Isolate* isolate, const std::string& id,
   unsatisfied_dependencies_.insert(id);
 }
 
+bool ModuleRegistry::HasModule(v8::Isolate* isolate, const std::string& id,
+                               v8::Handle<v8::Value>& out) {
+  v8::Handle<Object> modules = Local<Object>::New(isolate, modules_);
+  v8::Handle<String> key = gin::StringToSymbol(isolate, id);
+  if (modules->HasOwnProperty(key)) {
+    out = modules->Get(key);
+    return true;
+  }
+  return false;
+}
+
 void ModuleRegistry::RegisterModule(Isolate* isolate, const std::string& id,
                                     v8::Handle<Value> module) {
   if (id.empty() || module.IsEmpty()) return;

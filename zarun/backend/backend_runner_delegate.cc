@@ -16,9 +16,9 @@
 
 #include "zarun/zarun_shell.h"
 #include "zarun/modules/module_registry.h"
-#include "zarun/modules/console.h"
-#include "zarun/modules/process.h"
-#include "zarun/modules/gc.h"
+#include "zarun/modules/cpp/console.h"
+#include "zarun/modules/cpp/process.h"
+#include "zarun/modules/cpp/gc.h"
 
 namespace zarun {
 namespace backend {
@@ -30,15 +30,14 @@ void InstallGlobalModule(zarun::ScriptRunner* runner, std::string id,
   gin::ContextHolder* context_holder = runner->GetContextHolder();
   v8::Isolate* isolate = context_holder->isolate();
   v8::Handle<v8::Object> globalObj = runner->global();
-
   globalObj->Set(gin::StringToSymbol(isolate, id), module);
 }
-}
-// namespace
+
+}  // namespace
 
 BackendScriptRunnerDelegate::BackendScriptRunnerDelegate() {
-  AddBuiltinModule(zarun::Console::kModuleName, zarun::Console::GetModule);
   AddBuiltinModule(zarun::Process::kModuleName, zarun::Process::GetModule);
+  AddBuiltinModule(zarun::Console::kModuleName, zarun::Console::GetModule);
   AddBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
 }
 
@@ -80,16 +79,9 @@ void BackendScriptRunnerDelegate::DidCreateContext(
   }
 
   registry->LoadModule(
-      isolate, zarun::Console::kModuleName,
-      base::Bind(&InstallGlobalModule, runner, zarun::Console::kModuleName));
-
-  registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, runner, zarun::Process::kModuleName));
 
-  registry->LoadModule(
-      isolate, zarun::GC::kModuleName,
-      base::Bind(&InstallGlobalModule, runner, zarun::GC::kModuleName));
 }
 
 void BackendScriptRunnerDelegate::UnhandledException(

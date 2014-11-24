@@ -22,9 +22,9 @@
         './backend/backend_application.cc',
         
         './modules/module_registry.cc',
-        './modules/console.cc',
-        './modules/process.cc',
-        './modules/gc.cc',
+        './modules/cpp/console.cc',
+        './modules/cpp/process.cc',
+        './modules/cpp/gc.cc',
         
         './switches.cc',
         './readline_editor.cc',

@@ -37,6 +37,9 @@ class ZARUN_EXPORT ModuleRegistry {
   void LoadModule(v8::Isolate* isolate, const std::string& id,
                   LoadModuleCallback callback);
 
+  bool HasModule(v8::Isolate* isolate, const std::string& id,
+                 v8::Handle<v8::Value>& out);
+
   const std::set<std::string>& available_modules() const {
     return available_modules_;
   }

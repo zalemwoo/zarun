@@ -8,7 +8,7 @@
 // Copyright 2013 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#include "zarun/modules/process.h"
+#include "zarun/modules/cpp/process.h"
 
 #include <stdlib.h>
 
@@ -21,6 +21,7 @@
 #include "base/sys_info.h"
 #include "base/environment.h"
 #include "base/strings/string_util.h"
+#include "base/strings/stringprintf.h"
 #include "base/process/process.h"
 #include "base/process/process_handle.h"
 #include "base/process/kill.h"
@@ -33,6 +34,9 @@
 #include "gin/public/wrapper_info.h"
 #include "v8/include/v8.h"
 
+#include "zarun/zarun_version.h"
+#include "zarun/modules/module_registry.h"
+
 #if defined(OS_POSIX)
 #include <unistd.h>
 #if defined(OS_MACOSX)
@@ -42,9 +46,6 @@
 extern char** environ;
 #endif
 #endif
-
-#include "zarun/zarun_version.h"
-#include "zarun/modules/module_registry.h"
 
 namespace zarun {
 
@@ -86,9 +87,7 @@ struct SystemEnvironment : public base::SupportsUserData::Data {
 #endif
 
 // process.version
-v8::Handle<v8::String> GetVersion(v8::Isolate* isolate) {
-  return v8::String::NewFromUtf8(isolate, ZARUN_VERSION_FULL);
-}
+std::string GetVersion() { return std::string(ZARUN_VERSION_FULL); }
 
 // process.versions
 v8::Handle<v8::Object> GetVersions(v8::Isolate* isolate) {
@@ -317,6 +316,30 @@ v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   return env_templ->NewInstance();
 }
 
+// process.binding
+void BindingCallback(gin::Arguments* args) {
+  std::string module_name;
+  if (args->Length() != 1 || !args->GetNext(&module_name)) {
+    return args->ThrowTypeError("Bad argument.");
+  }
+
+  v8::Isolate* isolate = args->isolate();
+  v8::HandleScope scope(isolate);
+  v8::Handle<v8::Value> exports;
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  ModuleRegistry* module_registry = ModuleRegistry::From(context);
+
+  bool registered = module_registry->HasModule(isolate, module_name, exports);
+
+  if (registered) {
+    return args->Return(exports);
+  }
+
+  isolate->ThrowException(v8::Exception::ReferenceError(gin::StringToV8(
+      isolate,
+      base::StringPrintf("No such module: %s.", module_name.c_str()))));
+}
+
 gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
 
 }  // namespace
@@ -344,11 +367,13 @@ v8::Local<v8::Value> Process::GetModule(v8::Isolate* isolate) {
                 .SetMethod("_kill", &KillCallback)
                 .SetMethod("chdir", &ChdirCallback)
                 .SetMethod("cwd", &CwdCallback)
+                .SetMethod("binding", &BindingCallback)
                 .SetValue("_events", eventsObject)
                 .Build();
 
     templ->Set(
-        gin::StringToV8(isolate, "version"), GetVersion(isolate),
+        gin::StringToV8(isolate, "version"),
+        gin::StringToV8(isolate, GetVersion()),
         static_cast<v8::PropertyAttribute>(v8::ReadOnly | v8::DontDelete));
 
     data->SetObjectTemplate(&g_wrapper_info, templ);

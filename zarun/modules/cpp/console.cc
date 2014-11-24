@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "zarun/modules/console.h"
+#include "zarun/modules/cpp/console.h"
 
 #include <iostream>
 
@@ -33,7 +33,6 @@ void Log(gin::Arguments* args) {
   }
   std::cout << JoinString(strs, ' ') << std::endl;
 }
-
 
 }  // namespace
 
