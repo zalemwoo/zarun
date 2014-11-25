@@ -28,12 +28,15 @@ void ProcessScriptResult(std::string result) {
 }  // namespace
 
 // static
-ZarunShell& ZarunShell::GetZarunShell() { return zarun_shell.Get(); }
+ZarunShell& ZarunShell::GetZarunShell() {
+  return zarun_shell.Get();
+}
 
-ZarunShell::ZarunShell()
-    : cmd_line_args_(NULL), shell_mode_(ShellMode::Batch) {}
+ZarunShell::ZarunShell() : cmd_line_args_(NULL), shell_mode_(ShellMode::Batch) {
+}
 
-ZarunShell::~ZarunShell() {}
+ZarunShell::~ZarunShell() {
+}
 
 void ZarunShell::Init(const base::CommandLine* args) {
   cmd_line_args_ = args;
@@ -81,7 +84,8 @@ void ZarunShell::Repl() {
   std::string script;
   while (true) {
     script = console->Prompt("= ");
-    if (script.empty()) continue;
+    if (script.empty())
+      continue;
     if (script == "q") {
       backend_application_->Stop();
       break;
@@ -98,6 +102,8 @@ void ZarunShell::OnBackendApplicationEnd(
   task_runner_->PostTask(FROM_HERE, quit_closure_);
 }
 
-const std::string& GetDefaultV8Options() { return kDefaultV8Options; }
+const std::string& GetDefaultV8Options() {
+  return kDefaultV8Options;
+}
 
 }  // namespace zarun

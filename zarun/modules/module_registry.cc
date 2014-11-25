@@ -1,8 +1,6 @@
 /*
  * module_registry.cc
  *
- *  Created on: Nov 20, 2014
- *      Author: zalem
  */
 
 #include "zarun/modules/module_registry.h"
@@ -45,14 +43,18 @@ struct ModuleRegistryData : public base::SupportsUserData::Data {
 }  // namespace
 
 ModuleRegistry::ModuleRegistry(Isolate* isolate)
-    : modules_(isolate, Object::New(isolate)) {}
+    : modules_(isolate, Object::New(isolate)) {
+}
 
-ModuleRegistry::~ModuleRegistry() { modules_.Reset(); }
+ModuleRegistry::~ModuleRegistry() {
+  modules_.Reset();
+}
 
 // static
 ModuleRegistry* ModuleRegistry::From(v8::Handle<Context> context) {
   gin::PerContextData* data = gin::PerContextData::From(context);
-  if (!data) return NULL;
+  if (!data)
+    return NULL;
 
   ModuleRegistryData* registry_data =
       static_cast<ModuleRegistryData*>(data->GetUserData(kModuleRegistryKey));
@@ -77,7 +79,8 @@ void ModuleRegistry::RegisterBuiltinModule(const std::string& id,
   builtin_module_provider_->RegisterModule(id, getter);
 }
 
-void ModuleRegistry::LoadModule(Isolate* isolate, const std::string& id,
+void ModuleRegistry::LoadModule(Isolate* isolate,
+                                const std::string& id,
                                 LoadModuleCallback callback) {
   v8::HandleScope scope(isolate);
   if (available_modules_.find(id) != available_modules_.end()) {
@@ -98,7 +101,8 @@ void ModuleRegistry::LoadModule(Isolate* isolate, const std::string& id,
   callback.Run(v8::Local<v8::Value>());
 }
 
-bool ModuleRegistry::HasModule(v8::Isolate* isolate, const std::string& id,
+bool ModuleRegistry::HasModule(v8::Isolate* isolate,
+                               const std::string& id,
                                v8::Handle<v8::Value>& out) {
   v8::Handle<Object> modules = Local<Object>::New(isolate, modules_);
   v8::Handle<String> key = gin::StringToSymbol(isolate, id);

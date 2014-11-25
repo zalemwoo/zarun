@@ -38,7 +38,9 @@ BackendApplication::BackendApplication(
       base::Bind(&BackendApplication::OnThreadEnd, base::Unretained(this)));
 }
 
-BackendApplication::~BackendApplication() { backend_runner_delegate_.reset(); }
+BackendApplication::~BackendApplication() {
+  backend_runner_delegate_.reset();
+}
 
 void BackendApplication::Start() {
   base::Thread::Options options;
@@ -49,7 +51,9 @@ void BackendApplication::Start() {
   CHECK(backend_runner_.get());
 }
 
-void BackendApplication::Stop() { main_thread_->Stop(); }
+void BackendApplication::Stop() {
+  main_thread_->Stop();
+}
 
 void BackendApplication::CreateEnvironment() {
   DCHECK(!environment_.get());

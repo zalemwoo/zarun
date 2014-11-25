@@ -1,8 +1,6 @@
 /*
  * module_registry.h
  *
- *  Created on: Nov 20, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_MODULES_MODULE_REGISTRY_H_
@@ -35,10 +33,12 @@ class ZARUN_EXPORT ModuleRegistry {
   void RegisterBuiltinModule(const std::string& id, ModuleGetter getter);
 
   // The caller must have already entered our context.
-  void LoadModule(v8::Isolate* isolate, const std::string& id,
+  void LoadModule(v8::Isolate* isolate,
+                  const std::string& id,
                   LoadModuleCallback callback);
 
-  bool HasModule(v8::Isolate* isolate, const std::string& id,
+  bool HasModule(v8::Isolate* isolate,
+                 const std::string& id,
                  v8::Handle<v8::Value>& out);
 
   const std::set<std::string>& available_modules() const {

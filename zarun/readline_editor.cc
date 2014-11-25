@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <stdio.h>              // NOLINT
-#include <string.h>             // NOLINT
+#include <stdio.h>   // NOLINT
+#include <string.h>  // NOLINT
 
 #ifdef READLINE_EDITOR
 #include <readline/readline.h>  // NOLINT
@@ -29,18 +29,38 @@ namespace zarun {
 LineEditor* LineEditor::current_ = NULL;
 
 LineEditor::LineEditor(Type type, const char* name) : type_(type), name_(name) {
-  if (current_ == NULL || current_->type_ < type) current_ = this;
+  if (current_ == NULL || current_->type_ < type)
+    current_ = this;
 }
 
-bool LineEditor::Open() { return true; }
-bool LineEditor::Close() { return true; }
+bool LineEditor::Open() {
+  return true;
+}
+bool LineEditor::Close() {
+  return true;
+}
 
 #ifdef READLINE_EDITOR
 
 static ReadLineEditor read_line_editor;
-char ReadLineEditor::kWordBreakCharacters[] = {
-    ' ', '\t', '\n', '"', '\\', '\'', '`', '@', '.',
-    '>', '<',  '=',  ';', '|',  '&',  '{', '(', '\0'};
+char ReadLineEditor::kWordBreakCharacters[] = {' ',
+                                               '\t',
+                                               '\n',
+                                               '"',
+                                               '\\',
+                                               '\'',
+                                               '`',
+                                               '@',
+                                               '.',
+                                               '>',
+                                               '<',
+                                               '=',
+                                               ';',
+                                               '|',
+                                               '&',
+                                               '{',
+                                               '(',
+                                               '\0'};
 
 const char* ReadLineEditor::kHistoryFileName = ".zarun_history";
 const int ReadLineEditor::kMaxHistoryEntries = 1000;
@@ -65,7 +85,8 @@ bool ReadLineEditor::Close() {
 std::string ReadLineEditor::Prompt(const char* prompt) {
   char* result = NULL;
   result = readline(prompt);
-  if (result == NULL) return std::string();
+  if (result == NULL)
+    return std::string();
   std::string str(result);
   free(result);
   //  AddHistory(str.c_str());
@@ -74,7 +95,8 @@ std::string ReadLineEditor::Prompt(const char* prompt) {
 
 void ReadLineEditor::AddHistory(const char* str) {
   // Do not record empty input.
-  if (strlen(str) == 0) return;
+  if (strlen(str) == 0)
+    return;
   // Remove duplicate history entry.
   history_set_pos(history_length - 1);
   if (current_history()) {
@@ -101,7 +123,8 @@ std::string DumbLineEditor::Prompt(const char* prompt) {
     // If fgets gets an error, just give up.
     char* input = NULL;
     input = fgets(buffer, kBufferSize, stdin);
-    if (input == NULL) return std::string();
+    if (input == NULL)
+      return std::string();
     length = static_cast<int>(strlen(buffer));
     if (length == 0) {
       return std::string();

@@ -25,15 +25,18 @@ vars = {
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
   'build_revision': '543ed203fe082033239602b0c7bfff18d3b6859a',
-  'base_revision': '20113b4986f359ee0676638964fecfa618f12a0a',
+  'base_revision': '1d5d58086a1e7d24b6d09ef03ab206f74cccaa2a',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
-  'gin_revision': '58b32347e16b5e8ca6b845b6152e619a4350f421',
+  'gin_revision': '2e4b6303e0b229a59f8b1ef750d8b987612f9ec4',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
+
+  'valgrind_revision': '235eeee1812c073999e35dfdb1013276d375cbe3',
+  'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling V8 
   # and V8 without interference from each other.
-  'v8_revision': 'e097fd0c891fbcf55a218db3ce928e06d90b85ff', # 3.31.16
+  'v8_revision': '125fa1aeef2cc6985dc9a114bfd16a8b7ab15143', # 3.31.22
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling WebRTC
   # and V8 without interference from each other.
@@ -117,6 +120,12 @@ deps = {
 
   'src/tools/clang':
     Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + 'a7bf977931de9c904335bd0e0ae2b11860dc510b',
+
+  'src/tools/valgrind':
+    Var('chromium_git') + '/chromium/src/tools/valgrind.git' + '@' + Var('valgrind_revision'),
+
+  'src/third_party/valgrind-git':
+    Var('chromium_git') + '/chromium/deps/valgrind.git' + '@' + Var('valgrind_deps_revision'),
 
   'src/base':
     Var('chromium_git') + '/chromium/src/base.git' + '@' +  Var('base_revision'),
@@ -339,5 +348,13 @@ hooks = [
         'src/tools/remove_stale_pyc_files.py',
         'src/tools',
     ],
+  },
+  {
+    'name': 'symbol_link_valgrind',
+    'action': [
+        'sh',
+        '-c',
+        'cd src/third_party && test \( ! -h valgrind \) && ln -s ./valgrind-git/binaries ./valgrind || echo ""'
+     ],
   },
 ]

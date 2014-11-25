@@ -1,8 +1,6 @@
 /*
  * module_provider.h
  *
- *  Created on: Nov 25, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_BUILTIN_MODULES_MODULE_PROVIDER_H_

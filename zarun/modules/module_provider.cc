@@ -1,8 +1,6 @@
 /*
  * module_provider.cc
  *
- *  Created on: Nov 25, 2014
- *      Author: zalem
  */
 
 #include "zarun/modules/module_provider.h"
@@ -12,9 +10,11 @@
 
 namespace zarun {
 
-ModuleProvider::ModuleProvider() {}
+ModuleProvider::ModuleProvider() {
+}
 
-ModuleProvider::~ModuleProvider() {}
+ModuleProvider::~ModuleProvider() {
+}
 
 void ModuleProvider::RegisterModule(const std::string& id,
                                     ModuleGetter getter) {

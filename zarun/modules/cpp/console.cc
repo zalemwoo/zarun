@@ -44,9 +44,11 @@ gin::Handle<Console> Console::Create(v8::Isolate* isolate) {
   return gin::CreateHandle(isolate, new Console());
 }
 
-Console::Console() {}
+Console::Console() {
+}
 
-Console::~Console() {}
+Console::~Console() {
+}
 
 // static
 v8::Local<v8::Value> Console::GetModule(v8::Isolate* isolate) {

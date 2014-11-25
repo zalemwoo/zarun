@@ -55,7 +55,9 @@ Environment::~Environment() {
   }
 }
 
-v8::Isolate* Environment::isolate() { return this->isolate_holder_.isolate(); }
+v8::Isolate* Environment::isolate() {
+  return this->isolate_holder_.isolate();
+}
 
 v8::Local<v8::Context> Environment::context() {
   return this->runner_->GetContextHolder()->context();

@@ -1,8 +1,6 @@
 /*
  * zarun_export.h
  *
- *  Created on: Nov 20, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_ZARUN_EXPORT_H_

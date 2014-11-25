@@ -1,13 +1,8 @@
 /*
  * process.cc
  *
- *  Created on: Nov 20, 2014
- *      Author: zalem
  */
 
-// Copyright 2013 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 #include "zarun/modules/cpp/process.h"
 
 #include <stdlib.h>
@@ -87,7 +82,9 @@ struct SystemEnvironment : public base::SupportsUserData::Data {
 #endif
 
 // process.version
-std::string GetVersion() { return std::string(ZARUN_VERSION_FULL); }
+std::string GetVersion() {
+  return std::string(ZARUN_VERSION_FULL);
+}
 
 // process.versions
 v8::Handle<v8::Object> GetVersions(v8::Isolate* isolate) {
@@ -123,7 +120,9 @@ std::vector<std::string> ModuleListCallback(gin::Arguments* args) {
 }
 
 // process.pid
-base::ProcessId ProcessIdCallback() { return base::GetCurrentProcId(); }
+base::ProcessId ProcessIdCallback() {
+  return base::GetCurrentProcId();
+}
 
 // process.features
 v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
@@ -165,7 +164,9 @@ int KillCallback(gin::Arguments* args) {
 }
 
 // process.abort
-void AbortCallback() { abort(); }
+void AbortCallback() {
+  abort();
+}
 
 // process.chdir
 void ChdirCallback(gin::Arguments* args) {
@@ -194,7 +195,8 @@ std::string CwdCallback(gin::Arguments* args) {
 // static
 base::Environment* GetSystemEnvironment(v8::Handle<v8::Context> context) {
   gin::PerContextData* per_context_data = gin::PerContextData::From(context);
-  if (!per_context_data) return NULL;
+  if (!per_context_data)
+    return NULL;
 
   SystemEnvironment* env_data = static_cast<SystemEnvironment*>(
       per_context_data->GetUserData(kSystemEnvironmentKey));
@@ -226,7 +228,8 @@ void EnvGetter(v8::Local<v8::String> property,
   info.GetReturnValue().Set(info.Data().As<v8::Object>()->Get(property));
 }
 
-void EnvSetter(v8::Local<v8::String> property, v8::Local<v8::Value> value,
+void EnvSetter(v8::Local<v8::String> property,
+               v8::Local<v8::Value> value,
                const v8::PropertyCallbackInfo<v8::Value>& info) {
   std::string prop = gin::V8ToString(property);
   v8::Isolate* isolate = info.GetIsolate();
@@ -247,7 +250,8 @@ void EnvQuery(v8::Local<v8::String> property,
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   base::Environment* env = GetSystemEnvironment(context);
   bool ret = env->HasVar(prop.c_str());
-  if (ret) info.GetReturnValue().Set(0);
+  if (ret)
+    info.GetReturnValue().Set(0);
 }
 
 void EnvDeleter(v8::Local<v8::String> property,
@@ -264,7 +268,8 @@ void EnvEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
   v8::Isolate* isolate = info.GetIsolate();
 #if defined(OS_POSIX)
   int size = 0;
-  while (environ[size]) size++;
+  while (environ[size])
+    size++;
 
   v8::Local<v8::Array> envarr = v8::Array::New(isolate, size);
 
@@ -278,7 +283,8 @@ void EnvEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
   }
 #else  // _WIN32
   WCHAR* environment = GetEnvironmentStringsW();
-  if (environment == NULL) return;  // This should not happen.
+  if (environment == NULL)
+    return;  // This should not happen.
   v8::Local<v8::Array> envarr = v8::Array::New(isolate);
   WCHAR* p = environment;
   int i = 0;
@@ -316,7 +322,8 @@ v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   return env_templ->NewInstance();
 }
 
-void ModuleLoaded(gin::Arguments* args, std::string module_name,
+void ModuleLoaded(gin::Arguments* args,
+                  std::string module_name,
                   v8::Handle<v8::Value> module) {
   v8::Isolate* isolate = args->isolate();
   if (module.IsEmpty()) {

@@ -26,7 +26,8 @@ namespace backend {
 
 namespace {
 
-void InstallGlobalModule(zarun::ScriptRunner* runner, std::string id,
+void InstallGlobalModule(zarun::ScriptRunner* runner,
+                         std::string id,
                          v8::Handle<v8::Value> module) {
   gin::ContextHolder* context_holder = runner->GetContextHolder();
   v8::Isolate* isolate = context_holder->isolate();
@@ -45,10 +46,12 @@ BackendScriptRunnerDelegate::BackendScriptRunnerDelegate(
   runscript_callback_ = runscript_callback;
 }
 
-BackendScriptRunnerDelegate::~BackendScriptRunnerDelegate() {}
+BackendScriptRunnerDelegate::~BackendScriptRunnerDelegate() {
+}
 
 v8::Handle<v8::ObjectTemplate> BackendScriptRunnerDelegate::GetGlobalTemplate(
-    zarun::ScriptRunner* runner, v8::Isolate* isolate) {
+    zarun::ScriptRunner* runner,
+    v8::Isolate* isolate) {
   v8::Handle<v8::ObjectTemplate> templ =
       gin::ObjectTemplateBuilder(isolate).Build();
   return templ;
@@ -75,7 +78,8 @@ void BackendScriptRunnerDelegate::DidCreateContext(
 }
 
 void BackendScriptRunnerDelegate::UnhandledException(
-    zarun::ScriptRunner* runner, gin::TryCatch& try_catch) {
+    zarun::ScriptRunner* runner,
+    gin::TryCatch& try_catch) {
   LOG(ERROR) << try_catch.GetStackTrace();
 }
 
@@ -85,7 +89,8 @@ void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
     v8::Isolate* isolate = runner->GetContextHolder()->isolate();
     v8::Local<v8::Value> result = runner->global()->GetHiddenValue(
         gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName));
-    if (result.IsEmpty()) return;
+    if (result.IsEmpty())
+      return;
     v8::String::Utf8Value utf8_value(result);
     std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
     runscript_callback_.Run(str);

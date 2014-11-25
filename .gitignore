@@ -376,6 +376,7 @@ v8.log
 /third_party/usrsctp/usrsctplib
 /third_party/v8-i18n
 /third_party/valgrind
+/third_party/valgrind-git
 /third_party/v4l2capture
 /third_party/webdriver/pylib
 /third_party/webdriver/python/selenium
@@ -418,6 +419,7 @@ v8.log
 /tools/tryserver
 /tools/win/link_limiter/build
 /tools/clang
+/tools/valgrind
 /ui/surface/surface.xml
 /ui/surface/surface_gpu_tests.xml
 /ui/keyboard/keyboard_mojom_bindings.xml

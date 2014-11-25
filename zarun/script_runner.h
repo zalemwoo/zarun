@@ -1,8 +1,6 @@
 /*
  * scrpt_runner.h
  *
- *  Created on: Nov 21, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_SCRIPT_RUNNER_H_
@@ -31,7 +29,8 @@ class ZARUN_EXPORT ScriptRunnerDelegate {
 
   // Returns the template for the global object.
   virtual v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
-      ScriptRunner* runner, v8::Isolate* isolate);
+      ScriptRunner* runner,
+      v8::Isolate* isolate);
   virtual void DidCreateContext(ScriptRunner* runner);
   virtual void WillRunScript(ScriptRunner* runner);
   virtual void DidRunScript(ScriptRunner* runner);
@@ -55,7 +54,8 @@ class ZARUN_EXPORT ScriptRunner : public gin::Runner {
   void Run(const std::string& source,
            const std::string& resource_name) override;
   v8::Handle<v8::Value> Call(v8::Handle<v8::Function> function,
-                             v8::Handle<v8::Value> receiver, int argc,
+                             v8::Handle<v8::Value> receiver,
+                             int argc,
                              v8::Handle<v8::Value> argv[]) override;
   gin::ContextHolder* GetContextHolder() override;
 

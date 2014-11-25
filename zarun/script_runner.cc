@@ -1,8 +1,6 @@
 /*
  * script_runner.cc
  *
- *  Created on: Nov 21, 2014
- *      Author: zalem
  */
 
 // Copyright 2014 The Chromium Authors. All rights reserved.
@@ -32,20 +30,26 @@ using gin::PerContextData;
 
 namespace zarun {
 
-ScriptRunnerDelegate::ScriptRunnerDelegate() {}
+ScriptRunnerDelegate::ScriptRunnerDelegate() {
+}
 
-ScriptRunnerDelegate::~ScriptRunnerDelegate() {}
+ScriptRunnerDelegate::~ScriptRunnerDelegate() {
+}
 
 v8::Handle<ObjectTemplate> ScriptRunnerDelegate::GetGlobalTemplate(
-    ScriptRunner* runner, v8::Isolate* isolate) {
+    ScriptRunner* runner,
+    v8::Isolate* isolate) {
   return v8::Handle<ObjectTemplate>();
 }
 
-void ScriptRunnerDelegate::DidCreateContext(ScriptRunner* runner) {}
+void ScriptRunnerDelegate::DidCreateContext(ScriptRunner* runner) {
+}
 
-void ScriptRunnerDelegate::WillRunScript(ScriptRunner* runner) {}
+void ScriptRunnerDelegate::WillRunScript(ScriptRunner* runner) {
+}
 
-void ScriptRunnerDelegate::DidRunScript(ScriptRunner* runner) {}
+void ScriptRunnerDelegate::DidRunScript(ScriptRunner* runner) {
+}
 
 void ScriptRunnerDelegate::UnhandledException(ScriptRunner* runner,
                                               TryCatch& try_catch) {
@@ -69,7 +73,8 @@ ScriptRunner::ScriptRunner(ScriptRunnerDelegate* delegate, Isolate* isolate)
   delegate_->DidCreateContext(this);
 }
 
-ScriptRunner::~ScriptRunner() {}
+ScriptRunner::~ScriptRunner() {
+}
 
 void ScriptRunner::Run(const std::string& source,
                        const std::string& resource_name) {
@@ -96,7 +101,8 @@ v8::Handle<v8::Value> ScriptRunner::Call(v8::Handle<v8::Function> function,
   v8::Handle<v8::Value> result = function->Call(receiver, argc, argv);
 
   delegate_->DidRunScript(this);
-  if (try_catch.HasCaught()) delegate_->UnhandledException(this, try_catch);
+  if (try_catch.HasCaught())
+    delegate_->UnhandledException(this, try_catch);
 
   return result;
 }

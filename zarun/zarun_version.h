@@ -1,8 +1,6 @@
 /*
  * zarun_version.h
  *
- *  Created on: Nov 21, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_ZARUN_VERSION_H_

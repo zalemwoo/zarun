@@ -10,9 +10,12 @@ namespace backend {
 BackendThread::BackendThread(
     const std::string& name,
     const base::WeakPtr<BackendApplication>& application)
-    : base::Thread(name), termination_callback_(), application_(application) {}
+    : base::Thread(name), termination_callback_(), application_(application) {
+}
 
-BackendThread::~BackendThread() { base::Thread::Stop(); }
+BackendThread::~BackendThread() {
+  base::Thread::Stop();
+}
 
 void BackendThread::Init() {
   if (application_.get()) {

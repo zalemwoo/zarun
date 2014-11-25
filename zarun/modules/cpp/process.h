@@ -1,8 +1,6 @@
 /*
  * process.h
  *
- *  Created on: Nov 20, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_MODULES_PROCESS_H_
