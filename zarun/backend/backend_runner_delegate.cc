@@ -16,6 +16,7 @@
 
 #include "zarun/zarun_shell.h"
 #include "zarun/modules/module_registry.h"
+#include "zarun/modules/builtin_module_provider.h"
 #include "zarun/modules/cpp/console.h"
 #include "zarun/modules/cpp/process.h"
 #include "zarun/modules/cpp/gc.h"
@@ -36,9 +37,6 @@ void InstallGlobalModule(zarun::ScriptRunner* runner, std::string id,
 }  // namespace
 
 BackendScriptRunnerDelegate::BackendScriptRunnerDelegate() {
-  AddBuiltinModule(zarun::Process::kModuleName, zarun::Process::GetModule);
-  AddBuiltinModule(zarun::Console::kModuleName, zarun::Console::GetModule);
-  AddBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
 }
 
 BackendScriptRunnerDelegate::BackendScriptRunnerDelegate(
@@ -48,16 +46,6 @@ BackendScriptRunnerDelegate::BackendScriptRunnerDelegate(
 }
 
 BackendScriptRunnerDelegate::~BackendScriptRunnerDelegate() {}
-
-void BackendScriptRunnerDelegate::AddBuiltinModule(const std::string& id,
-                                                   ModuleGetter getter) {
-  builtin_modules_[id] = base::Bind(getter);
-}
-
-void BackendScriptRunnerDelegate::AddBuiltinModule(
-    const std::string& id, const ModuleGetterCallback& getter) {
-  builtin_modules_[id] = getter;
-}
 
 v8::Handle<v8::ObjectTemplate> BackendScriptRunnerDelegate::GetGlobalTemplate(
     zarun::ScriptRunner* runner, v8::Isolate* isolate) {
@@ -71,17 +59,19 @@ void BackendScriptRunnerDelegate::DidCreateContext(
   v8::Handle<v8::Context> context = runner->GetContextHolder()->context();
   ModuleRegistry* registry = ModuleRegistry::From(context);
 
+  registry->SetBuiltinModuleProvider(new BuiltinModuleProvider());
+
   v8::Isolate* isolate = runner->GetContextHolder()->isolate();
 
-  for (BuiltinModuleMap::const_iterator it = builtin_modules_.begin();
-       it != builtin_modules_.end(); ++it) {
-    registry->AddBuiltinModule(isolate, it->first, it->second.Run(isolate));
-  }
+  registry->RegisterBuiltinModule(zarun::Process::kModuleName,
+                                  zarun::Process::GetModule);
+  registry->RegisterBuiltinModule(zarun::Console::kModuleName,
+                                  zarun::Console::GetModule);
+  registry->RegisterBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
 
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, runner, zarun::Process::kModuleName));
-
 }
 
 void BackendScriptRunnerDelegate::UnhandledException(
@@ -93,7 +83,7 @@ void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
   if ((ZarunShell::Mode() == ShellMode::Repl) &&
       (!runscript_callback_.is_null())) {
     v8::Isolate* isolate = runner->GetContextHolder()->isolate();
-    v8::Local<v8::Value> result = runner->global()->Get(
+    v8::Local<v8::Value> result = runner->global()->GetHiddenValue(
         gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName));
     if (result.IsEmpty()) return;
     v8::String::Utf8Value utf8_value(result);

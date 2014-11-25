@@ -11,8 +11,11 @@
 #include "base/callback.h"
 #include "base/task_runner.h"
 #include "base/files/file_path.h"
+#include "base/memory/scoped_ptr.h"
+#include "base/memory/weak_ptr.h"
 
 #include "zarun/zarun_export.h"
+#include "zarun/environment.h"
 #include "zarun/backend/backend_thread.h"
 
 namespace zarun {
@@ -23,9 +26,10 @@ class BackendScriptRunnerDelegate;
 class ZARUN_EXPORT BackendApplication {
  public:
   BackendApplication(
-      scoped_refptr<base::TaskRunner> shell_thread,
+      scoped_refptr<base::TaskRunner> shell_runner,
       const base::Callback<void(BackendApplication*)>& termination_callback,
       backend::BackendScriptRunnerDelegate* backend_script_runner_delegate);
+
   ~BackendApplication();
 
   void Start();
@@ -34,18 +38,28 @@ class ZARUN_EXPORT BackendApplication {
   void RunScript(const base::FilePath& path);
   void RunScript(const std::string& source, const std::string& resource_name);
 
-  void OnThreadEnd(BackendThread* thread);
+  base::WeakPtr<BackendApplication> GetWeakPtr() {
+    return weak_factory_.GetWeakPtr();
+  }
 
  private:
+  void CreateEnvironment();
+  void DisposeEnvironment();
+  void OnThreadEnd(BackendThread* thread);
+
   void run_script_(const std::string& source, const std::string& resource_name);
 
  private:
-  BackendThread main_thread_;
-  scoped_refptr<base::TaskRunner> task_runner_;
-  scoped_refptr<base::TaskRunner> shell_thread_;
+  scoped_ptr<BackendScriptRunnerDelegate> backend_runner_delegate_;
+  scoped_refptr<base::TaskRunner> backend_runner_;
+  scoped_refptr<base::TaskRunner> shell_runner_;
+  scoped_ptr<zarun::Environment> environment_;
+  scoped_ptr<BackendThread> main_thread_;
   base::Callback<void(BackendApplication*)> termination_callback_;
 
-  DISALLOW_COPY_AND_ASSIGN(BackendApplication);
+  base::WeakPtrFactory<BackendApplication> weak_factory_;
+
+  friend class BackendThread;
 };
 }
 }  // namespace zarun::backend

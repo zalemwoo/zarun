@@ -120,7 +120,7 @@ void ScriptRunner::Run(v8::Handle<Script> script) {
 
   if (ZarunShell::Mode() == ShellMode::Repl) {
     v8::Isolate* isolate = GetContextHolder()->isolate();
-    global()->Set(
+    global()->SetHiddenValue(
         gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName),
         result);
   }

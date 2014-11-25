@@ -13,12 +13,12 @@
 #include <string>
 
 #include "base/callback.h"
-#include "base/compiler_specific.h"
+#include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
-#include "base/memory/scoped_vector.h"
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_export.h"
+#include "zarun/modules/builtin_module_provider.h"
 
 namespace zarun {
 
@@ -30,10 +30,11 @@ class ZARUN_EXPORT ModuleRegistry {
 
   static ModuleRegistry* From(v8::Handle<v8::Context> context);
 
-  // The caller must have already entered our context.
-  void AddBuiltinModule(v8::Isolate* isolate, const std::string& id,
-                        v8::Handle<v8::Value> module);
+  void SetBuiltinModuleProvider(BuiltinModuleProvider* builtin_module_provider);
 
+  void RegisterBuiltinModule(const std::string& id, ModuleGetter getter);
+
+  // The caller must have already entered our context.
   void LoadModule(v8::Isolate* isolate, const std::string& id,
                   LoadModuleCallback callback);
 
@@ -45,20 +46,12 @@ class ZARUN_EXPORT ModuleRegistry {
   }
 
  private:
-  typedef std::multimap<std::string, LoadModuleCallback> LoadModuleCallbackMap;
-
   explicit ModuleRegistry(v8::Isolate* isolate);
-
-  void RegisterModule(v8::Isolate* isolate, const std::string& id,
-                      v8::Handle<v8::Value> module);
 
   v8::Handle<v8::Value> GetModule(v8::Isolate* isolate, const std::string& id);
 
+  scoped_ptr<BuiltinModuleProvider> builtin_module_provider_;
   std::set<std::string> available_modules_;
-  std::set<std::string> unsatisfied_dependencies_;
-
-  LoadModuleCallbackMap waiting_callbacks_;
-
   v8::Persistent<v8::Object> modules_;
 
   DISALLOW_COPY_AND_ASSIGN(ModuleRegistry);

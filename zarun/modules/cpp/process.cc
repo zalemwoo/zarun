@@ -316,6 +316,18 @@ v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   return env_templ->NewInstance();
 }
 
+void ModuleLoaded(gin::Arguments* args, std::string module_name,
+                  v8::Handle<v8::Value> module) {
+  v8::Isolate* isolate = args->isolate();
+  if (module.IsEmpty()) {
+    isolate->ThrowException(v8::Exception::ReferenceError(gin::StringToV8(
+        isolate,
+        base::StringPrintf("No such module: %s.", module_name.c_str()))));
+    return;
+  }
+  return args->Return(module);
+}
+
 // process.binding
 void BindingCallback(gin::Arguments* args) {
   std::string module_name;
@@ -333,11 +345,10 @@ void BindingCallback(gin::Arguments* args) {
 
   if (registered) {
     return args->Return(exports);
+  } else {
+    module_registry->LoadModule(isolate, module_name,
+                                base::Bind(&ModuleLoaded, args, module_name));
   }
-
-  isolate->ThrowException(v8::Exception::ReferenceError(gin::StringToV8(
-      isolate,
-      base::StringPrintf("No such module: %s.", module_name.c_str()))));
 }
 
 gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};

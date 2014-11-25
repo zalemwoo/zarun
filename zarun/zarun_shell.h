@@ -1,6 +1,8 @@
 #ifndef ZARUN_SHELL_H_
 #define ZARUN_SHELL_H_
 
+#include <string>
+
 #include "base/command_line.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -47,6 +49,8 @@ class ZarunShell {
 
   DISALLOW_COPY_AND_ASSIGN(ZarunShell);
 };
+
+const std::string& GetDefaultV8Options();
 
 }  // namespace zarun
 

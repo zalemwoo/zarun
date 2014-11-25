@@ -1,43 +1,41 @@
 #ifndef ZARUN_BACKEND_THREAD_H_
 #define ZARUN_BACKEND_THREAD_H_
 
+#include "base/callback.h"
 #include "base/threading/thread.h"
-#include "base/memory/scoped_ptr.h"
+#include "base/memory/weak_ptr.h"
 
 #include "zarun/zarun_export.h"
-#include "zarun/script_runner.h"
-
-namespace gin {
-class IsolateHolder;
-}
 
 namespace zarun {
-
 namespace backend {
+
+class BackendApplication;
+class BackendThread;
+
+typedef base::Callback<void(BackendThread*)> ThreadTerminateCallback;
 
 class ZARUN_EXPORT BackendThread : public base::Thread {
  public:
-  BackendThread(
-      const std::string& name,
-      const base::Callback<void(BackendThread*)>& termination_callback,
-      zarun::ScriptRunnerDelegate* runner_delegate);
+  BackendThread(const std::string& name,
+                const base::WeakPtr<BackendApplication>& application);
 
   ~BackendThread();
 
-  zarun::ScriptRunner* shell_runner() const { return runner_.get(); }
+  void SetTerminateCallback(
+      const ThreadTerminateCallback& termination_callback) {
+    termination_callback_ = termination_callback;
+  }
 
  protected:
   // Called just prior to starting the message loop
   virtual void Init() override;
-
   // Called just after the message loop ends
   virtual void CleanUp() override;
 
  private:
   base::Callback<void(BackendThread*)> termination_callback_;
-  scoped_ptr<gin::IsolateHolder> isolate_holder_;
-  scoped_ptr<zarun::ScriptRunner> runner_;
-  scoped_ptr<zarun::ScriptRunnerDelegate> runner_delegate_;
+  base::WeakPtr<BackendApplication> application_;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);
 };

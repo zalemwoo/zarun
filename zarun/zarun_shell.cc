@@ -16,6 +16,9 @@ namespace zarun {
 
 namespace {
 
+static const std::string kDefaultV8Options =
+    "--harmony --es_staging --expose_gc";
+
 base::LazyInstance<zarun::ZarunShell> zarun_shell = LAZY_INSTANCE_INITIALIZER;
 
 void ProcessScriptResult(std::string result) {
@@ -94,5 +97,7 @@ void ZarunShell::OnBackendApplicationEnd(
     zarun::backend::BackendApplication* backendApplication) {
   task_runner_->PostTask(FROM_HERE, quit_closure_);
 }
+
+const std::string& GetDefaultV8Options() { return kDefaultV8Options; }
 
 }  // namespace zarun
