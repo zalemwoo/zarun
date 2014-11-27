@@ -1,8 +1,6 @@
 /*
  * backend_runner_delegate.cc
  *
- *  Created on: Nov 19, 2014
- *      Author: zalem
  */
 
 #include "zarun/backend/backend_runner_delegate.h"
@@ -95,6 +93,19 @@ void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
     std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
     runscript_callback_.Run(str);
   }
+}
+
+scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate() {
+  scoped_ptr<BackendScriptRunnerDelegate> delegate;
+  delegate.reset(new BackendScriptRunnerDelegate());
+  return delegate.Pass();
+}
+
+scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate(
+    const RunScriptCallback& runscript_callback) {
+  scoped_ptr<BackendScriptRunnerDelegate> delegate;
+  delegate.reset(new BackendScriptRunnerDelegate(runscript_callback));
+  return delegate.Pass();
 }
 }
 }  // namespace zarun::backend

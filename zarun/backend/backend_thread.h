@@ -11,12 +11,10 @@ namespace zarun {
 namespace backend {
 
 class BackendApplication;
-class BackendThread;
-
-typedef base::Callback<void(BackendThread*)> ThreadTerminateCallback;
 
 class ZARUN_EXPORT BackendThread : public base::Thread {
  public:
+  typedef base::Callback<void(BackendThread*)> ThreadTerminateCallback;
   BackendThread(const std::string& name,
                 const base::WeakPtr<BackendApplication>& application);
 
@@ -34,8 +32,8 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
   virtual void CleanUp() override;
 
  private:
-  base::Callback<void(BackendThread*)> termination_callback_;
   base::WeakPtr<BackendApplication> application_;
+  ThreadTerminateCallback termination_callback_;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);
 };

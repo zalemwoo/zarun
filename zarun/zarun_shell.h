@@ -14,9 +14,11 @@
 #include "base/threading/thread_checker.h"
 #include "base/run_loop.h"
 
-#include "zarun/backend/backend_application.h"
-
 namespace zarun {
+
+namespace backend {
+class BackendApplication;
+}
 
 enum ShellMode {
   Batch = 0,

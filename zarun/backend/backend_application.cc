@@ -1,12 +1,9 @@
 /*
  * backend_application.cc
  *
- *  Created on: Nov 18, 2014
- *      Author: zalem
  */
 
 #include "zarun/backend/backend_application.h"
-#include "zarun/backend/backend_runner_delegate.h"
 
 #include "base/bind.h"
 #include "base/files/file_util.h"
@@ -28,23 +25,25 @@ std::string Load(const base::FilePath& path) {
 BackendApplication::BackendApplication(
     scoped_refptr<base::TaskRunner> shell_runner,
     const base::Callback<void(BackendApplication*)>& termination_callback,
-    backend::BackendScriptRunnerDelegate* backend_script_runner_delegate)
-    : backend_runner_delegate_(backend_script_runner_delegate),
-      shell_runner_(shell_runner),
+    const backend::RunScriptCallback& run_script_callback)
+    : shell_runner_(shell_runner),
       termination_callback_(termination_callback),
+      backend_runner_delegate_(
+          CreateBackendScriptRunnerDelegate(run_script_callback)),
       weak_factory_(this) {
-  main_thread_.reset(new BackendThread("backend", this->GetWeakPtr()));
-  main_thread_->SetTerminateCallback(
-      base::Bind(&BackendApplication::OnThreadEnd, base::Unretained(this)));
 }
 
 BackendApplication::~BackendApplication() {
-  backend_runner_delegate_.reset();
 }
 
 void BackendApplication::Start() {
   base::Thread::Options options;
   options.message_loop_type = base::MessageLoop::TYPE_IO;
+
+  main_thread_.reset(new BackendThread("backend", this->GetWeakPtr()));
+  main_thread_->SetTerminateCallback(
+      base::Bind(&BackendApplication::OnThreadEnd, base::Unretained(this)));
+
   bool launched = main_thread_->StartWithOptions(options);
   DCHECK(launched);
   backend_runner_ = main_thread_->task_runner().get();
@@ -53,15 +52,17 @@ void BackendApplication::Start() {
 
 void BackendApplication::Stop() {
   main_thread_->Stop();
+  main_thread_.reset();
+  shell_runner_->PostTask(FROM_HERE, base::Bind(termination_callback_, this));
 }
 
 void BackendApplication::CreateEnvironment() {
-  DCHECK(!environment_.get());
+  DCHECK(!environment_.get()) << "environment created already";
   environment_.reset(Environment::Create(backend_runner_delegate_.get()));
 }
 
 void BackendApplication::DisposeEnvironment() {
-  DCHECK(environment_.get());
+  DCHECK(environment_.get()) << "environment disposed already";
   environment_.reset();
 }
 
@@ -85,7 +86,6 @@ void BackendApplication::run_script_(const std::string& source,
 
 // must be sync called on backend thread.
 void BackendApplication::OnThreadEnd(BackendThread* thread) {
-  shell_runner_->PostTask(FROM_HERE, base::Bind(termination_callback_, this));
 }
 }
 }  // namespace zarun::backend

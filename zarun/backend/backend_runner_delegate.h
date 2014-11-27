@@ -1,14 +1,13 @@
 /*
  * backend_runner_delegate.h
  *
- *  Created on: Nov 19, 2014
- *      Author: zalem
  */
 
 #ifndef ZARUN_BACKEND_BACKEND_RUNNER_DELEGATE_H_
 #define ZARUN_BACKEND_BACKEND_RUNNER_DELEGATE_H_
 
 #include "base/callback.h"
+#include "base/memory/scoped_ptr.h"
 #include "gin/try_catch.h"
 
 #include "zarun/zarun_export.h"
@@ -40,6 +39,10 @@ class ZARUN_EXPORT BackendScriptRunnerDelegate : public ScriptRunnerDelegate {
   RunScriptCallback runscript_callback_;
   DISALLOW_COPY_AND_ASSIGN(BackendScriptRunnerDelegate);
 };
+
+scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate();
+scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate(
+    const RunScriptCallback& runscript_callback);
 }
 }  // namespace zarun::backend
 

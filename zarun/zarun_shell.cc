@@ -1,7 +1,7 @@
 #include "zarun/zarun_shell.h"
 #include "zarun/switches.h"
 #include "zarun/line_editor.h"
-#include "zarun/backend/backend_runner_delegate.h"
+#include "zarun/backend/backend_application.h"
 
 #include "base/bind.h"
 #include "base/lazy_instance.h"
@@ -53,11 +53,11 @@ void ZarunShell::Run() {
 
   task_runner_ = base::MessageLoopProxy::current().get();
 
+  // BackendScriptRunnerDelegate owned by backend_application, will freed by it.
   backend_application_.reset(new zarun::backend::BackendApplication(
       task_runner_,
       base::Bind(&ZarunShell::OnBackendApplicationEnd, base::Unretained(this)),
-      new backend::BackendScriptRunnerDelegate(
-          base::Bind(&ProcessScriptResult))));
+      base::Bind(&ProcessScriptResult)));
 
   backend_application_->Start();
 
@@ -75,6 +75,7 @@ void ZarunShell::Run() {
   }
 
   run_loop.Run();
+  DLOG(INFO) << "bye.";
 }
 
 void ZarunShell::Repl() {
@@ -94,7 +95,6 @@ void ZarunShell::Repl() {
     }
   }
   console->Close();
-  DLOG(INFO) << "bye.";
 }
 
 void ZarunShell::OnBackendApplicationEnd(
