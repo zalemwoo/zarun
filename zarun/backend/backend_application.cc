@@ -62,7 +62,6 @@ void BackendApplication::CreateEnvironment() {
 }
 
 void BackendApplication::DisposeEnvironment() {
-  DCHECK(environment_.get()) << "environment disposed already";
   environment_.reset();
 }
 

@@ -15,9 +15,6 @@ class BackendApplication;
 class ZARUN_EXPORT BackendThread : public base::Thread {
  public:
   typedef base::Callback<void(BackendThread*)> ThreadTerminateCallback;
-  BackendThread(const std::string& name,
-                const base::WeakPtr<BackendApplication>& application);
-
   ~BackendThread();
 
   void SetTerminateCallback(
@@ -26,6 +23,9 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
   }
 
  protected:
+  BackendThread(const std::string& name,
+                const base::WeakPtr<BackendApplication>& application);
+
   // Called just prior to starting the message loop
   virtual void Init() override;
   // Called just after the message loop ends
@@ -34,6 +34,8 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
  private:
   base::WeakPtr<BackendApplication> application_;
   ThreadTerminateCallback termination_callback_;
+
+  friend BackendApplication;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);
 };
