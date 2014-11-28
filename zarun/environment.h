@@ -20,6 +20,8 @@ namespace zarun {
 
 class ZARUN_EXPORT Environment {
  public:
+  class StringSourceMap;
+
   static Environment* Create(
       zarun::ScriptContextDelegate* script_context_delegate);
 
@@ -34,6 +36,7 @@ class ZARUN_EXPORT Environment {
   gin::IsolateHolder isolate_holder_;
   scoped_ptr<gin::ContextHolder> context_holder_;
   scoped_ptr<zarun::ScriptContext> script_context_;
+  scoped_ptr<StringSourceMap> source_map_;
 };
 
 }  // namespace zarun

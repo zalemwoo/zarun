@@ -18,10 +18,11 @@
 #include "base/compiler_specific.h"
 #include "base/memory/linked_ptr.h"
 #include "base/memory/scoped_ptr.h"
+#include "v8/include/v8.h"
+
+#include "zarun/modules/module_registry_observer.h"
 #include "zarun/modules/native_javascript_module.h"
 #include "zarun/modules/object_backed_native_module.h"
-#include "gin/modules/module_registry_observer.h"
-#include "v8/include/v8.h"
 
 namespace zarun {
 
@@ -43,7 +44,7 @@ class ScriptContext;
 // Note that a ModuleSystem must be used only in conjunction with a single
 // v8::Context.
 class JavaScriptModuleSystem : public ObjectBackedNativeModule,
-                               public gin::ModuleRegistryObserver {
+                               public zarun::ModuleRegistryObserver {
  public:
   class SourceMap {
    public:
@@ -113,7 +114,8 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   void OverrideNativeModuleForTest(const std::string& name);
 
   // Executes |code| in the current context with |name| as the filename.
-  void RunString(const std::string& code, const std::string& name);
+  v8::Handle<v8::Value> RunString(const std::string& code,
+                                  const std::string& name);
 
   // Make |object|.|field| lazily evaluate to the result of
   // require(|module_name|)[|module_field|].
@@ -206,7 +208,7 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
       scoped_ptr<v8::UniquePersistent<v8::Promise::Resolver> > resolver,
       v8::Handle<v8::Value> value);
 
-  // gin::ModuleRegistryObserver overrides.
+  // zarun::ModuleRegistryObserver overrides.
   void OnDidAddPendingModule(
       const std::string& id,
       const std::vector<std::string>& dependencies) override;

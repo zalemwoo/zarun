@@ -22,7 +22,6 @@
         './modules/javascript_module_system.cc',
         './modules/module_registry.cc',
         './modules/module_provider.cc',
-        './modules/builtin_module_provider.cc',
         './modules/cpp/print.cc',
         './modules/cpp/console.cc',
         './modules/cpp/process.cc',

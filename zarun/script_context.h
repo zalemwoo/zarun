@@ -48,6 +48,9 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                 const v8::Handle<v8::Context>& v8_context);
   ~ScriptContext() override;
 
+  v8::Handle<v8::Context> v8_context() const;
+  v8::Isolate* isolate() const { return isolate_; }
+
   // Runs |function| with appropriate scopes. Doesn't catch exceptions, callers
   // must do that if they want.
   //
@@ -65,6 +68,12 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   SafeBuiltins* safe_builtins() { return &safe_builtins_; }
   const SafeBuiltins* safe_builtins() const { return &safe_builtins_; }
 
+  // Clears this context and invalidates the associated ModuleSystem.
+  void Invalidate();
+  // Returns true if this context is still valid, false if it isn't.
+  // A context becomes invalid via Invalidate().
+  bool is_valid() const;
+
   // Before running script in this context, you'll need to enter the runner's
   // context by creating an instance of Runner::Scope on the stack.
   // gin::Runner overrides:
@@ -74,33 +83,17 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                              v8::Handle<v8::Value> receiver,
                              int argc,
                              v8::Handle<v8::Value> argv[]) override;
-
-  // Clears this context and invalidates the associated ModuleSystem.
-  void Invalidate();
-  // Returns true if this context is still valid, false if it isn't.
-  // A context becomes invalid via Invalidate().
-  bool is_valid() const;
-
-  v8::Handle<v8::Context> v8_context() const;
-  v8::Isolate* isolate() const { return isolate_; }
+  gin::ContextHolder* GetContextHolder() override;
 
   static const std::string kReplResultVariableName;
 
-  gin::ContextHolder* GetContextHolder() override;
-
  private:
   friend class gin::Runner::Scope;
-
-  void Run(v8::Handle<v8::Script> script);
-
   ScriptContextDelegate* delegate_;
-
   // The v8 context the bindings are accessible to.
   ScopedPersistent<v8::Context> v8_context_;
-
   // Owns and structures the JS that is injected to set up extension bindings.
   scoped_ptr<JavaScriptModuleSystem> module_system_;
-
   // Contains safe copies of builtin objects like Function.prototype.
   SafeBuiltins safe_builtins_;
 

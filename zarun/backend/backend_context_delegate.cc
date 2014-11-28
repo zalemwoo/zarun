@@ -14,7 +14,6 @@
 
 #include "zarun/zarun_shell.h"
 #include "zarun/modules/module_registry.h"
-#include "zarun/modules/builtin_module_provider.h"
 #include "zarun/modules/cpp/console.h"
 #include "zarun/modules/cpp/process.h"
 #include "zarun/modules/cpp/gc.h"
@@ -49,26 +48,29 @@ v8::Handle<v8::ObjectTemplate> BackendScriptContextDelegate::GetGlobalTemplate(
   v8::EscapableHandleScope handle_scope(isolate);
   v8::Local<v8::ObjectTemplate> templ =
       gin::ObjectTemplateBuilder(isolate).Build();
+  ModuleRegistry::RegisterGlobals(isolate, templ);
   return handle_scope.Escape(templ);
 }
 
 void BackendScriptContextDelegate::DidCreateContext(
     zarun::ScriptContext* context) {
+  v8::Isolate* isolate = context->isolate();
   v8::Handle<v8::Context> v8_context = context->v8_context();
   ModuleRegistry* registry = ModuleRegistry::From(v8_context);
-  registry->SetBuiltinModuleProvider(new BuiltinModuleProvider());
   // register builtin modules
-  registry->RegisterBuiltinModule(zarun::Process::kModuleName,
-                                  zarun::Process::GetModule);
-  registry->RegisterBuiltinModule(zarun::Console::kModuleName,
-                                  zarun::Console::GetModule);
-  registry->RegisterBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
+  registry->AddBuiltinModule(isolate, zarun::Process::kModuleName,
+                             zarun::Process::GetModule(isolate));
+  registry->AddBuiltinModule(isolate, zarun::Console::kModuleName,
+                             zarun::Console::GetModule(isolate));
+  registry->AddBuiltinModule(isolate, zarun::GC::kModuleName,
+                             zarun::GC::GetModule(isolate));
 
   // load "process" module into global object
-  v8::Isolate* isolate = context->isolate();
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, context, zarun::Process::kModuleName));
+
+  registry->AttemptToLoadMoreModules(isolate);
 }
 
 void BackendScriptContextDelegate::UnhandledException(

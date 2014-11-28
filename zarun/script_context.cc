@@ -101,16 +101,17 @@ v8::Handle<v8::Context> ScriptContext::v8_context() const {
 
 void ScriptContext::Run(const std::string& source,
                         const std::string& resource_name) {
-  TryCatch try_catch;
-  v8::Isolate* isolate = GetContextHolder()->isolate();
-  v8::Handle<v8::Script> script =
-      v8::Script::Compile(gin::StringToV8(isolate, source),
-                          gin::StringToV8(isolate, resource_name));
-  if (try_catch.HasCaught()) {
-    delegate_->UnhandledException(this, try_catch);
-    return;
+  delegate_->WillRunScript(this);
+  v8::Handle<v8::Value> result =
+      module_system_->RunString(source, resource_name);
+
+  if (ZarunShell::Mode() == ShellMode::Repl) {
+    v8::Isolate* isolate = GetContextHolder()->isolate();
+    global()->SetHiddenValue(
+        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName),
+        result);
   }
-  Run(script);
+  delegate_->DidRunScript(this);
 }
 
 v8::Handle<v8::Value> ScriptContext::Call(v8::Handle<v8::Function> function,
@@ -127,26 +128,6 @@ v8::Handle<v8::Value> ScriptContext::Call(v8::Handle<v8::Function> function,
     delegate_->UnhandledException(this, try_catch);
 
   return result;
-}
-
-void ScriptContext::Run(v8::Handle<v8::Script> script) {
-  TryCatch try_catch;
-
-  delegate_->WillRunScript(this);
-  v8::Handle<v8::Value> result = script->Run();
-
-  if (result.IsEmpty()) {
-    if (try_catch.HasCaught()) {
-      return delegate_->UnhandledException(this, try_catch);
-    }
-  }
-  if (ZarunShell::Mode() == ShellMode::Repl) {
-    v8::Isolate* isolate = GetContextHolder()->isolate();
-    global()->SetHiddenValue(
-        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName),
-        result);
-  }
-  delegate_->DidRunScript(this);
 }
 
 ContextHolder* ScriptContext::GetContextHolder() {

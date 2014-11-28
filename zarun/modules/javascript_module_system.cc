@@ -16,7 +16,7 @@
 #include "base/strings/stringprintf.h"
 #include "zarun/console.h"
 #include "zarun/script_context.h"
-#include "gin/modules/module_registry.h"
+#include "zarun/modules/module_registry.h"
 
 namespace zarun {
 
@@ -38,7 +38,7 @@ const char* kModulesField = "modules";
 // up our JS in unexpected ways. Hopefully dev/canary channel will pick up such
 // problems, but given the wider variety on stable/beta it's impossible to know.
 void Fatal(ScriptContext* context, const std::string& message) {
-  console::Fatal(context->isolate()->GetCallingContext(), message);
+  console::Error(context->isolate()->GetCallingContext(), message);
 }
 
 void Warn(v8::Isolate* isolate, const std::string& message) {
@@ -124,7 +124,7 @@ JavaScriptModuleSystem::JavaScriptModuleSystem(ScriptContext* context,
   global->SetHiddenValue(v8::String::NewFromUtf8(isolate, kModuleSystem),
                          v8::External::New(isolate, this));
 
-  gin::ModuleRegistry::From(context->v8_context())->AddObserver(this);
+  zarun::ModuleRegistry::From(context->v8_context())->AddObserver(this);
 }
 
 JavaScriptModuleSystem::~JavaScriptModuleSystem() {
@@ -284,11 +284,12 @@ void JavaScriptModuleSystem::OverrideNativeModuleForTest(
   overridden_native_handlers_.insert(name);
 }
 
-void JavaScriptModuleSystem::RunString(const std::string& code,
-                                       const std::string& name) {
+v8::Handle<v8::Value> JavaScriptModuleSystem::RunString(
+    const std::string& code,
+    const std::string& name) {
   v8::HandleScope handle_scope(GetIsolate());
-  RunString(v8::String::NewFromUtf8(GetIsolate(), code.c_str()),
-            v8::String::NewFromUtf8(GetIsolate(), name.c_str()));
+  return RunString(v8::String::NewFromUtf8(GetIsolate(), code.c_str()),
+                   v8::String::NewFromUtf8(GetIsolate(), name.c_str()));
 }
 
 // static
@@ -502,8 +503,8 @@ void JavaScriptModuleSystem::RequireAsync(
   args.GetReturnValue().Set(resolver->GetPromise());
   scoped_ptr<v8::UniquePersistent<v8::Promise::Resolver> > persistent_resolver(
       new v8::UniquePersistent<v8::Promise::Resolver>(GetIsolate(), resolver));
-  gin::ModuleRegistry* module_registry =
-      gin::ModuleRegistry::From(context_->v8_context());
+  zarun::ModuleRegistry* module_registry =
+      zarun::ModuleRegistry::From(context_->v8_context());
   if (!module_registry) {
     Warn(GetIsolate(), "Extension view no longer exists");
     resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(
@@ -579,7 +580,7 @@ v8::Handle<v8::Value> JavaScriptModuleSystem::LoadModule(
   v8::Handle<v8::Function> func = v8::Handle<v8::Function>::Cast(func_as_value);
 
   v8::Handle<v8::Object> define_object = v8::Object::New(GetIsolate());
-  gin::ModuleRegistry::InstallGlobals(GetIsolate(), define_object);
+  zarun::ModuleRegistry::InstallGlobals(GetIsolate(), define_object);
 
   v8::Local<v8::Value> exports = v8::Object::New(GetIsolate());
   v8::Handle<v8::Object> natives(NewInstance());
@@ -628,8 +629,8 @@ void JavaScriptModuleSystem::OnDidAddPendingModule(
   if (!source_map_->Contains(id))
     return;
 
-  gin::ModuleRegistry* registry =
-      gin::ModuleRegistry::From(context_->v8_context());
+  zarun::ModuleRegistry* registry =
+      zarun::ModuleRegistry::From(context_->v8_context());
   DCHECK(registry);
   for (std::vector<std::string>::const_iterator it = dependencies.begin();
        it != dependencies.end(); ++it) {

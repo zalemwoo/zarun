@@ -348,14 +348,8 @@ void BindingCallback(gin::Arguments* args) {
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   ModuleRegistry* module_registry = ModuleRegistry::From(context);
 
-  bool registered = module_registry->HasModule(isolate, module_name, exports);
-
-  if (registered) {
-    return args->Return(exports);
-  } else {
     module_registry->LoadModule(isolate, module_name,
                                 base::Bind(&ModuleLoaded, args, module_name));
-  }
 }
 
 gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
