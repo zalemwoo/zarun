@@ -111,11 +111,29 @@ ContextHolder* ScriptContext::GetContextHolder() {
   return context_holder_.get();
 }
 
-v8::Handle<v8::Context> ScriptContext::v8_context() {
-  return GetContextHolder()->context();
+v8::Handle<v8::Context> ScriptContext::v8_context() const {
+  ContextHolder* context_holder =
+      (const_cast<ScriptContext*>(this))->GetContextHolder();
+  if (context_holder) {
+    return context_holder->context();
+  }
+  return v8::Local<v8::Context>();
+}
+
+void ScriptContext::Invalidate() {
+  if (!is_valid())
+    return;
+  //	  if (module_system_)
+  //	    module_system_->Invalidate();
+  context_holder_.reset();
+}
+
+bool ScriptContext::is_valid() const {
+  return !v8_context().IsEmpty();
 }
 
 void ScriptContext::Run(v8::Handle<Script> script) {
+  DCHECK(is_valid());
   TryCatch try_catch;
   delegate_->WillRunScript(this);
 

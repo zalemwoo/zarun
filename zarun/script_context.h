@@ -58,7 +58,13 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                              v8::Handle<v8::Value> argv[]) override;
   gin::ContextHolder* GetContextHolder() override;
 
-  v8::Handle<v8::Context> v8_context();
+  // Clears this context and invalidates the associated ModuleSystem.
+  void Invalidate();
+  // Returns true if this context is still valid, false if it isn't.
+  // A context becomes invalid via Invalidate().
+  bool is_valid() const;
+
+  v8::Handle<v8::Context> v8_context() const;
 
   static const std::string kReplResultVariableName;
 
