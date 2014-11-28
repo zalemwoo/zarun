@@ -27,6 +27,12 @@ class ZARUN_EXPORT Environment {
 
   ~Environment();
 
+  // get Environment from context, maybe NULL
+  static Environment* From(v8::Handle<v8::Context> context);
+
+  // Register a named JS module in the module system.
+  void RegisterModule(const std::string& name, const std::string& code);
+
   zarun::ScriptContext* context() { return script_context_.get(); }
   v8::Isolate* isolate();
   v8::Local<v8::Context> v8_context();

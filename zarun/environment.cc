@@ -7,6 +7,7 @@
 
 #include "gin/array_buffer.h"
 #include "gin/public/context_holder.h"
+#include "gin/per_context_data.h"
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/modules/javascript_module_system.h"
@@ -16,6 +17,15 @@ namespace zarun {
 
 namespace {
 bool v8_inited = false;
+
+// Key for base::SupportsUserData::Data.
+const char kEnvironmentKey[] = "ZarunEnvironment";
+
+struct EnvironmentData : public base::SupportsUserData::Data {
+	Environment* env;
+};
+
+
 }  // namespace
 
 // Source map that operates on std::strings.
@@ -71,10 +81,17 @@ Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
 
   context_holder_->SetContext(v8_context);
 
+  gin::PerContextData* data = gin::PerContextData::From(v8_context);
+
+  EnvironmentData* env_data = new EnvironmentData();
+  env_data->env = this;
+  data->SetUserData(kEnvironmentKey, env_data);
+
   script_context_.reset(
       new ScriptContext(script_context_delegate, context_holder_->context()));
   v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   script_context_->v8_context()->Enter();
+
   {
     scoped_ptr<JavaScriptModuleSystem> module_system(
         new JavaScriptModuleSystem(script_context_.get(), source_map_.get()));
@@ -113,12 +130,27 @@ Environment::~Environment() {
   }
 }
 
+// static
+Environment* Environment::From(v8::Handle<v8::Context> context) {
+  gin::PerContextData* data = gin::PerContextData::From(context);
+  if (!data)
+    return NULL;
+
+  EnvironmentData* env_data = static_cast<EnvironmentData*>(data->GetUserData(kEnvironmentKey));
+  return env_data->env;
+}
+
 v8::Isolate* Environment::isolate() {
   return this->isolate_holder_.isolate();
 }
 
 v8::Local<v8::Context> Environment::v8_context() {
   return this->script_context_->v8_context();
+}
+
+void Environment::RegisterModule(const std::string& name,
+                                                 const std::string& code) {
+  source_map_->RegisterModule(name, code);
 }
 
 }  // namespace zarun
