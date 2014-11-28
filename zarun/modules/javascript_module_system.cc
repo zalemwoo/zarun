@@ -425,17 +425,9 @@ v8::Handle<v8::Value> JavaScriptModuleSystem::RunString(
   v8::EscapableHandleScope handle_scope(GetIsolate());
   v8::Context::Scope context_scope(context()->v8_context());
 
-  // Prepend extensions:: to |name| so that internal code can be differentiated
-  // from external code in stack traces. This has no effect on behaviour.
-  std::string internal_name =
-      base::StringPrintf("extensions::%s", *v8::String::Utf8Value(name));
-
   v8::TryCatch try_catch;
   try_catch.SetCaptureMessage(true);
-  v8::Handle<v8::Script> script(v8::Script::Compile(
-      code, v8::String::NewFromUtf8(GetIsolate(), internal_name.c_str(),
-                                    v8::String::kNormalString,
-                                    internal_name.size())));
+  v8::Handle<v8::Script> script(v8::Script::Compile(code, name));
   if (try_catch.HasCaught()) {
     HandleException(try_catch);
     return v8::Undefined(GetIsolate());
