@@ -11,6 +11,7 @@
 
 #include "base/bind.h"
 #include "base/macros.h"
+#include "v8/include/v8-util.h"
 #include "v8/include/v8.h"
 
 #include "zarun/modules/native_javascript_module.h"
@@ -68,7 +69,7 @@ class ObjectBackedNativeModule : public NativeJavaScriptModule {
   // So, we use v8::Objects here to hold that data, effectively refcounting
   // the data. When |this| is destroyed we remove the base::Bound function from
   // the object to indicate that it shoudn't be called.
-  typedef std::vector<v8::UniquePersistent<v8::Object>> RouterData;
+  typedef v8::PersistentValueVector<v8::Object> RouterData;
   RouterData router_data_;
 
   ScriptContext* context_;

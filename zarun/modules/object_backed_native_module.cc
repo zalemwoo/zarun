@@ -15,7 +15,7 @@ const char* kHandlerFunction = "handler_function";
 }  // namespace
 
 ObjectBackedNativeModule::ObjectBackedNativeModule(ScriptContext* context)
-    : router_data_(),
+    : router_data_(context->v8_context()->GetIsolate()),
       context_(context),
       object_template_(
           v8::ObjectTemplate::New(context->v8_context()->GetIsolate())) {
@@ -69,7 +69,7 @@ void ObjectBackedNativeModule::RouteFunction(
       v8::FunctionTemplate::New(isolate, Router, data);
   object_template_.NewHandle(isolate)
       ->Set(isolate, name.c_str(), function_template);
-  router_data_.push_back(v8::UniquePersistent<v8::Object>(isolate, data));
+  router_data_.Append(v8::UniquePersistent<v8::Object>(isolate, data));
 }
 
 void ObjectBackedNativeModule::Invalidate() {
@@ -79,9 +79,9 @@ void ObjectBackedNativeModule::Invalidate() {
   v8::HandleScope handle_scope(isolate);
   v8::Context::Scope context_scope(context_->v8_context());
 
-  for (size_t i = 0; i < router_data_.size(); i++) {
+  for (size_t i = 0; i < router_data_.Size(); i++) {
     v8::Handle<v8::Object> data =
-        v8::Local<v8::Object>::New(isolate, router_data_[i]);
+        v8::Local<v8::Object>::New(isolate, router_data_.Get(i));
     v8::Handle<v8::Value> handler_function_value =
         data->Get(v8::String::NewFromUtf8(isolate, kHandlerFunction));
     CHECK(!handler_function_value.IsEmpty());
@@ -89,7 +89,7 @@ void ObjectBackedNativeModule::Invalidate() {
         handler_function_value.As<v8::External>()->Value());
     data->Delete(v8::String::NewFromUtf8(isolate, kHandlerFunction));
   }
-  router_data_.clear();
+  router_data_.Clear();
   object_template_.reset();
   context_ = NULL;
   NativeJavaScriptModule::Invalidate();
