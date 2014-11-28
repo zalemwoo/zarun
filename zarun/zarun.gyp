@@ -17,6 +17,8 @@
         './backend/backend_thread.cc',
         './backend/backend_application.cc',
         
+        './modules/native_javascript_module.cc',
+        './modules/object_backed_native_module.cc',
         './modules/module_registry.cc',
         './modules/module_provider.cc',
         './modules/builtin_module_provider.cc',
@@ -24,6 +26,7 @@
         './modules/cpp/process.cc',
         './modules/cpp/gc.cc',
         
+        './console.cc',
         './switches.cc',
         './readline_editor.cc',
         './script_context.cc',

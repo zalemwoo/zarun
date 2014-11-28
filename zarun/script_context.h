@@ -56,7 +56,6 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                              v8::Handle<v8::Value> receiver,
                              int argc,
                              v8::Handle<v8::Value> argv[]) override;
-  gin::ContextHolder* GetContextHolder() override;
 
   // Clears this context and invalidates the associated ModuleSystem.
   void Invalidate();
@@ -65,8 +64,12 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   bool is_valid() const;
 
   v8::Handle<v8::Context> v8_context() const;
+  v8::Isolate* isolate() const { return isolate_; }
 
   static const std::string kReplResultVariableName;
+
+ protected:
+  gin::ContextHolder* GetContextHolder() override;
 
  private:
   friend class gin::Runner::Scope;
@@ -75,6 +78,7 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
 
   ScriptContextDelegate* delegate_;
   scoped_ptr<gin::ContextHolder> context_holder_;
+  v8::Isolate* isolate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptContext);
 };

@@ -89,7 +89,6 @@ void BackendApplication::RunScript(const std::string& source,
 void BackendApplication::run_script_(const std::string& source,
                                      const std::string& resource_name) {
   zarun::ScriptContext* script_context = environment_->context();
-  CHECK(script_context->is_valid());
   gin::Runner::Scope scope(script_context);
   script_context->Run(source, resource_name);
 }

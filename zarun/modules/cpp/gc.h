@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GIN_TEST_GC_H_
-#define GIN_TEST_GC_H_
+#ifndef ZARUN_MODULES_GC_H_
+#define ZARUN_MODULES_GC_H_
 
 #include "v8/include/v8.h"
 
@@ -18,4 +18,4 @@ class GC {
 
 }  // namespace zarun
 
-#endif  // GIN_TEST_GC_H_
+#endif  // ZARUN_MODULES_GC_H_

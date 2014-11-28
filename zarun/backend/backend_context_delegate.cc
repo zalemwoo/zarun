@@ -27,8 +27,7 @@ namespace {
 void InstallGlobalModule(zarun::ScriptContext* context,
                          std::string id,
                          v8::Handle<v8::Value> module) {
-  gin::ContextHolder* context_holder = context->GetContextHolder();
-  v8::Isolate* isolate = context_holder->isolate();
+  v8::Isolate* isolate = context->isolate();
   v8::Handle<v8::Object> globalObj = context->global();
   globalObj->Set(gin::StringToSymbol(isolate, id), module);
 }
@@ -63,7 +62,7 @@ void BackendScriptContextDelegate::DidCreateContext(
 
   registry->SetBuiltinModuleProvider(new BuiltinModuleProvider());
 
-  v8::Isolate* isolate = context->GetContextHolder()->isolate();
+  v8::Isolate* isolate = context->isolate();
 
   registry->RegisterBuiltinModule(zarun::Process::kModuleName,
                                   zarun::Process::GetModule);
@@ -85,7 +84,7 @@ void BackendScriptContextDelegate::UnhandledException(
 void BackendScriptContextDelegate::DidRunScript(zarun::ScriptContext* context) {
   if ((ZarunShell::Mode() == ShellMode::Repl) &&
       (!runscript_callback_.is_null())) {
-    v8::Isolate* isolate = context->GetContextHolder()->isolate();
+    v8::Isolate* isolate = context->isolate();
     v8::Local<v8::Value> result = context->global()->GetHiddenValue(
         gin::StringToV8(isolate, ScriptContext::kReplResultVariableName));
     if (result.IsEmpty())

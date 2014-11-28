@@ -22,4 +22,4 @@ class ZARUN_EXPORT Process {
 
 }  // namespace zarun
 
-#endif /* ZARUN_MODULES_PROCESS_H_ */
+#endif  // ZARUN_MODULES_PROCESS_H_

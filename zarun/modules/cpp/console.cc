@@ -13,6 +13,8 @@
 #include "gin/per_isolate_data.h"
 #include "gin/public/wrapper_info.h"
 
+#include "zarun/console.h"
+
 namespace zarun {
 
 namespace {
@@ -52,7 +54,8 @@ Console::~Console() {
 
 // static
 v8::Local<v8::Value> Console::GetModule(v8::Isolate* isolate) {
-  return Create(isolate)->GetWrapper(isolate);
+  //  return Create(isolate)->GetWrapper(isolate);
+  return zarun::console::AsV8Object(isolate);
 }
 
 gin::ObjectTemplateBuilder Console::GetObjectTemplateBuilder(

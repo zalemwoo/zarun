@@ -53,7 +53,7 @@ const std::string ScriptContext::kReplResultVariableName = "__repl_result__";
 
 ScriptContext::ScriptContext(ScriptContextDelegate* delegate,
                              v8::Isolate* isolate)
-    : delegate_(delegate) {
+    : delegate_(delegate), isolate_(isolate) {
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
   v8::Handle<v8::Context> v8_context = v8::Context::New(
