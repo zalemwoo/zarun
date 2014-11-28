@@ -17,51 +17,11 @@
 
 namespace zarun {
 
-namespace {
-
-static const char* ToCString(const v8::String::Utf8Value& value) {
-  return *value ? *value : "<string conversion failed>";
-}
-
-void Log(gin::Arguments* args) {
-  std::vector<std::string> strs;
-  for (int i = 0; i < args->Length(); i++) {
-    v8::Handle<v8::Value> val;
-    if (!args->GetNext(&val)) {
-      args->ThrowError();
-      return;
-    }
-    strs.push_back(ToCString(v8::String::Utf8Value(val)));
-  }
-  std::cout << JoinString(strs, ',') << std::endl;
-}
-
-}  // namespace
-
 const char Console::kModuleName[] = "console";
-gin::WrapperInfo Console::kWrapperInfo = {gin::kEmbedderNativeGin};
-
-// static
-gin::Handle<Console> Console::Create(v8::Isolate* isolate) {
-  return gin::CreateHandle(isolate, new Console());
-}
-
-Console::Console() {
-}
-
-Console::~Console() {
-}
 
 // static
 v8::Local<v8::Value> Console::GetModule(v8::Isolate* isolate) {
-  //  return Create(isolate)->GetWrapper(isolate);
   return zarun::console::AsV8Object(isolate);
-}
-
-gin::ObjectTemplateBuilder Console::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return Wrappable<Console>::GetObjectTemplateBuilder(isolate)
-      .SetMethod("log", Log);
 }
 
 }  // namespace zarun

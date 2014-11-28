@@ -16,19 +16,14 @@ namespace zarun {
 
 // The Console module provides a basic API for printing to stdout. Over time,
 // we'd like to evolve the API to match window.console in browsers.
-class ZARUN_EXPORT Console : public gin::Wrappable<Console> {
+class ZARUN_EXPORT Console {
  public:
   static const char kModuleName[];
-  static gin::WrapperInfo kWrapperInfo;
-  static gin::Handle<Console> Create(v8::Isolate* isolate);
   static v8::Local<v8::Value> GetModule(v8::Isolate* isolate);
 
  private:
-  Console();
-  ~Console() override;
-
-  gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
+  Console(){};
+  ~Console(){};
 };
 
 }  // namespace zarun

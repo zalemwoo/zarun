@@ -107,13 +107,13 @@ typedef void (*LogMethod)(v8::Handle<v8::Context> context,
 void BoundLogMethodCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
   LogMethod log_method =
       reinterpret_cast<LogMethod>(info.Data().As<v8::External>()->Value());
-  std::string message;
-  for (int i = 0; i < info.Length(); ++i) {
-    if (i > 0)
-      message += " ";
-    message += *v8::String::Utf8Value(info[i]);
+  std::vector<std::string> strs;
+  for (int i = 0; i < info.Length(); i++) {
+    v8::Handle<v8::Value> val;
+    strs.push_back(*v8::String::Utf8Value(info[i]));
   }
-  (*log_method)(info.GetIsolate()->GetCallingContext(), message);
+
+  (*log_method)(info.GetIsolate()->GetCallingContext(), JoinString(strs, ','));
 }
 
 void BindLogMethod(v8::Isolate* isolate,
