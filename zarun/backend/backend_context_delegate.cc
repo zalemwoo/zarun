@@ -23,7 +23,6 @@ namespace zarun {
 namespace backend {
 
 namespace {
-
 void InstallGlobalModule(zarun::ScriptContext* context,
                          std::string id,
                          v8::Handle<v8::Value> module) {
@@ -31,7 +30,6 @@ void InstallGlobalModule(zarun::ScriptContext* context,
   v8::Handle<v8::Object> globalObj = context->global();
   globalObj->Set(gin::StringToSymbol(isolate, id), module);
 }
-
 }  // namespace
 
 BackendScriptContextDelegate::BackendScriptContextDelegate() {
@@ -47,7 +45,6 @@ BackendScriptContextDelegate::~BackendScriptContextDelegate() {
 }
 
 v8::Handle<v8::ObjectTemplate> BackendScriptContextDelegate::GetGlobalTemplate(
-    zarun::ScriptContext* context,
     v8::Isolate* isolate) {
   v8::EscapableHandleScope handle_scope(isolate);
   v8::Local<v8::ObjectTemplate> templ =
@@ -59,17 +56,16 @@ void BackendScriptContextDelegate::DidCreateContext(
     zarun::ScriptContext* context) {
   v8::Handle<v8::Context> v8_context = context->v8_context();
   ModuleRegistry* registry = ModuleRegistry::From(v8_context);
-
   registry->SetBuiltinModuleProvider(new BuiltinModuleProvider());
-
-  v8::Isolate* isolate = context->isolate();
-
+  // register builtin modules
   registry->RegisterBuiltinModule(zarun::Process::kModuleName,
                                   zarun::Process::GetModule);
   registry->RegisterBuiltinModule(zarun::Console::kModuleName,
                                   zarun::Console::GetModule);
   registry->RegisterBuiltinModule(zarun::GC::kModuleName, zarun::GC::GetModule);
 
+  // load "process" module into global object
+  v8::Isolate* isolate = context->isolate();
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, context, zarun::Process::kModuleName));

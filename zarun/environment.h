@@ -12,6 +12,10 @@
 #include "gin/public/isolate_holder.h"
 #include "v8/include/v8.h"
 
+namespace gin {
+class ContextHolder;
+}
+
 namespace zarun {
 
 class ZARUN_EXPORT Environment {
@@ -28,6 +32,7 @@ class ZARUN_EXPORT Environment {
  private:
   Environment(zarun::ScriptContextDelegate* script_context_delegate);
   gin::IsolateHolder isolate_holder_;
+  scoped_ptr<gin::ContextHolder> context_holder_;
   scoped_ptr<zarun::ScriptContext> script_context_;
 };
 

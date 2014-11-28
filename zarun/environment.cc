@@ -6,6 +6,7 @@
 #include "zarun/environment.h"
 
 #include "gin/array_buffer.h"
+#include "gin/public/context_holder.h"
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 
@@ -32,19 +33,33 @@ Environment* Environment::Create(
 
 Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
     : isolate_holder_() {
+  v8::Isolate* isolate = isolate_holder_.isolate();
+  v8::Isolate::Scope isolate_scope(isolate);
+  v8::HandleScope handle_scope(isolate);
+  v8::Handle<v8::Context> v8_context = v8::Context::New(
+      isolate, NULL, script_context_delegate->GetGlobalTemplate(isolate));
+
+  context_holder_.reset(new gin::ContextHolder(isolate));
+  context_holder_->SetContext(v8_context);
+
   script_context_.reset(
-      new ScriptContext(script_context_delegate, isolate_holder_.isolate()));
-  {
-    gin::Runner::Scope scope(script_context_.get());
-    v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
-  }
+      new ScriptContext(script_context_delegate, context_holder_->context()));
+  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  script_context_->v8_context()->Enter();
 }
 
 Environment::~Environment() {
+  v8::Isolate* isolate = isolate_holder_.isolate();
+  {
+    v8::HandleScope handle_scope(isolate);
+    if (script_context_)
+      script_context_->v8_context()->Exit();
+  }
+
   script_context_.reset();
+  context_holder_.reset();
 
   v8::HeapStatistics stats;
-  v8::Isolate* isolate = isolate_holder_.isolate();
   isolate->GetHeapStatistics(&stats);
   size_t old_heap_size = 0;
   // Run the GC until the heap size reaches a steady state to ensure that

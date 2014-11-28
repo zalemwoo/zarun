@@ -8,11 +8,13 @@
 
 #include "gin/runner.h"
 #include "zarun/zarun_export.h"
+#include "zarun/modules/javascript_module_system.h"
+#include "zarun/safe_builtins.h"
+#include "v8/include/v8.h"
 
 namespace gin {
-
-class ContextHolder;
 class TryCatch;
+class PerContextData;
 }
 
 namespace zarun {
@@ -29,7 +31,6 @@ class ZARUN_EXPORT ScriptContextDelegate {
 
   // Returns the template for the global object.
   virtual v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
-      ScriptContext* runner,
       v8::Isolate* isolate);
   virtual void DidCreateContext(ScriptContext* runner);
   virtual void WillRunScript(ScriptContext* runner);
@@ -43,13 +44,30 @@ class ZARUN_EXPORT ScriptContextDelegate {
 // destroyed when the ScriptContext is deleted.
 class ZARUN_EXPORT ScriptContext : public gin::Runner {
  public:
-  ScriptContext(ScriptContextDelegate* delegate, v8::Isolate* isolate);
+  ScriptContext(ScriptContextDelegate* delegate,
+                const v8::Handle<v8::Context>& v8_context);
   ~ScriptContext() override;
+
+  // Runs |function| with appropriate scopes. Doesn't catch exceptions, callers
+  // must do that if they want.
+  //
+  // USE THIS METHOD RATHER THAN v8::Function::Call WHEREVER POSSIBLE.
+  v8::Local<v8::Value> CallFunction(v8::Handle<v8::Function> function,
+                                    int argc,
+                                    v8::Handle<v8::Value> argv[]) const;
+
+  void set_module_system(scoped_ptr<JavaScriptModuleSystem> module_system) {
+    module_system_ = module_system.Pass();
+  }
+
+  JavaScriptModuleSystem* module_system() { return module_system_.get(); }
+
+  SafeBuiltins* safe_builtins() { return &safe_builtins_; }
+  const SafeBuiltins* safe_builtins() const { return &safe_builtins_; }
 
   // Before running script in this context, you'll need to enter the runner's
   // context by creating an instance of Runner::Scope on the stack.
-
-  // Runner overrides:
+  // gin::Runner overrides:
   void Run(const std::string& source,
            const std::string& resource_name) override;
   v8::Handle<v8::Value> Call(v8::Handle<v8::Function> function,
@@ -68,7 +86,6 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
 
   static const std::string kReplResultVariableName;
 
- protected:
   gin::ContextHolder* GetContextHolder() override;
 
  private:
@@ -77,7 +94,16 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   void Run(v8::Handle<v8::Script> script);
 
   ScriptContextDelegate* delegate_;
-  scoped_ptr<gin::ContextHolder> context_holder_;
+
+  // The v8 context the bindings are accessible to.
+  ScopedPersistent<v8::Context> v8_context_;
+
+  // Owns and structures the JS that is injected to set up extension bindings.
+  scoped_ptr<JavaScriptModuleSystem> module_system_;
+
+  // Contains safe copies of builtin objects like Function.prototype.
+  SafeBuiltins safe_builtins_;
+
   v8::Isolate* isolate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptContext);

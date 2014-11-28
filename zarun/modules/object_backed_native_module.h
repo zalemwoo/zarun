@@ -3,14 +3,14 @@
  *
  */
 
-#ifndef OBJECT_BACKED_NATIVE_MODULE_H_
-#define OBJECT_BACKED_NATIVE_MODULE_H_
+#ifndef ZARUN_MODULES_OBJECT_BACKED_NATIVE_MODULE_H_
+#define ZARUN_MODULES_OBJECT_BACKED_NATIVE_MODULE_H_
 
 #include <string>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/macros.h"
-#include "v8/include/v8-util.h"
 #include "v8/include/v8.h"
 
 #include "zarun/modules/native_javascript_module.h"
@@ -20,14 +20,14 @@ namespace zarun {
 
 class ScriptContext;
 
-// An ObjectBackedNativeJavaScriptModule is a factory for JS objects with
+// An ObjectBackedNativeModule is a factory for JS objects with
 // functions on
 // them that map to native C++ functions. Subclasses should call RouteFunction()
 // in their constructor to define functions on the created JS objects.
-class ObjectBackedNativeJavaScriptModule : public NativeJavaScriptModule {
+class ObjectBackedNativeModule : public NativeJavaScriptModule {
  public:
-  explicit ObjectBackedNativeJavaScriptModule(ScriptContext* context);
-  ~ObjectBackedNativeJavaScriptModule() override;
+  explicit ObjectBackedNativeModule(ScriptContext* context);
+  ~ObjectBackedNativeModule() override;
 
   // Create an object with bindings to the native functions defined through
   // RouteFunction().
@@ -40,7 +40,7 @@ class ObjectBackedNativeJavaScriptModule : public NativeJavaScriptModule {
       HandlerFunction;
 
   // Installs a new 'route' from |name| to |handler_function|. This means that
-  // NewInstance()s of this ObjectBackedNativeJavaScriptModule will have a
+  // NewInstance()s of this ObjectBackedNativeModule will have a
   // property
   // |name| which will be handled by |handler_function|.
   void RouteFunction(const std::string& name,
@@ -68,16 +68,16 @@ class ObjectBackedNativeJavaScriptModule : public NativeJavaScriptModule {
   // So, we use v8::Objects here to hold that data, effectively refcounting
   // the data. When |this| is destroyed we remove the base::Bound function from
   // the object to indicate that it shoudn't be called.
-  typedef v8::PersistentValueVector<v8::Object> RouterData;
+  typedef std::vector<v8::UniquePersistent<v8::Object>> RouterData;
   RouterData router_data_;
 
   ScriptContext* context_;
 
   ScopedPersistent<v8::ObjectTemplate> object_template_;
 
-  DISALLOW_COPY_AND_ASSIGN(ObjectBackedNativeJavaScriptModule);
+  DISALLOW_COPY_AND_ASSIGN(ObjectBackedNativeModule);
 };
 
 }  // namespace zarun
 
-#endif  // OBJECT_BACKED_NATIVE_MODULE_H_
+#endif  // ZARUN_MODULES_OBJECT_BACKED_NATIVE_MODULE_H_

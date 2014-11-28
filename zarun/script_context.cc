@@ -8,18 +8,17 @@
 // found in the LICENSE file.
 #include "zarun/script_context.h"
 
+#include "base/logging.h"
 #include "gin/converter.h"
-#include "gin/per_context_data.h"
-#include "gin/public/context_holder.h"
 #include "gin/try_catch.h"
 
 #include "zarun/modules/module_registry.h"
 
+#include "gin/per_context_data.h"
 #include "zarun/zarun_shell.h"
 
 using gin::TryCatch;
 using gin::ContextHolder;
-using gin::PerContextData;
 
 namespace zarun {
 
@@ -30,7 +29,6 @@ ScriptContextDelegate::~ScriptContextDelegate() {
 }
 
 v8::Handle<v8::ObjectTemplate> ScriptContextDelegate::GetGlobalTemplate(
-    ScriptContext* runner,
     v8::Isolate* isolate) {
   return v8::Handle<v8::ObjectTemplate>();
 }
@@ -49,25 +47,56 @@ void ScriptContextDelegate::UnhandledException(ScriptContext* runner,
   CHECK(false) << try_catch.GetStackTrace();
 }
 
+// ScriptContext
 const std::string ScriptContext::kReplResultVariableName = "__repl_result__";
 
 ScriptContext::ScriptContext(ScriptContextDelegate* delegate,
-                             v8::Isolate* isolate)
-    : delegate_(delegate), isolate_(isolate) {
-  v8::Isolate::Scope isolate_scope(isolate);
-  v8::HandleScope handle_scope(isolate);
-  v8::Handle<v8::Context> v8_context = v8::Context::New(
-      isolate, NULL, delegate_->GetGlobalTemplate(this, isolate));
-
-  context_holder_.reset(new ContextHolder(isolate));
-  context_holder_->SetContext(v8_context);
-  PerContextData::From(v8_context)->set_runner(this);
-
+                             const v8::Handle<v8::Context>& v8_context)
+    : delegate_(delegate),
+      v8_context_(v8_context),
+      safe_builtins_(this),
+      isolate_(v8_context->GetIsolate()) {
+  VLOG(1) << "Created context:\n";
+  gin::PerContextData::From(v8_context)->set_runner(this);
   v8::Context::Scope scope(v8_context);
   delegate_->DidCreateContext(this);
 }
 
 ScriptContext::~ScriptContext() {
+  VLOG(1) << "Destroyed context for extension\n";
+  Invalidate();
+}
+
+v8::Local<v8::Value> ScriptContext::CallFunction(
+    v8::Handle<v8::Function> function,
+    int argc,
+    v8::Handle<v8::Value> argv[]) const {
+  v8::EscapableHandleScope handle_scope(isolate());
+  v8::Context::Scope scope(v8_context());
+
+  if (!is_valid()) {
+    return handle_scope.Escape(
+        v8::Local<v8::Primitive>(v8::Undefined(isolate())));
+  }
+
+  v8::Handle<v8::Object> global = v8_context()->Global();
+  return handle_scope.Escape(function->Call(global, argc, argv));
+}
+
+void ScriptContext::Invalidate() {
+  if (!is_valid())
+    return;
+  if (module_system_)
+    module_system_->Invalidate();
+  v8_context_.reset();
+}
+
+bool ScriptContext::is_valid() const {
+  return !v8_context_.IsEmpty();
+}
+
+v8::Handle<v8::Context> ScriptContext::v8_context() const {
+  return v8_context_.NewHandle(isolate());
 }
 
 void ScriptContext::Run(const std::string& source,
@@ -91,38 +120,13 @@ v8::Handle<v8::Value> ScriptContext::Call(v8::Handle<v8::Function> function,
   TryCatch try_catch;
   delegate_->WillRunScript(this);
 
-  v8::Handle<v8::Value> result = function->Call(receiver, argc, argv);
+  v8::Handle<v8::Value> result = CallFunction(function, argc, argv);
 
   delegate_->DidRunScript(this);
   if (try_catch.HasCaught())
     delegate_->UnhandledException(this, try_catch);
 
   return result;
-}
-
-ContextHolder* ScriptContext::GetContextHolder() {
-  return context_holder_.get();
-}
-
-v8::Handle<v8::Context> ScriptContext::v8_context() const {
-  ContextHolder* context_holder =
-      (const_cast<ScriptContext*>(this))->GetContextHolder();
-  if (context_holder) {
-    return context_holder->context();
-  }
-  return v8::Local<v8::Context>();
-}
-
-void ScriptContext::Invalidate() {
-  if (!is_valid())
-    return;
-  //	  if (module_system_)
-  //	    module_system_->Invalidate();
-  context_holder_.reset();
-}
-
-bool ScriptContext::is_valid() const {
-  return !v8_context().IsEmpty();
 }
 
 void ScriptContext::Run(v8::Handle<v8::Script> script) {
@@ -143,6 +147,11 @@ void ScriptContext::Run(v8::Handle<v8::Script> script) {
         result);
   }
   delegate_->DidRunScript(this);
+}
+
+ContextHolder* ScriptContext::GetContextHolder() {
+  v8::HandleScope handle_scope(isolate());
+  return gin::PerContextData::From(v8_context())->context_holder();
 }
 
 }  // namespace zarun

@@ -30,7 +30,6 @@ class ZARUN_EXPORT BackendScriptContextDelegate : public ScriptContextDelegate {
  protected:
   // From ShellRunnerDelegate:
   v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
-      zarun::ScriptContext* context,
       v8::Isolate* isolate) override;
   void DidCreateContext(zarun::ScriptContext* context) override;
   void DidRunScript(zarun::ScriptContext* context) override;

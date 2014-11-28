@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ZARUN_NATIVE_JAVASCRIPT_MODULE_H_
-#define ZARUN_NATIVE_JAVASCRIPT_MODULE_H_
+#ifndef ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
+#define ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
 
 #include "base/basictypes.h"
 #include "v8/include/v8.h"
 
 namespace zarun {
 
-// NativeHandlers are intended to be used with a ModuleSystem. The ModuleSystem
-// will assume ownership of the NativeHandler, and as a ModuleSystem is tied to
-// a single v8::Context, this implies that NativeHandlers will also be tied to
-// a single v8::Context.
+// NativeJavaScriptModule are intended to be used with a ModuleSystem.
+// The ModuleSystem will assume ownership of the NativeJavaScriptModule,
+// and as a ModuleSystem is tied to a single v8::Context, this implies
+// that NativeJavaScriptModule will also be tied to a single v8::Context.
 class NativeJavaScriptModule {
  public:
   NativeJavaScriptModule();
@@ -42,4 +42,4 @@ class NativeJavaScriptModule {
 
 }  // namespace zarun
 
-#endif  // ZARUN_NATIVE_JAVASCRIPT_MODULE_H_
+#endif  // ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
