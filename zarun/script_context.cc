@@ -107,7 +107,7 @@ void ScriptContext::Run(const std::string& source,
 
   if (ZarunShell::Mode() == ShellMode::Repl) {
     v8::Isolate* isolate = GetContextHolder()->isolate();
-    global()->SetHiddenValue(
+    v8_context()->Global()->SetHiddenValue(
         gin::StringToV8(isolate, ScriptContext::kReplResultVariableName),
         result);
   }

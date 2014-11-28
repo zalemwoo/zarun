@@ -287,9 +287,11 @@ void JavaScriptModuleSystem::OverrideNativeModuleForTest(
 v8::Handle<v8::Value> JavaScriptModuleSystem::RunString(
     const std::string& code,
     const std::string& name) {
-  v8::HandleScope handle_scope(GetIsolate());
-  return RunString(v8::String::NewFromUtf8(GetIsolate(), code.c_str()),
-                   v8::String::NewFromUtf8(GetIsolate(), name.c_str()));
+  v8::EscapableHandleScope handle_scope(GetIsolate());
+  v8::Local<v8::Value> result =
+      RunString(v8::String::NewFromUtf8(GetIsolate(), code.c_str()),
+                v8::String::NewFromUtf8(GetIsolate(), name.c_str()));
+  return handle_scope.Escape(result);
 }
 
 // static
