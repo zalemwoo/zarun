@@ -6,7 +6,7 @@
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#include "zarun/script_runner.h"
+#include "zarun/script_context.h"
 
 #include "gin/converter.h"
 #include "gin/per_context_data.h"
@@ -30,35 +30,35 @@ using gin::PerContextData;
 
 namespace zarun {
 
-ScriptRunnerDelegate::ScriptRunnerDelegate() {
+ScriptContextDelegate::ScriptContextDelegate() {
 }
 
-ScriptRunnerDelegate::~ScriptRunnerDelegate() {
+ScriptContextDelegate::~ScriptContextDelegate() {
 }
 
-v8::Handle<ObjectTemplate> ScriptRunnerDelegate::GetGlobalTemplate(
-    ScriptRunner* runner,
+v8::Handle<ObjectTemplate> ScriptContextDelegate::GetGlobalTemplate(
+    ScriptContext* runner,
     v8::Isolate* isolate) {
   return v8::Handle<ObjectTemplate>();
 }
 
-void ScriptRunnerDelegate::DidCreateContext(ScriptRunner* runner) {
+void ScriptContextDelegate::DidCreateContext(ScriptContext* runner) {
 }
 
-void ScriptRunnerDelegate::WillRunScript(ScriptRunner* runner) {
+void ScriptContextDelegate::WillRunScript(ScriptContext* runner) {
 }
 
-void ScriptRunnerDelegate::DidRunScript(ScriptRunner* runner) {
+void ScriptContextDelegate::DidRunScript(ScriptContext* runner) {
 }
 
-void ScriptRunnerDelegate::UnhandledException(ScriptRunner* runner,
-                                              TryCatch& try_catch) {
+void ScriptContextDelegate::UnhandledException(ScriptContext* runner,
+                                               TryCatch& try_catch) {
   CHECK(false) << try_catch.GetStackTrace();
 }
 
-const std::string ScriptRunner::kReplResultVariableName = "__repl_result__";
+const std::string ScriptContext::kReplResultVariableName = "__repl_result__";
 
-ScriptRunner::ScriptRunner(ScriptRunnerDelegate* delegate, Isolate* isolate)
+ScriptContext::ScriptContext(ScriptContextDelegate* delegate, Isolate* isolate)
     : delegate_(delegate) {
   v8::Isolate::Scope isolate_scope(isolate);
   HandleScope handle_scope(isolate);
@@ -73,11 +73,11 @@ ScriptRunner::ScriptRunner(ScriptRunnerDelegate* delegate, Isolate* isolate)
   delegate_->DidCreateContext(this);
 }
 
-ScriptRunner::~ScriptRunner() {
+ScriptContext::~ScriptContext() {
 }
 
-void ScriptRunner::Run(const std::string& source,
-                       const std::string& resource_name) {
+void ScriptContext::Run(const std::string& source,
+                        const std::string& resource_name) {
   TryCatch try_catch;
   v8::Isolate* isolate = GetContextHolder()->isolate();
   v8::Handle<Script> script =
@@ -91,10 +91,10 @@ void ScriptRunner::Run(const std::string& source,
   Run(script);
 }
 
-v8::Handle<v8::Value> ScriptRunner::Call(v8::Handle<v8::Function> function,
-                                         v8::Handle<v8::Value> receiver,
-                                         int argc,
-                                         v8::Handle<v8::Value> argv[]) {
+v8::Handle<v8::Value> ScriptContext::Call(v8::Handle<v8::Function> function,
+                                          v8::Handle<v8::Value> receiver,
+                                          int argc,
+                                          v8::Handle<v8::Value> argv[]) {
   TryCatch try_catch;
   delegate_->WillRunScript(this);
 
@@ -107,11 +107,15 @@ v8::Handle<v8::Value> ScriptRunner::Call(v8::Handle<v8::Function> function,
   return result;
 }
 
-ContextHolder* ScriptRunner::GetContextHolder() {
+ContextHolder* ScriptContext::GetContextHolder() {
   return context_holder_.get();
 }
 
-void ScriptRunner::Run(v8::Handle<Script> script) {
+v8::Handle<v8::Context> ScriptContext::v8_context() {
+  return GetContextHolder()->context();
+}
+
+void ScriptContext::Run(v8::Handle<Script> script) {
   TryCatch try_catch;
   delegate_->WillRunScript(this);
 
@@ -127,7 +131,7 @@ void ScriptRunner::Run(v8::Handle<Script> script) {
   if (ZarunShell::Mode() == ShellMode::Repl) {
     v8::Isolate* isolate = GetContextHolder()->isolate();
     global()->SetHiddenValue(
-        gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName),
+        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName),
         result);
   }
   delegate_->DidRunScript(this);

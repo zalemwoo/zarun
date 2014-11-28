@@ -24,12 +24,22 @@ std::string Load(const base::FilePath& path) {
 
 BackendApplication::BackendApplication(
     scoped_refptr<base::TaskRunner> shell_runner,
+    const ApplicationTerminateCallback& termination_callback,
+    scoped_ptr<BackendScriptContextDelegate> script_runner_delegate)
+    : shell_runner_(shell_runner),
+      termination_callback_(termination_callback),
+      backend_context_delegate_(script_runner_delegate.Pass()),
+      weak_factory_(this) {
+}
+
+BackendApplication::BackendApplication(
+    scoped_refptr<base::TaskRunner> shell_runner,
     const base::Callback<void(BackendApplication*)>& termination_callback,
     const backend::RunScriptCallback& run_script_callback)
     : shell_runner_(shell_runner),
       termination_callback_(termination_callback),
-      backend_runner_delegate_(
-          CreateBackendScriptRunnerDelegate(run_script_callback)),
+      backend_context_delegate_(
+          CreateBackendScriptContextDelegate(run_script_callback)),
       weak_factory_(this) {
 }
 
@@ -58,7 +68,7 @@ void BackendApplication::Stop() {
 
 void BackendApplication::CreateEnvironment() {
   DCHECK(!environment_.get()) << "environment created already";
-  environment_.reset(Environment::Create(backend_runner_delegate_.get()));
+  environment_.reset(Environment::Create(backend_context_delegate_.get()));
 }
 
 void BackendApplication::DisposeEnvironment() {
@@ -78,9 +88,9 @@ void BackendApplication::RunScript(const std::string& source,
 
 void BackendApplication::run_script_(const std::string& source,
                                      const std::string& resource_name) {
-  zarun::ScriptRunner* script_runner = environment_->runner();
-  gin::Runner::Scope scope(script_runner);
-  script_runner->Run(source, resource_name);
+  zarun::ScriptContext* script_context = environment_->context();
+  gin::Runner::Scope scope(script_context);
+  script_context->Run(source, resource_name);
 }
 
 // must be sync called on backend thread.

@@ -31,7 +31,7 @@ void Log(gin::Arguments* args) {
     }
     strs.push_back(ToCString(v8::String::Utf8Value(val)));
   }
-  std::cout << JoinString(strs, ' ') << std::endl;
+  std::cout << JoinString(strs, ',') << std::endl;
 }
 
 }  // namespace

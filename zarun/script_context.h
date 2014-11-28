@@ -1,10 +1,10 @@
 /*
- * scrpt_runner.h
+ * scrpt_CONTEXT.h
  *
  */
 
-#ifndef ZARUN_SCRIPT_RUNNER_H_
-#define ZARUN_SCRIPT_RUNNER_H_
+#ifndef ZARUN_SCRIPT_CONTEXT_H_
+#define ZARUN_SCRIPT_CONTEXT_H_
 
 #include "gin/runner.h"
 #include "zarun/zarun_export.h"
@@ -17,35 +17,34 @@ class TryCatch;
 
 namespace zarun {
 
-class ScriptRunner;
+class ScriptContext;
 
-// Subclass ScriptRunnerDelegate to customize the behavior of ScriptRunner.
+// Subclass ScriptContextDelegate to customize the behavior of ScriptContext.
 // Typical embedders will want to subclass one of the specialized
-// ScriptRunnerDelegates.
-class ZARUN_EXPORT ScriptRunnerDelegate {
+// ScriptContextDelegates.
+class ZARUN_EXPORT ScriptContextDelegate {
  public:
-  ScriptRunnerDelegate();
-  virtual ~ScriptRunnerDelegate();
+  ScriptContextDelegate();
+  virtual ~ScriptContextDelegate();
 
   // Returns the template for the global object.
   virtual v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
-      ScriptRunner* runner,
+      ScriptContext* runner,
       v8::Isolate* isolate);
-  virtual void DidCreateContext(ScriptRunner* runner);
-  virtual void WillRunScript(ScriptRunner* runner);
-  virtual void DidRunScript(ScriptRunner* runner);
-  virtual void UnhandledException(ScriptRunner* runner,
+  virtual void DidCreateContext(ScriptContext* runner);
+  virtual void WillRunScript(ScriptContext* runner);
+  virtual void DidRunScript(ScriptContext* runner);
+  virtual void UnhandledException(ScriptContext* runner,
                                   gin::TryCatch& try_catch);
 };
 
-// ScriptRunner executes the script/functions directly in a v8::Context.
-// ScriptRunner owns a ContextHolder and v8::Context, both of which are
-// destroyed
-// when the ScriptRunner is deleted.
-class ZARUN_EXPORT ScriptRunner : public gin::Runner {
+// ScriptContext executes the script/functions directly in a v8::Context.
+// ScriptContext owns a ContextHolder and v8::Context, both of which are
+// destroyed when the ScriptContext is deleted.
+class ZARUN_EXPORT ScriptContext : public gin::Runner {
  public:
-  ScriptRunner(ScriptRunnerDelegate* delegate, v8::Isolate* isolate);
-  ~ScriptRunner() override;
+  ScriptContext(ScriptContextDelegate* delegate, v8::Isolate* isolate);
+  ~ScriptContext() override;
 
   // Before running script in this context, you'll need to enter the runner's
   // context by creating an instance of Runner::Scope on the stack.
@@ -59,6 +58,8 @@ class ZARUN_EXPORT ScriptRunner : public gin::Runner {
                              v8::Handle<v8::Value> argv[]) override;
   gin::ContextHolder* GetContextHolder() override;
 
+  v8::Handle<v8::Context> v8_context();
+
   static const std::string kReplResultVariableName;
 
  private:
@@ -66,12 +67,12 @@ class ZARUN_EXPORT ScriptRunner : public gin::Runner {
 
   void Run(v8::Handle<v8::Script> script);
 
-  ScriptRunnerDelegate* delegate_;
+  ScriptContextDelegate* delegate_;
   scoped_ptr<gin::ContextHolder> context_holder_;
 
-  DISALLOW_COPY_AND_ASSIGN(ScriptRunner);
+  DISALLOW_COPY_AND_ASSIGN(ScriptContext);
 };
 
 }  // namespace zarun
 
-#endif /* ZARUN_SCRIPT_RUNNER_H_ */
+#endif  // ZARUN_SCRIPT_CONTEXT_H_

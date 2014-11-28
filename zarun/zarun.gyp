@@ -13,7 +13,7 @@
         '../gin/gin.gyp/:gin',
       ],
       'sources': [
-        './backend/backend_runner_delegate.cc',
+        './backend/backend_context_delegate.cc',
         './backend/backend_thread.cc',
         './backend/backend_application.cc',
         
@@ -26,7 +26,7 @@
         
         './switches.cc',
         './readline_editor.cc',
-        './script_runner.cc',
+        './script_context.cc',
         './environment.cc',
         './zarun_shell.cc',
         './zarun_main.cc',

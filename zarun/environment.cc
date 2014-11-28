@@ -16,7 +16,8 @@ bool v8_inited = false;
 }  // namespace
 
 // static
-Environment* Environment::Create(zarun::ScriptRunnerDelegate* runner_delegate) {
+Environment* Environment::Create(
+    zarun::ScriptContextDelegate* script_context_delegate) {
   if (!v8_inited) {
     v8_inited = true;
     gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
@@ -25,21 +26,22 @@ Environment* Environment::Create(zarun::ScriptRunnerDelegate* runner_delegate) {
     v8::V8::SetFlagsFromString(v8options.c_str(), v8options.length());
   }
 
-  DCHECK(runner_delegate);
-  return new Environment(runner_delegate);
+  DCHECK(script_context_delegate);
+  return new Environment(script_context_delegate);
 }
 
-Environment::Environment(zarun::ScriptRunnerDelegate* runner_delegate)
+Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
     : isolate_holder_() {
-  runner_.reset(new ScriptRunner(runner_delegate, isolate_holder_.isolate()));
+  script_context_.reset(
+      new ScriptContext(script_context_delegate, isolate_holder_.isolate()));
   {
-    gin::Runner::Scope scope(runner_.get());
+    gin::Runner::Scope scope(script_context_.get());
     v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   }
 }
 
 Environment::~Environment() {
-  runner_.reset();
+  script_context_.reset();
 
   v8::HeapStatistics stats;
   v8::Isolate* isolate = isolate_holder_.isolate();
@@ -59,8 +61,8 @@ v8::Isolate* Environment::isolate() {
   return this->isolate_holder_.isolate();
 }
 
-v8::Local<v8::Context> Environment::context() {
-  return this->runner_->GetContextHolder()->context();
+v8::Local<v8::Context> Environment::v8_context() {
+  return this->script_context_->v8_context();
 }
 
 }  // namespace zarun

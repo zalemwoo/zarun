@@ -1,9 +1,9 @@
 /*
- * backend_runner_delegate.cc
+ * backend_context_delegate.cc
  *
  */
 
-#include "zarun/backend/backend_runner_delegate.h"
+#include "zarun/backend/backend_context_delegate.h"
 
 #include "base/logging.h"
 #include "base/bind.h"
@@ -24,45 +24,46 @@ namespace backend {
 
 namespace {
 
-void InstallGlobalModule(zarun::ScriptRunner* runner,
+void InstallGlobalModule(zarun::ScriptContext* context,
                          std::string id,
                          v8::Handle<v8::Value> module) {
-  gin::ContextHolder* context_holder = runner->GetContextHolder();
+  gin::ContextHolder* context_holder = context->GetContextHolder();
   v8::Isolate* isolate = context_holder->isolate();
-  v8::Handle<v8::Object> globalObj = runner->global();
+  v8::Handle<v8::Object> globalObj = context->global();
   globalObj->Set(gin::StringToSymbol(isolate, id), module);
 }
 
 }  // namespace
 
-BackendScriptRunnerDelegate::BackendScriptRunnerDelegate() {
+BackendScriptContextDelegate::BackendScriptContextDelegate() {
 }
 
-BackendScriptRunnerDelegate::BackendScriptRunnerDelegate(
+BackendScriptContextDelegate::BackendScriptContextDelegate(
     RunScriptCallback runscript_callback)
-    : BackendScriptRunnerDelegate() {
+    : BackendScriptContextDelegate() {
   runscript_callback_ = runscript_callback;
 }
 
-BackendScriptRunnerDelegate::~BackendScriptRunnerDelegate() {
+BackendScriptContextDelegate::~BackendScriptContextDelegate() {
 }
 
-v8::Handle<v8::ObjectTemplate> BackendScriptRunnerDelegate::GetGlobalTemplate(
-    zarun::ScriptRunner* runner,
+v8::Handle<v8::ObjectTemplate> BackendScriptContextDelegate::GetGlobalTemplate(
+    zarun::ScriptContext* context,
     v8::Isolate* isolate) {
-  v8::Handle<v8::ObjectTemplate> templ =
+  v8::EscapableHandleScope handle_scope(isolate);
+  v8::Local<v8::ObjectTemplate> templ =
       gin::ObjectTemplateBuilder(isolate).Build();
-  return templ;
+  return handle_scope.Escape(templ);
 }
 
-void BackendScriptRunnerDelegate::DidCreateContext(
-    zarun::ScriptRunner* runner) {
-  v8::Handle<v8::Context> context = runner->GetContextHolder()->context();
-  ModuleRegistry* registry = ModuleRegistry::From(context);
+void BackendScriptContextDelegate::DidCreateContext(
+    zarun::ScriptContext* context) {
+  v8::Handle<v8::Context> v8_context = context->v8_context();
+  ModuleRegistry* registry = ModuleRegistry::From(v8_context);
 
   registry->SetBuiltinModuleProvider(new BuiltinModuleProvider());
 
-  v8::Isolate* isolate = runner->GetContextHolder()->isolate();
+  v8::Isolate* isolate = context->GetContextHolder()->isolate();
 
   registry->RegisterBuiltinModule(zarun::Process::kModuleName,
                                   zarun::Process::GetModule);
@@ -72,21 +73,21 @@ void BackendScriptRunnerDelegate::DidCreateContext(
 
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
-      base::Bind(&InstallGlobalModule, runner, zarun::Process::kModuleName));
+      base::Bind(&InstallGlobalModule, context, zarun::Process::kModuleName));
 }
 
-void BackendScriptRunnerDelegate::UnhandledException(
-    zarun::ScriptRunner* runner,
+void BackendScriptContextDelegate::UnhandledException(
+    zarun::ScriptContext* context,
     gin::TryCatch& try_catch) {
   LOG(ERROR) << try_catch.GetStackTrace();
 }
 
-void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
+void BackendScriptContextDelegate::DidRunScript(zarun::ScriptContext* context) {
   if ((ZarunShell::Mode() == ShellMode::Repl) &&
       (!runscript_callback_.is_null())) {
-    v8::Isolate* isolate = runner->GetContextHolder()->isolate();
-    v8::Local<v8::Value> result = runner->global()->GetHiddenValue(
-        gin::StringToV8(isolate, ScriptRunner::kReplResultVariableName));
+    v8::Isolate* isolate = context->GetContextHolder()->isolate();
+    v8::Local<v8::Value> result = context->global()->GetHiddenValue(
+        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName));
     if (result.IsEmpty())
       return;
     v8::String::Utf8Value utf8_value(result);
@@ -95,16 +96,16 @@ void BackendScriptRunnerDelegate::DidRunScript(zarun::ScriptRunner* runner) {
   }
 }
 
-scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate() {
-  scoped_ptr<BackendScriptRunnerDelegate> delegate;
-  delegate.reset(new BackendScriptRunnerDelegate());
+scoped_ptr<BackendScriptContextDelegate> CreateBackendScriptContextDelegate() {
+  scoped_ptr<BackendScriptContextDelegate> delegate;
+  delegate.reset(new BackendScriptContextDelegate());
   return delegate.Pass();
 }
 
-scoped_ptr<BackendScriptRunnerDelegate> CreateBackendScriptRunnerDelegate(
+scoped_ptr<BackendScriptContextDelegate> CreateBackendScriptContextDelegate(
     const RunScriptCallback& runscript_callback) {
-  scoped_ptr<BackendScriptRunnerDelegate> delegate;
-  delegate.reset(new BackendScriptRunnerDelegate(runscript_callback));
+  scoped_ptr<BackendScriptContextDelegate> delegate;
+  delegate.reset(new BackendScriptContextDelegate(runscript_callback));
   return delegate.Pass();
 }
 }

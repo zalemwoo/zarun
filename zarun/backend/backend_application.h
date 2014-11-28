@@ -15,7 +15,7 @@
 #include "zarun/zarun_export.h"
 #include "zarun/environment.h"
 #include "zarun/backend/backend_thread.h"
-#include "zarun/backend/backend_runner_delegate.h"
+#include "zarun/backend/backend_context_delegate.h"
 
 namespace zarun {
 namespace backend {
@@ -24,6 +24,11 @@ class ZARUN_EXPORT BackendApplication {
  public:
   typedef base::Callback<void(BackendApplication*)>
       ApplicationTerminateCallback;
+
+  BackendApplication(
+      scoped_refptr<base::TaskRunner> shell_runner,
+      const ApplicationTerminateCallback& termination_callback,
+      scoped_ptr<backend::BackendScriptContextDelegate> script_runner_delegate);
 
   BackendApplication(scoped_refptr<base::TaskRunner> shell_runner,
                      const ApplicationTerminateCallback& termination_callback,
@@ -57,7 +62,7 @@ class ZARUN_EXPORT BackendApplication {
   scoped_ptr<zarun::Environment> environment_;
   scoped_ptr<BackendThread> main_thread_;
   base::Callback<void(BackendApplication*)> termination_callback_;
-  scoped_ptr<BackendScriptRunnerDelegate> backend_runner_delegate_;
+  scoped_ptr<BackendScriptContextDelegate> backend_context_delegate_;
 
   base::WeakPtrFactory<BackendApplication> weak_factory_;
 
@@ -66,4 +71,4 @@ class ZARUN_EXPORT BackendApplication {
 }
 }  // namespace zarun::backend
 
-#endif /* ZARUN_BACKEND_BACKEND_APPLICATION_H_ */
+#endif  // ZARUN_BACKEND_BACKEND_APPLICATION_H_
