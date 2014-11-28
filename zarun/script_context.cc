@@ -17,13 +17,6 @@
 
 #include "zarun/zarun_shell.h"
 
-using v8::Context;
-using v8::HandleScope;
-using v8::Isolate;
-using v8::Object;
-using v8::ObjectTemplate;
-using v8::Script;
-
 using gin::TryCatch;
 using gin::ContextHolder;
 using gin::PerContextData;
@@ -36,10 +29,10 @@ ScriptContextDelegate::ScriptContextDelegate() {
 ScriptContextDelegate::~ScriptContextDelegate() {
 }
 
-v8::Handle<ObjectTemplate> ScriptContextDelegate::GetGlobalTemplate(
+v8::Handle<v8::ObjectTemplate> ScriptContextDelegate::GetGlobalTemplate(
     ScriptContext* runner,
     v8::Isolate* isolate) {
-  return v8::Handle<ObjectTemplate>();
+  return v8::Handle<v8::ObjectTemplate>();
 }
 
 void ScriptContextDelegate::DidCreateContext(ScriptContext* runner) {
@@ -58,18 +51,19 @@ void ScriptContextDelegate::UnhandledException(ScriptContext* runner,
 
 const std::string ScriptContext::kReplResultVariableName = "__repl_result__";
 
-ScriptContext::ScriptContext(ScriptContextDelegate* delegate, Isolate* isolate)
+ScriptContext::ScriptContext(ScriptContextDelegate* delegate,
+                             v8::Isolate* isolate)
     : delegate_(delegate) {
   v8::Isolate::Scope isolate_scope(isolate);
-  HandleScope handle_scope(isolate);
-  v8::Handle<v8::Context> context =
-      Context::New(isolate, NULL, delegate_->GetGlobalTemplate(this, isolate));
+  v8::HandleScope handle_scope(isolate);
+  v8::Handle<v8::Context> v8_context = v8::Context::New(
+      isolate, NULL, delegate_->GetGlobalTemplate(this, isolate));
 
   context_holder_.reset(new ContextHolder(isolate));
-  context_holder_->SetContext(context);
-  PerContextData::From(context)->set_runner(this);
+  context_holder_->SetContext(v8_context);
+  PerContextData::From(v8_context)->set_runner(this);
 
-  v8::Context::Scope scope(context);
+  v8::Context::Scope scope(v8_context);
   delegate_->DidCreateContext(this);
 }
 
@@ -80,14 +74,13 @@ void ScriptContext::Run(const std::string& source,
                         const std::string& resource_name) {
   TryCatch try_catch;
   v8::Isolate* isolate = GetContextHolder()->isolate();
-  v8::Handle<Script> script =
-      Script::Compile(gin::StringToV8(isolate, source),
-                      gin::StringToV8(isolate, resource_name));
+  v8::Handle<v8::Script> script =
+      v8::Script::Compile(gin::StringToV8(isolate, source),
+                          gin::StringToV8(isolate, resource_name));
   if (try_catch.HasCaught()) {
     delegate_->UnhandledException(this, try_catch);
     return;
   }
-
   Run(script);
 }
 
@@ -132,20 +125,17 @@ bool ScriptContext::is_valid() const {
   return !v8_context().IsEmpty();
 }
 
-void ScriptContext::Run(v8::Handle<Script> script) {
-  DCHECK(is_valid());
+void ScriptContext::Run(v8::Handle<v8::Script> script) {
   TryCatch try_catch;
-  delegate_->WillRunScript(this);
 
+  delegate_->WillRunScript(this);
   v8::Handle<v8::Value> result = script->Run();
 
   if (result.IsEmpty()) {
     if (try_catch.HasCaught()) {
-      delegate_->UnhandledException(this, try_catch);
+      return delegate_->UnhandledException(this, try_catch);
     }
-    return;
   }
-
   if (ZarunShell::Mode() == ShellMode::Repl) {
     v8::Isolate* isolate = GetContextHolder()->isolate();
     global()->SetHiddenValue(
