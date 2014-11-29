@@ -7,6 +7,7 @@
 #define ZARUN_ENVIRONMENT_H_
 
 #include "base/files/file_path.h"
+#include "base/callback.h"
 
 #include "gin/public/isolate_holder.h"
 #include "v8/include/v8.h"
@@ -21,12 +22,15 @@ class ContextHolder;
 
 namespace zarun {
 
+class NativeSourceMap;
+
 class ZARUN_EXPORT Environment {
  public:
-  class StringSourceMap;
+  typedef base::Callback<void(Environment*)> EnvironmentCreatedCallback;
 
   Environment(v8::Isolate* isolate,
-              zarun::ScriptContextDelegate* script_context_delegate);
+              zarun::ScriptContextDelegate* script_context_delegate,
+              const EnvironmentCreatedCallback& created_callback);
 
   ~Environment();
 
@@ -35,7 +39,6 @@ class ZARUN_EXPORT Environment {
 
   // Register a named JS module in the module system.
   void RegisterModule(const std::string& name, const std::string& code);
-
   void RegisterModuleFileForTest(const std::string& name,
                                  const base::FilePath& relate_path);
 
@@ -52,7 +55,9 @@ class ZARUN_EXPORT Environment {
   scoped_ptr<gin::ContextHolder> context_holder_;
   v8::HandleScope handle_scope_;
   scoped_ptr<zarun::ScriptContext> script_context_;
-  scoped_ptr<StringSourceMap> source_map_;
+  scoped_ptr<NativeSourceMap> source_map_;
+
+  DISALLOW_COPY_AND_ASSIGN(Environment);
 };
 
 }  // namespace zarun

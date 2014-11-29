@@ -37,8 +37,6 @@ class ZARUN_EXPORT ScriptContextDelegate {
   virtual void DidRunScript(ScriptContext* context);
   virtual void UnhandledException(ScriptContext* context,
                                   gin::TryCatch& try_catch);
-
-  virtual void DidCreateEnvironment(ScriptContext* context);
 };
 
 // ScriptContext executes the script/functions directly in a v8::Context.

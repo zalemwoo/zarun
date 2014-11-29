@@ -213,11 +213,11 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
       const std::string& id,
       const std::vector<std::string>& dependencies) override;
 
-  ScriptContext* context_;
+  ScriptContext* context_;  // not owned
 
   // A map from module names to the JS source for that module. GetSource()
   // performs a lookup on this map.
-  SourceMap* source_map_;
+  SourceMap* source_map_;  // not owned
 
   // A map from native module names to native modules.
   NativeModuleMap native_module_map_;

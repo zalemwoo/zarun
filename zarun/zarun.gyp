@@ -1,6 +1,9 @@
 {
   'variables': {
     'chromium_code': 1,
+    'javascript_files': [
+      './modules/js/bootstrap.js',
+    ],
   },
   'targets': [
     {
@@ -11,6 +14,10 @@
         '../base/base.gyp:base_i18n',
         '../v8/tools/gyp/v8.gyp:v8',
         '../gin/gin.gyp/:gin',
+        'zarun_js2c#host',
+      ],
+      'include_dirs': [
+        '<(SHARED_INTERMEDIATE_DIR)' # for zarun_natives.h
       ],
       'sources': [
         './utils/file_util.cc',
@@ -22,6 +29,7 @@
         
         './modules/native_javascript_module.cc',
         './modules/object_backed_native_module.cc',
+        './modules/native_source_map.cc',
         './modules/javascript_module_system.cc',
         './modules/module_registry.cc',
         './modules/module_provider.cc',
@@ -51,6 +59,28 @@
           'SubSystem': '1', # /SUBSYSTEM:CONSOLE
         },
       },
-    },
+    }, # end zarun
+    {
+      'target_name': 'zarun_js2c',
+      'type': 'none',
+      'toolsets': ['host'],
+      'actions': [
+        {
+          'action_name': 'zarun_js2c',
+          'inputs': [
+            '<@(javascript_files)',
+          ],
+          'outputs': [
+            '<(SHARED_INTERMEDIATE_DIR)/zarun_natives.h',
+          ],
+          'action': [
+            'python',
+            './tools/zarun_js2c.py',
+            '<@(_outputs)',
+            '<@(_inputs)',
+          ],
+        },
+      ],
+    }, # end zarun_js2c
   ],
 }

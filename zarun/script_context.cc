@@ -47,9 +47,6 @@ void ScriptContextDelegate::UnhandledException(ScriptContext* context,
   CHECK(false) << try_catch.GetStackTrace();
 }
 
-void ScriptContextDelegate::DidCreateEnvironment(ScriptContext* context) {
-}
-
 // ScriptContext
 const std::string ScriptContext::kReplResultVariableName = "__repl_result__";
 

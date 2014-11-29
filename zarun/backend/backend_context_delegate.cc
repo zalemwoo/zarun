@@ -14,9 +14,6 @@
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_shell.h"
-#include "zarun/switches.h"
-#include "zarun/environment.h"
-#include "zarun/modules/javascript_module_system.h"
 #include "zarun/modules/module_registry.h"
 #include "zarun/modules/cpp/process.h"
 
@@ -50,7 +47,6 @@ v8::Handle<v8::ObjectTemplate> BackendScriptContextDelegate::GetGlobalTemplate(
   v8::EscapableHandleScope handle_scope(isolate);
   v8::Local<v8::ObjectTemplate> templ =
       gin::ObjectTemplateBuilder(isolate).Build();
-  ModuleRegistry::RegisterGlobals(isolate, templ);
   return handle_scope.Escape(templ);
 }
 
@@ -89,26 +85,6 @@ void BackendScriptContextDelegate::DidRunScript(zarun::ScriptContext* context) {
     std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
     runscript_callback_.Run(str);
   }
-}
-
-void BackendScriptContextDelegate::DidCreateEnvironment(
-    zarun::ScriptContext* context) {
-  base::FilePath bootstrap_script_path("./bootstrap.js");
-
-  const base::CommandLine* command_line =
-      base::CommandLine::ForCurrentProcess();
-  if (command_line->HasSwitch(zarun::switches::kBootstrapJsFilePath)) {
-    bootstrap_script_path =
-        command_line->GetSwitchValuePath(zarun::switches::kBootstrapJsFilePath);
-  }
-
-  Environment* env = Environment::From(context->v8_context());
-  CHECK(env);
-  JavaScriptModuleSystem* module_system = context->module_system();
-  env->RegisterModuleFileForTest("bootstrap", bootstrap_script_path);
-  // enable for requireNative() js call.
-  JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
-  module_system->Require("bootstrap");
 }
 
 scoped_ptr<BackendScriptContextDelegate> CreateBackendScriptContextDelegate() {

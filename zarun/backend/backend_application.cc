@@ -10,13 +10,21 @@
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/utils/file_util.h"
+#include "zarun/modules/javascript_module_system.h"
 
 namespace zarun {
 namespace backend {
 
 namespace {
 
-bool v8_inited = false;
+static bool v8_inited = false;
+
+void DidCreateEnvironmentCallback(zarun::Environment* env) {
+  JavaScriptModuleSystem* module_system = env->context()->module_system();
+  // enable for requireNative() js call.
+  JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
+  module_system->Require("bootstrap");
+}
 
 }  // namespace
 
@@ -73,7 +81,9 @@ void BackendApplication::Stop() {
 
 void BackendApplication::CreateEnvironment(v8::Isolate* isolate) {
   DCHECK(!environment_.get()) << "environment created already";
-  environment_.reset(new Environment(isolate, backend_context_delegate_.get()));
+  environment_.reset(
+      new Environment(isolate, backend_context_delegate_.get(),
+                      base::Bind(&DidCreateEnvironmentCallback)));
 }
 
 void BackendApplication::DisposeEnvironment() {

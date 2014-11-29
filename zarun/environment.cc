@@ -14,6 +14,7 @@
 #include "zarun/utils/file_util.h"
 #include "zarun/utils/path_util.h"
 #include "zarun/safe_builtins.h"
+#include "zarun/modules/native_source_map.h"
 #include "zarun/modules/javascript_module_system.h"
 
 namespace zarun {
@@ -53,38 +54,13 @@ base::LazyInstance<V8ExtensionConfigurator>::Leaky g_v8_extension_configurator =
 
 }  // namespace
 
-// Source map that operates on std::strings.
-class Environment::StringSourceMap : public JavaScriptModuleSystem::SourceMap {
- public:
-  StringSourceMap() {}
-  ~StringSourceMap() override {}
-
-  v8::Handle<v8::Value> GetSource(v8::Isolate* isolate,
-                                  const std::string& name) override {
-    if (source_map_.count(name) == 0)
-      return v8::Undefined(isolate);
-    return v8::String::NewFromUtf8(isolate, source_map_[name].c_str());
-  }
-
-  bool Contains(const std::string& name) override {
-    return source_map_.count(name);
-  }
-
-  void RegisterModule(const std::string& name, const std::string& source) {
-    CHECK_EQ(0u, source_map_.count(name)) << "Module " << name << " not found";
-    source_map_[name] = source;
-  }
-
- private:
-  std::map<std::string, std::string> source_map_;
-};
-
 Environment::Environment(v8::Isolate* isolate,
-                         zarun::ScriptContextDelegate* script_context_delegate)
+                         zarun::ScriptContextDelegate* script_context_delegate,
+                         const EnvironmentCreatedCallback& created_callback)
     : isolate_(isolate),
       context_holder_(new gin::ContextHolder(isolate)),
       handle_scope_(isolate_),
-      source_map_(new StringSourceMap()) {
+      source_map_(new NativeSourceMap()) {
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
   v8::Handle<v8::Context> v8_context = v8::Context::New(
@@ -109,7 +85,7 @@ Environment::Environment(v8::Isolate* isolate,
     script_context_->set_module_system(module_system.Pass());
   }
 
-  script_context_delegate->DidCreateEnvironment(script_context_.get());
+  created_callback.Run(this);
 }
 
 Environment::~Environment() {
