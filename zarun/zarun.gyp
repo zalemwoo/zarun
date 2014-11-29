@@ -13,6 +13,9 @@
         '../gin/gin.gyp/:gin',
       ],
       'sources': [
+        './utils/file_util.cc',
+        './utils/path_util.cc',
+        
         './backend/backend_context_delegate.cc',
         './backend/backend_thread.cc',
         './backend/backend_application.cc',
@@ -25,7 +28,6 @@
         './modules/cpp/print.cc',
         './modules/cpp/console.cc',
         './modules/cpp/process.cc',
-        './modules/cpp/gc.cc',
         
         './console.cc',
         './switches.cc',

@@ -14,9 +14,7 @@
 
 #include "zarun/zarun_shell.h"
 #include "zarun/modules/module_registry.h"
-#include "zarun/modules/cpp/console.h"
 #include "zarun/modules/cpp/process.h"
-#include "zarun/modules/cpp/gc.h"
 
 namespace zarun {
 namespace backend {
@@ -60,12 +58,8 @@ void BackendScriptContextDelegate::DidCreateContext(
   // register builtin modules
   registry->AddBuiltinModule(isolate, zarun::Process::kModuleName,
                              zarun::Process::GetModule(isolate));
-  registry->AddBuiltinModule(isolate, zarun::Console::kModuleName,
-                             zarun::Console::GetModule(isolate));
-  registry->AddBuiltinModule(isolate, zarun::GC::kModuleName,
-                             zarun::GC::GetModule(isolate));
 
-  // load "process" module into global object
+  // setup "process" module into global object
   registry->LoadModule(
       isolate, zarun::Process::kModuleName,
       base::Bind(&InstallGlobalModule, context, zarun::Process::kModuleName));

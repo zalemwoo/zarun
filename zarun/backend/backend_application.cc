@@ -6,10 +6,10 @@
 #include "zarun/backend/backend_application.h"
 
 #include "base/bind.h"
-#include "base/files/file_util.h"
 #include "gin/array_buffer.h"
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
+#include "zarun/utils/file_util.h"
 
 namespace zarun {
 namespace backend {
@@ -17,13 +17,6 @@ namespace backend {
 namespace {
 
 bool v8_inited = false;
-
-std::string Load(const base::FilePath& path) {
-  std::string source;
-  if (!base::ReadFileToString(path, &source))
-    LOG(FATAL) << "Unable to read " << path.LossyDisplayName();
-  return source;
-}
 
 }  // namespace
 
@@ -88,7 +81,7 @@ void BackendApplication::DisposeEnvironment() {
 }
 
 void BackendApplication::RunScript(const base::FilePath& path) {
-  this->RunScript(Load(path), path.AsUTF8Unsafe());
+  this->RunScript(zarun::util::ReadFile(path), path.AsUTF8Unsafe());
 }
 
 void BackendApplication::RunScript(const std::string& source,

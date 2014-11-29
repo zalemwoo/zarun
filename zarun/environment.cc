@@ -5,9 +5,15 @@
 
 #include "zarun/environment.h"
 
+#include "base/lazy_instance.h"
+#include "base/stl_util.h"
+
 #include "gin/public/context_holder.h"
 #include "gin/per_context_data.h"
 
+#include "zarun/utils/file_util.h"
+#include "zarun/utils/path_util.h"
+#include "zarun/safe_builtins.h"
 #include "zarun/modules/javascript_module_system.h"
 #include "zarun/modules/cpp/print.h"
 
@@ -21,6 +27,30 @@ const char kEnvironmentKey[] = "ZarunEnvironment";
 struct EnvironmentData : public base::SupportsUserData::Data {
   Environment* env;
 };
+
+class V8ExtensionConfigurator {
+ public:
+  V8ExtensionConfigurator()
+      : safe_builtins_(SafeBuiltins::CreateV8Extension()),
+        names_(1, safe_builtins_->name()),
+        configuration_(
+            new v8::ExtensionConfiguration(static_cast<int>(names_.size()),
+                                           vector_as_array(&names_))) {
+    v8::RegisterExtension(safe_builtins_.get());
+  }
+
+  v8::ExtensionConfiguration* GetConfiguration() {
+    return configuration_.get();
+  }
+
+ private:
+  scoped_ptr<v8::Extension> safe_builtins_;
+  std::vector<const char*> names_;
+  scoped_ptr<v8::ExtensionConfiguration> configuration_;
+};
+
+base::LazyInstance<V8ExtensionConfigurator>::Leaky g_v8_extension_configurator =
+    LAZY_INSTANCE_INITIALIZER;
 
 }  // namespace
 
@@ -54,11 +84,13 @@ Environment::Environment(v8::Isolate* isolate,
                          zarun::ScriptContextDelegate* script_context_delegate)
     : isolate_(isolate),
       context_holder_(new gin::ContextHolder(isolate)),
+      handle_scope_(isolate_),
       source_map_(new StringSourceMap()) {
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
   v8::Handle<v8::Context> v8_context = v8::Context::New(
-      isolate, NULL, script_context_delegate->GetGlobalTemplate(isolate));
+      isolate, g_v8_extension_configurator.Get().GetConfiguration(),
+      script_context_delegate->GetGlobalTemplate(isolate));
 
   context_holder_->SetContext(v8_context);
 
@@ -82,6 +114,12 @@ Environment::Environment(v8::Isolate* isolate,
   module_system->RegisterNativeModule(
       "print", scoped_ptr<NativeJavaScriptModule>(
                    new PrintModule(script_context_.get())));
+
+  this->RegisterModuleFileForTest("bootstrap",
+                                  base::FilePath("./bootstrap.js"));
+  // enable for requireNative() js call.
+  JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
+  module_system->Require("bootstrap");
 }
 
 Environment::~Environment() {
@@ -93,18 +131,6 @@ Environment::~Environment() {
 
     script_context_.reset();
     context_holder_.reset();
-  }
-
-  v8::HeapStatistics stats;
-  isolate_->GetHeapStatistics(&stats);
-  size_t old_heap_size = 0;
-  // Run the GC until the heap size reaches a steady state to ensure that
-  // all the garbage is collected.
-  while (stats.used_heap_size() != old_heap_size) {
-    old_heap_size = stats.used_heap_size();
-    isolate_->RequestGarbageCollectionForTesting(
-        v8::Isolate::kFullGarbageCollection);
-    isolate_->GetHeapStatistics(&stats);
   }
 }
 
@@ -125,6 +151,13 @@ v8::Isolate* Environment::isolate() {
 
 v8::Local<v8::Context> Environment::v8_context() {
   return this->script_context_->v8_context();
+}
+
+void Environment::RegisterModuleFileForTest(const std::string& name,
+                                            const base::FilePath& relate_path) {
+  base::FilePath full_path =
+      zarun::util::MakeAbsoluteFilePathRelateToProgram(relate_path);
+  RegisterModule(name, zarun::util::ReadFile(full_path));
 }
 
 void Environment::RegisterModule(const std::string& name,

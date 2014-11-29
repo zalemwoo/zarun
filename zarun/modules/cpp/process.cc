@@ -32,6 +32,8 @@
 #include "zarun/zarun_version.h"
 #include "zarun/modules/module_registry.h"
 
+#include "zarun/utils/path_util.h"
+
 #if defined(OS_POSIX)
 #include <unistd.h>
 #if defined(OS_MACOSX)
@@ -106,9 +108,7 @@ std::vector<std::string> GetArgv() {
 
 // process.execPath
 std::string GetExecutablePath() {
-  base::FilePath executablePath =
-      base::CommandLine::ForCurrentProcess()->GetProgram();
-  return base::MakeAbsoluteFilePath(executablePath).AsUTF8Unsafe();
+  return zarun::util::ExecutionPath().AsUTF8Unsafe();
 }
 
 // process.moduleLoadList
@@ -348,8 +348,8 @@ void BindingCallback(gin::Arguments* args) {
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   ModuleRegistry* module_registry = ModuleRegistry::From(context);
 
-    module_registry->LoadModule(isolate, module_name,
-                                base::Bind(&ModuleLoaded, args, module_name));
+  module_registry->LoadModule(isolate, module_name,
+                              base::Bind(&ModuleLoaded, args, module_name));
 }
 
 gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
@@ -380,6 +380,8 @@ v8::Local<v8::Value> Process::GetModule(v8::Isolate* isolate) {
                 .SetMethod("chdir", &ChdirCallback)
                 .SetMethod("cwd", &CwdCallback)
                 .SetMethod("binding", &BindingCallback)
+                .SetMethod("gc", base::Bind(&v8::Isolate::LowMemoryNotification,
+                                            base::Unretained(isolate)))
                 .SetValue("_events", eventsObject)
                 .Build();
 
