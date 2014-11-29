@@ -49,8 +49,6 @@ class LineEditorImpl : public LineEditor {
   static const int kMaxHistoryEntries;
 };
 
-static LineEditorImpl read_line_editor;
-
 const char* LineEditorImpl::kHistoryFileName = ".zarun_history";
 const int LineEditorImpl::kMaxHistoryEntries = 1000;
 
@@ -112,5 +110,11 @@ std::string DumbLineEditor::Prompt(const char* prompt) {
 }
 
 #endif
-}
-// namespace zarun
+
+#if defined(OS_POSIX)
+static LineEditorImpl read_line_editor;
+#else
+static DumbLineEditor editor;
+#endif
+
+}  // namespace zarun
