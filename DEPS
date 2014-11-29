@@ -19,24 +19,25 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'libcxx_revision': 'eb01278922dfc49a6a0497cc29a4b7c799c204f2',
-  'libcxxabi_revision': 'fea8e327e2faf47f3314670322b8a1ffd2c4bd3a',
+  'libcxx_revision': '5a7a7efa07180f34a29e1433a979a03c709e37a8',
+  'libcxxabi_revision': '63cbbb329969436e3efbf0b7ad7105d0e7a6316d',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
-  'build_revision': '543ed203fe082033239602b0c7bfff18d3b6859a',
-  'base_revision': '1d5d58086a1e7d24b6d09ef03ab206f74cccaa2a',
+  'build_revision': '461a1f8cc3a4dfc9fd3c1329816cf7f720c8d2bc',
+  'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
+  'base_revision': 'a941cf3c23918d164beb4a86995bbcecca4766e7',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
   'gin_revision': '2e4b6303e0b229a59f8b1ef750d8b987612f9ec4',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
-  'valgrind_revision': '235eeee1812c073999e35dfdb1013276d375cbe3',
+  'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
   'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling V8 
   # and V8 without interference from each other.
-  'v8_revision': '125fa1aeef2cc6985dc9a114bfd16a8b7ab15143', # 3.31.22
+  'v8_revision': '3cfdc7ee8314e64f09b7ba2ad21102ddd789d005', # 3.31.30
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling WebRTC
   # and V8 without interference from each other.
@@ -48,10 +49,6 @@ vars = {
   # the commit queue can handle CLs rolling ANGLE
   # and whatever else without interference from each other.
   "angle_revision": "560eef1627abdef65f71021b906e57dc609f47fa",
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling build tools
-  # and whatever else without interference from each other.
-  'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling PDFium
   # and whatever else without interference from each other.
@@ -91,10 +88,10 @@ deps = {
 #   Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
 
   'src/testing/gtest':
-   Var('chromium_git') + '/external/googletest.git' + '@' + '4650552ff637bb44ecf7784060091cbed3252211', # from svn revision 692
+   Var('chromium_git') + '/external/googletest.git' + '@' + '8245545b6dc9c4703e6496d1efd19e975ad2b038', 
 
   'src/testing/gmock':
-   Var('chromium_git') + '/external/googlemock.git' + '@' + '896ba0e03f520fb9b6ed582bde2bd00847e3c3f2', # from svn revision 485
+   Var('chromium_git') + '/external/gmock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
 
 #  'src/third_party/angle':
 #   Var('chromium_git') + '/angle/angle.git' + '@' +  Var('angle_revision'),

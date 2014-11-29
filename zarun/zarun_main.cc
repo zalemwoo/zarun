@@ -9,6 +9,8 @@
 #include "base/run_loop.h"
 #include "base/message_loop/message_loop.h"
 
+#include "gin/public/isolate_holder.h"
+
 #include "zarun/zarun_shell.h"
 #include "zarun/switches.h"
 
