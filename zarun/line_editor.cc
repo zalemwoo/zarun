@@ -14,9 +14,6 @@
 #include <string>
 #include <iostream>
 
-// The readline includes leaves RETURN defined which breaks V8 compilation.
-#undef RETURN
-
 #include "zarun/line_editor.h"
 
 namespace zarun {
@@ -50,7 +47,7 @@ class LineEditorImpl : public LineEditor {
 };
 
 const char* LineEditorImpl::kHistoryFileName = ".zarun_history";
-const int LineEditorImpl::kMaxHistoryEntries = 1000;
+const int LineEditorImpl::kMaxHistoryEntries = 32;
 
 bool LineEditorImpl::Open() {
   linenoiseSetMultiLine(1);
@@ -85,6 +82,12 @@ void LineEditorImpl::AddHistory(const char* str) {
 
 #else
 
+class DumbLineEditor : public LineEditor {
+ public:
+  explicit DumbLineEditor() : LineEditor(LineEditor::DUMB, "dumb") {}
+  virtual std::string Prompt(const char* prompt) override;
+};
+
 std::string DumbLineEditor::Prompt(const char* prompt) {
   printf("%s", prompt);
   static const int kBufferSize = 256;
@@ -112,9 +115,9 @@ std::string DumbLineEditor::Prompt(const char* prompt) {
 #endif
 
 #if defined(OS_POSIX)
-static LineEditorImpl read_line_editor;
+static LineEditorImpl line_editor;
 #else
-static DumbLineEditor editor;
+static DumbLineEditor line_editor;
 #endif
 
 }  // namespace zarun
