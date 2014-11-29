@@ -21,9 +21,6 @@ static const std::string kDefaultV8Options =
 
 base::LazyInstance<zarun::ZarunShell> zarun_shell = LAZY_INSTANCE_INITIALIZER;
 
-void ProcessScriptResult(std::string result) {
-  std::cerr << result << std::endl << "> " << std::flush;
-}
 
 }  // namespace
 
@@ -36,12 +33,21 @@ ZarunShell::ZarunShell() : cmd_line_args_(NULL), shell_mode_(ShellMode::Batch) {
 }
 
 ZarunShell::~ZarunShell() {
+  if (shell_mode_ == ShellMode::Repl) {
+    LineEditor* console = LineEditor::Get();
+    console->Close();
+  }
 }
 
 void ZarunShell::Init(const base::CommandLine* args) {
   cmd_line_args_ = args;
   if (cmd_line_args_->HasSwitch(zarun::switches::kRepl)) {
     shell_mode_ = ShellMode::Repl;
+  }
+
+  if (shell_mode_ == ShellMode::Repl) {
+    LineEditor* console = LineEditor::Get();
+    console->Open();
   }
 }
 
@@ -57,7 +63,7 @@ void ZarunShell::Run() {
   backend_application_.reset(new zarun::backend::BackendApplication(
       task_runner_,
       base::Bind(&ZarunShell::OnBackendApplicationEnd, base::Unretained(this)),
-      base::Bind(&ProcessScriptResult)));
+      base::Bind(&ZarunShell::OnDidRunScript, base::Unretained(this))));
 
   backend_application_->Start();
 
@@ -80,10 +86,8 @@ void ZarunShell::Run() {
 
 void ZarunShell::Repl() {
   LineEditor* console = LineEditor::Get();
-  console->Open();
-  std::string script;
   while (true) {
-    script = console->Prompt("= ");
+    std::string script = console->Prompt("> ");
     if (script.empty())
       continue;
     if (script == "q") {
@@ -91,9 +95,15 @@ void ZarunShell::Repl() {
       break;
     } else {
       backend_application_->RunScript(script, "zarun_repl");
+      break;
     }
   }
-  console->Close();
+}
+
+void ZarunShell::OnDidRunScript(std::string result) {
+  std::cerr << result << std::endl << std::flush;
+  task_runner_->PostTask(FROM_HERE,
+                         base::Bind(&ZarunShell::Repl, base::Unretained(this)));
 }
 
 void ZarunShell::OnBackendApplicationEnd(

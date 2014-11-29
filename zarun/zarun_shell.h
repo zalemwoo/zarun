@@ -38,6 +38,7 @@ class ZarunShell {
 
  private:
   void Repl();
+  void OnDidRunScript(std::string result);
   void OnBackendApplicationEnd(
       zarun::backend::BackendApplication* backendApplication);
 
