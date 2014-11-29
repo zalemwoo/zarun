@@ -7,6 +7,10 @@
 
 #include "zarun/zarun_export.h"
 
+namespace gin {
+class IsolateHolder;
+}
+
 namespace zarun {
 namespace backend {
 
@@ -34,7 +38,7 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
  private:
   base::WeakPtr<BackendApplication> application_;
   ThreadTerminateCallback termination_callback_;
-
+  scoped_ptr<gin::IsolateHolder> isolate_holder_;
   friend BackendApplication;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);

@@ -5,26 +5,22 @@
 
 #include "zarun/environment.h"
 
-#include "gin/array_buffer.h"
 #include "gin/public/context_holder.h"
 #include "gin/per_context_data.h"
 
-#include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/modules/javascript_module_system.h"
 #include "zarun/modules/cpp/print.h"
 
 namespace zarun {
 
 namespace {
-bool v8_inited = false;
 
 // Key for base::SupportsUserData::Data.
 const char kEnvironmentKey[] = "ZarunEnvironment";
 
 struct EnvironmentData : public base::SupportsUserData::Data {
-	Environment* env;
+  Environment* env;
 };
-
 
 }  // namespace
 
@@ -54,26 +50,11 @@ class Environment::StringSourceMap : public JavaScriptModuleSystem::SourceMap {
   std::map<std::string, std::string> source_map_;
 };
 
-// static
-Environment* Environment::Create(
-    zarun::ScriptContextDelegate* script_context_delegate) {
-  if (!v8_inited) {
-    v8_inited = true;
-    gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
-                                   gin::ArrayBufferAllocator::SharedInstance());
-    const std::string& v8options = ::zarun::GetDefaultV8Options();
-    v8::V8::SetFlagsFromString(v8options.c_str(), v8options.length());
-  }
-
-  DCHECK(script_context_delegate);
-  return new Environment(script_context_delegate);
-}
-
-Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
-    : isolate_holder_(),
-      context_holder_(new gin::ContextHolder(isolate_holder_.isolate())),
+Environment::Environment(v8::Isolate* isolate,
+                         zarun::ScriptContextDelegate* script_context_delegate)
+    : isolate_(isolate),
+      context_holder_(new gin::ContextHolder(isolate)),
       source_map_(new StringSourceMap()) {
-  v8::Isolate* isolate = isolate_holder_.isolate();
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
   v8::Handle<v8::Context> v8_context = v8::Context::New(
@@ -87,9 +68,7 @@ Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
   env_data->env = this;
   data->SetUserData(kEnvironmentKey, env_data);
 
-  script_context_.reset(
-      new ScriptContext(script_context_delegate, context_holder_->context()));
-  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+  script_context_.reset(new ScriptContext(script_context_delegate, v8_context));
   script_context_->v8_context()->Enter();
 
   {
@@ -106,10 +85,9 @@ Environment::Environment(zarun::ScriptContextDelegate* script_context_delegate)
 }
 
 Environment::~Environment() {
-  v8::Isolate* isolate = isolate_holder_.isolate();
   {
-    v8::Isolate::Scope isolate_scope(isolate);
-    v8::HandleScope handle_scope(isolate);
+    v8::Isolate::Scope isolate_scope(isolate_);
+    v8::HandleScope handle_scope(isolate_);
     if (script_context_)
       script_context_->v8_context()->Exit();
 
@@ -118,15 +96,15 @@ Environment::~Environment() {
   }
 
   v8::HeapStatistics stats;
-  isolate->GetHeapStatistics(&stats);
+  isolate_->GetHeapStatistics(&stats);
   size_t old_heap_size = 0;
   // Run the GC until the heap size reaches a steady state to ensure that
   // all the garbage is collected.
   while (stats.used_heap_size() != old_heap_size) {
     old_heap_size = stats.used_heap_size();
-    isolate->RequestGarbageCollectionForTesting(
+    isolate_->RequestGarbageCollectionForTesting(
         v8::Isolate::kFullGarbageCollection);
-    isolate->GetHeapStatistics(&stats);
+    isolate_->GetHeapStatistics(&stats);
   }
 }
 
@@ -136,12 +114,13 @@ Environment* Environment::From(v8::Handle<v8::Context> context) {
   if (!data)
     return NULL;
 
-  EnvironmentData* env_data = static_cast<EnvironmentData*>(data->GetUserData(kEnvironmentKey));
+  EnvironmentData* env_data =
+      static_cast<EnvironmentData*>(data->GetUserData(kEnvironmentKey));
   return env_data->env;
 }
 
 v8::Isolate* Environment::isolate() {
-  return this->isolate_holder_.isolate();
+  return isolate_;
 }
 
 v8::Local<v8::Context> Environment::v8_context() {
@@ -149,7 +128,7 @@ v8::Local<v8::Context> Environment::v8_context() {
 }
 
 void Environment::RegisterModule(const std::string& name,
-                                                 const std::string& code) {
+                                 const std::string& code) {
   source_map_->RegisterModule(name, code);
 }
 

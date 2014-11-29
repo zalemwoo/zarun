@@ -22,8 +22,8 @@ class ZARUN_EXPORT Environment {
  public:
   class StringSourceMap;
 
-  static Environment* Create(
-      zarun::ScriptContextDelegate* script_context_delegate);
+  Environment(v8::Isolate* isolate,
+              zarun::ScriptContextDelegate* script_context_delegate);
 
   ~Environment();
 
@@ -38,8 +38,7 @@ class ZARUN_EXPORT Environment {
   v8::Local<v8::Context> v8_context();
 
  private:
-  Environment(zarun::ScriptContextDelegate* script_context_delegate);
-  gin::IsolateHolder isolate_holder_;
+  v8::Isolate* isolate_;
   scoped_ptr<gin::ContextHolder> context_holder_;
   scoped_ptr<zarun::ScriptContext> script_context_;
   scoped_ptr<StringSourceMap> source_map_;

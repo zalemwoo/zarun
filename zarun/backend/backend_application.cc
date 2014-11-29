@@ -7,11 +7,16 @@
 
 #include "base/bind.h"
 #include "base/files/file_util.h"
+#include "gin/array_buffer.h"
+
+#include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 
 namespace zarun {
 namespace backend {
 
 namespace {
+
+bool v8_inited = false;
 
 std::string Load(const base::FilePath& path) {
   std::string source;
@@ -41,6 +46,13 @@ BackendApplication::BackendApplication(
       backend_context_delegate_(
           CreateBackendScriptContextDelegate(run_script_callback)),
       weak_factory_(this) {
+  if (!v8_inited) {
+    v8_inited = true;
+    gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
+                                   gin::ArrayBufferAllocator::SharedInstance());
+    const std::string& v8options = ::zarun::GetDefaultV8Options();
+    v8::V8::SetFlagsFromString(v8options.c_str(), v8options.length());
+  }
 }
 
 BackendApplication::~BackendApplication() {
@@ -66,9 +78,9 @@ void BackendApplication::Stop() {
   shell_runner_->PostTask(FROM_HERE, base::Bind(termination_callback_, this));
 }
 
-void BackendApplication::CreateEnvironment() {
+void BackendApplication::CreateEnvironment(v8::Isolate* isolate) {
   DCHECK(!environment_.get()) << "environment created already";
-  environment_.reset(Environment::Create(backend_context_delegate_.get()));
+  environment_.reset(new Environment(isolate, backend_context_delegate_.get()));
 }
 
 void BackendApplication::DisposeEnvironment() {

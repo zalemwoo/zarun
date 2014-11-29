@@ -47,7 +47,8 @@ class ZARUN_EXPORT BackendApplication {
   }
 
  private:
-  void CreateEnvironment();   // must called on backend thread, once.
+  void CreateEnvironment(
+      v8::Isolate* isolate);  // must called on backend thread, once.
   void DisposeEnvironment();  // must called on backend thread.
 
   void OnThreadEnd(BackendThread* thread);

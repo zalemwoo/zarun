@@ -18,6 +18,8 @@
 #include "zarun/script_context.h"
 #include "zarun/modules/module_registry.h"
 
+#include "zarun/zarun_shell.h"
+
 namespace zarun {
 
 namespace {
@@ -33,12 +35,13 @@ const char* kModulesField = "modules";
 //  - Whether it's valid.
 //  - The extension ID, if one exists.
 //
-// This will only actual be fatal in in dev/canary, since in too many cases
-// we're at the mercy of the extension or web page's environment. They can mess
-// up our JS in unexpected ways. Hopefully dev/canary channel will pick up such
-// problems, but given the wider variety on stable/beta it's impossible to know.
+// This will only actual be fatal in |batch| mode, in |repl| just output
+// the message to stderr and continue.
 void Fatal(ScriptContext* context, const std::string& message) {
-  console::Error(context->isolate()->GetCallingContext(), message);
+  if (ZarunShell::Mode() == ShellMode::Repl)
+    console::Error(context->isolate()->GetCallingContext(), message);
+  else
+    console::Fatal(context->isolate()->GetCallingContext(), message);
 }
 
 void Warn(v8::Isolate* isolate, const std::string& message) {
