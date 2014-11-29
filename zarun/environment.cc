@@ -93,8 +93,9 @@ Environment::Environment(v8::Isolate* isolate,
 
   context_holder_->SetContext(v8_context);
 
+  // register environment to its context, so later can use static method
+  // Environment::From(v8_context) to get the per context Environment.
   gin::PerContextData* data = gin::PerContextData::From(v8_context);
-
   EnvironmentData* env_data = new EnvironmentData();
   env_data->env = this;
   data->SetUserData(kEnvironmentKey, env_data);
