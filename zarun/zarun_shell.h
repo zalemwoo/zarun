@@ -33,7 +33,7 @@ class ZarunShell {
  public:
   ZarunShell();
   ~ZarunShell();
-  void Init(const base::CommandLine* args);
+  void Init();
   void Run();
 
  private:
@@ -45,7 +45,6 @@ class ZarunShell {
  private:
   scoped_ptr<zarun::backend::BackendApplication> backend_application_;
   scoped_refptr<base::TaskRunner> task_runner_;
-  const base::CommandLine* cmd_line_args_;
   ShellMode shell_mode_;
 
   base::Closure quit_closure_;

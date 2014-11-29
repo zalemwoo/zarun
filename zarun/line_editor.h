@@ -8,7 +8,7 @@
 #ifndef ZARUN_LINE_EDITOR_H_
 #define ZARUN_LINE_EDITOR_H_
 
-#include "v8/include/v8.h"
+#include <string>
 
 namespace zarun {
 

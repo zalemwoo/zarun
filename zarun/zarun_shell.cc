@@ -29,7 +29,13 @@ ZarunShell& ZarunShell::GetZarunShell() {
   return zarun_shell.Get();
 }
 
-ZarunShell::ZarunShell() : cmd_line_args_(NULL), shell_mode_(ShellMode::Batch) {
+ZarunShell::ZarunShell() {
+  const base::CommandLine* command_line =
+      base::CommandLine::ForCurrentProcess();
+
+  if (command_line->HasSwitch(zarun::switches::kRepl)) {
+    shell_mode_ = ShellMode::Repl;
+  }
 }
 
 ZarunShell::~ZarunShell() {
@@ -39,12 +45,7 @@ ZarunShell::~ZarunShell() {
   }
 }
 
-void ZarunShell::Init(const base::CommandLine* args) {
-  cmd_line_args_ = args;
-  if (cmd_line_args_->HasSwitch(zarun::switches::kRepl)) {
-    shell_mode_ = ShellMode::Repl;
-  }
-
+void ZarunShell::Init() {
   if (shell_mode_ == ShellMode::Repl) {
     LineEditor* console = LineEditor::Get();
     console->Open();
@@ -67,7 +68,10 @@ void ZarunShell::Run() {
 
   backend_application_->Start();
 
-  base::CommandLine::StringVector argv = cmd_line_args_->GetArgs();
+  const base::CommandLine* command_line =
+      base::CommandLine::ForCurrentProcess();
+
+  base::CommandLine::StringVector argv = command_line->GetArgs();
   for (CommandLine::StringVector::const_iterator it = argv.begin();
        it != argv.end(); ++it) {
     backend_application_->RunScript(base::FilePath(*it));

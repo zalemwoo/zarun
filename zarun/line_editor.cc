@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <stdio.h>   // NOLINT
-#include <string.h>  // NOLINT
+#include <stdio.h>
+#include <string.h>
 
 #include "build/build_config.h"
 
@@ -11,7 +11,6 @@
 #include "third_party/linenoise/linenoise.h"
 #endif
 
-#include <string>
 #include <iostream>
 
 #include "zarun/line_editor.h"
@@ -76,6 +75,7 @@ std::string LineEditorImpl::Prompt(const char* prompt) {
     return std::string();
   }
 }
+
 void LineEditorImpl::AddHistory(const char* str) {
   linenoiseHistoryAdd(str);
 }
