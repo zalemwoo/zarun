@@ -47,30 +47,9 @@ class LineEditorImpl : public LineEditor {
 
   static const char* kHistoryFileName;
   static const int kMaxHistoryEntries;
-
- private:
-  static char kWordBreakCharacters[];
 };
 
 static LineEditorImpl read_line_editor;
-char LineEditorImpl::kWordBreakCharacters[] = {' ',
-                                               '\t',
-                                               '\n',
-                                               '"',
-                                               '\\',
-                                               '\'',
-                                               '`',
-                                               '@',
-                                               '.',
-                                               '>',
-                                               '<',
-                                               '=',
-                                               ';',
-                                               '|',
-                                               '&',
-                                               '{',
-                                               '(',
-                                               '\0'};
 
 const char* LineEditorImpl::kHistoryFileName = ".zarun_history";
 const int LineEditorImpl::kMaxHistoryEntries = 1000;
