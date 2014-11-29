@@ -33,18 +33,21 @@ v8::Handle<v8::ObjectTemplate> ScriptContextDelegate::GetGlobalTemplate(
   return v8::Handle<v8::ObjectTemplate>();
 }
 
-void ScriptContextDelegate::DidCreateContext(ScriptContext* runner) {
+void ScriptContextDelegate::DidCreateContext(ScriptContext* context) {
 }
 
-void ScriptContextDelegate::WillRunScript(ScriptContext* runner) {
+void ScriptContextDelegate::WillRunScript(ScriptContext* context) {
 }
 
-void ScriptContextDelegate::DidRunScript(ScriptContext* runner) {
+void ScriptContextDelegate::DidRunScript(ScriptContext* context) {
 }
 
-void ScriptContextDelegate::UnhandledException(ScriptContext* runner,
+void ScriptContextDelegate::UnhandledException(ScriptContext* context,
                                                TryCatch& try_catch) {
   CHECK(false) << try_catch.GetStackTrace();
+}
+
+void ScriptContextDelegate::DidCreateEnvironment(ScriptContext* context) {
 }
 
 // ScriptContext

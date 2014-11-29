@@ -27,6 +27,8 @@ class ZARUN_EXPORT BackendScriptContextDelegate : public ScriptContextDelegate {
   void UnhandledException(zarun::ScriptContext* context,
                           gin::TryCatch& try_catch) override;
 
+  void DidCreateEnvironment(ScriptContext* context) override;
+
  protected:
   // From ShellRunnerDelegate:
   v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(

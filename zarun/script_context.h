@@ -32,11 +32,13 @@ class ZARUN_EXPORT ScriptContextDelegate {
   // Returns the template for the global object.
   virtual v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
       v8::Isolate* isolate);
-  virtual void DidCreateContext(ScriptContext* runner);
-  virtual void WillRunScript(ScriptContext* runner);
-  virtual void DidRunScript(ScriptContext* runner);
-  virtual void UnhandledException(ScriptContext* runner,
+  virtual void DidCreateContext(ScriptContext* context);
+  virtual void WillRunScript(ScriptContext* context);
+  virtual void DidRunScript(ScriptContext* context);
+  virtual void UnhandledException(ScriptContext* context,
                                   gin::TryCatch& try_catch);
+
+  virtual void DidCreateEnvironment(ScriptContext* context);
 };
 
 // ScriptContext executes the script/functions directly in a v8::Context.

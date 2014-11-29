@@ -108,13 +108,7 @@ Environment::Environment(v8::Isolate* isolate,
     script_context_->set_module_system(module_system.Pass());
   }
 
-  JavaScriptModuleSystem* module_system = script_context_->module_system();
-
-  this->RegisterModuleFileForTest("bootstrap",
-                                  base::FilePath("./bootstrap.js"));
-  // enable for requireNative() js call.
-  JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
-  module_system->Require("bootstrap");
+  script_context_delegate->DidCreateEnvironment(script_context_.get());
 }
 
 Environment::~Environment() {

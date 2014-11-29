@@ -15,8 +15,9 @@
 void Usage() {
   std::cerr << "Zarun, for study base/gin/mojo/v8... from chromium codebase.\n";
   std::cerr << "Usage: zarun"
-            << " [--" << zarun::switches::kRepl << "]"
-            << " ...\n\n";
+          << " [--" << zarun::switches::kRepl << "] "
+          << " [--" << zarun::switches::kBootstrapJsFilePath << "=bootstrap js file path] "
+          << " ...\n";
 }
 
 int main(int argc, char** argv) {
