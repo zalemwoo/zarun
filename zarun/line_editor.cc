@@ -82,13 +82,13 @@ void LineEditorImpl::AddHistory(const char* str) {
 
 #else
 
-class DumbLineEditor : public LineEditor {
+class LineEditorImpl : public LineEditor {
  public:
-  explicit DumbLineEditor() : LineEditor(LineEditor::DUMB, "dumb") {}
+  explicit LineEditorImpl() : LineEditor(LineEditor::DUMB, "dumb") {}
   virtual std::string Prompt(const char* prompt) override;
 };
 
-std::string DumbLineEditor::Prompt(const char* prompt) {
+std::string LineEditorImpl::Prompt(const char* prompt) {
   printf("%s", prompt);
   static const int kBufferSize = 256;
   char buffer[kBufferSize];
@@ -114,10 +114,6 @@ std::string DumbLineEditor::Prompt(const char* prompt) {
 
 #endif
 
-#if defined(OS_POSIX)
 static LineEditorImpl line_editor;
-#else
-static DumbLineEditor line_editor;
-#endif
 
 }  // namespace zarun
