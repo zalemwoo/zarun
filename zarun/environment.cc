@@ -15,7 +15,6 @@
 #include "zarun/utils/path_util.h"
 #include "zarun/safe_builtins.h"
 #include "zarun/modules/javascript_module_system.h"
-#include "zarun/modules/cpp/print.h"
 
 namespace zarun {
 
@@ -110,10 +109,6 @@ Environment::Environment(v8::Isolate* isolate,
   }
 
   JavaScriptModuleSystem* module_system = script_context_->module_system();
-
-  module_system->RegisterNativeModule(
-      "print", scoped_ptr<NativeJavaScriptModule>(
-                   new PrintModule(script_context_.get())));
 
   this->RegisterModuleFileForTest("bootstrap",
                                   base::FilePath("./bootstrap.js"));
