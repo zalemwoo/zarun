@@ -37,9 +37,9 @@ bool LineEditor::Close() {
 
 #if defined(OS_POSIX)
 
-class ReadLineEditor : public LineEditor {
+class LineEditorImpl : public LineEditor {
  public:
-  ReadLineEditor() : LineEditor(LineEditor::READLINE, "readline") {}
+  LineEditorImpl() : LineEditor(LineEditor::READLINE, "readline") {}
   virtual std::string Prompt(const char* prompt) override;
   virtual bool Open() override;
   virtual bool Close() override;
@@ -52,8 +52,8 @@ class ReadLineEditor : public LineEditor {
   static char kWordBreakCharacters[];
 };
 
-static ReadLineEditor read_line_editor;
-char ReadLineEditor::kWordBreakCharacters[] = {' ',
+static LineEditorImpl read_line_editor;
+char LineEditorImpl::kWordBreakCharacters[] = {' ',
                                                '\t',
                                                '\n',
                                                '"',
@@ -72,21 +72,24 @@ char ReadLineEditor::kWordBreakCharacters[] = {' ',
                                                '(',
                                                '\0'};
 
-const char* ReadLineEditor::kHistoryFileName = ".zarun_history";
-const int ReadLineEditor::kMaxHistoryEntries = 1000;
+const char* LineEditorImpl::kHistoryFileName = ".zarun_history";
+const int LineEditorImpl::kMaxHistoryEntries = 1000;
 
-bool ReadLineEditor::Open() {
+bool LineEditorImpl::Open() {
   linenoiseSetMultiLine(1);
   linenoiseHistoryLoad(kHistoryFileName);
   linenoiseHistorySetMaxLen(kMaxHistoryEntries);
   return true;
 }
 
-bool ReadLineEditor::Close() {
-  return true;
+bool LineEditorImpl::Close() {
+  if (!linenoiseHistorySave(kHistoryFileName)) {
+    return true;
+  }
+  return false;
 }
 
-std::string ReadLineEditor::Prompt(const char* prompt) {
+std::string LineEditorImpl::Prompt(const char* prompt) {
   char* result = NULL;
   result = linenoise(prompt);
   if (result[0] != '\0') {
@@ -99,9 +102,8 @@ std::string ReadLineEditor::Prompt(const char* prompt) {
     return std::string();
   }
 }
-void ReadLineEditor::AddHistory(const char* str) {
+void LineEditorImpl::AddHistory(const char* str) {
   linenoiseHistoryAdd(str);
-  linenoiseHistorySave(kHistoryFileName);
 }
 
 #else

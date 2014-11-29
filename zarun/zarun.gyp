@@ -39,7 +39,7 @@
         
         './console.cc',
         './switches.cc',
-        './readline_editor.cc',
+        './line_editor.cc',
         './safe_builtins.cc',
         './script_context.cc',
         './environment.cc',
