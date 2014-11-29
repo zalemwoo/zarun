@@ -114,6 +114,8 @@ std::string LineEditorImpl::Prompt(const char* prompt) {
 
 #endif
 
+namespace {
 static LineEditorImpl line_editor;
+}  // namespace
 
 }  // namespace zarun
