@@ -79,7 +79,9 @@ void ZarunShell::Run() {
 }
 
 void ZarunShell::Repl() {
+#if !defined(OS_POSIX)
   DumbLineEditor editor;
+#endif
   LineEditor* console = LineEditor::Get();
   console->Open();
   std::string script;

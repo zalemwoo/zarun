@@ -68,6 +68,8 @@ vars = {
   # the commit queue can handle CLs rolling nss
   # and whatever else without interference from each other.
   'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
+  
+  'linenoise_revision': '8b9f3e659e94951b36676aaca4ed312fbe3f0cae',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -138,6 +140,9 @@ deps = {
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
+    
+  'src/third_party/linenoise':
+    'https://github.com/zalemwoo' + '/linenoise.git' + '@' +  Var('linenoise_revision'),
 
 #  'src/third_party/sfntly/cpp/src':
 #    Var('chromium_git') + '/external/sfntly/cpp/src.git' + '@' +  Var('sfntly_revision'),

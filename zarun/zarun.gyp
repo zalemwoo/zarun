@@ -14,6 +14,7 @@
         '../base/base.gyp:base_i18n',
         '../v8/tools/gyp/v8.gyp:v8',
         '../gin/gin.gyp/:gin',
+        '../third_party/linenoise/linenoise.gyp/:linenoise',
         'zarun_js2c#host',
       ],
       'include_dirs': [
@@ -50,7 +51,6 @@
       'link_settings': {
         'libraries': [
           '-L<(PRODUCT_DIR)',
-#          '-lreadline',
           '-ldl',
         ],
       },

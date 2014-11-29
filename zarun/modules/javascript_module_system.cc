@@ -199,7 +199,7 @@ v8::Local<v8::Value> JavaScriptModuleSystem::RequireForJsInner(
   v8::Handle<v8::Value> modules_value = global->GetHiddenValue(
       v8::String::NewFromUtf8(GetIsolate(), kModulesField));
   if (modules_value.IsEmpty() || modules_value->IsUndefined()) {
-    Warn(GetIsolate(), "Extension view no longer exists");
+    Warn(GetIsolate(), "Module system no longer exists");
     return v8::Undefined(GetIsolate());
   }
 
@@ -329,8 +329,7 @@ void JavaScriptModuleSystem::LazyFieldGetterInner(
   if (module_system_value.IsEmpty() || !module_system_value->IsExternal()) {
     // JavaScriptModuleSystem has been deleted.
     // TODO(kalman): See comment in header file.
-    Warn(info.GetIsolate(),
-         "Module system has been deleted, does extension view exist?");
+    Warn(info.GetIsolate(), "Module system has been deleted.");
     return;
   }
 
@@ -503,9 +502,9 @@ void JavaScriptModuleSystem::RequireAsync(
   zarun::ModuleRegistry* module_registry =
       zarun::ModuleRegistry::From(context_->v8_context());
   if (!module_registry) {
-    Warn(GetIsolate(), "Extension view no longer exists");
+    Warn(GetIsolate(), "Module system no longer exists");
     resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(
-        GetIsolate(), "Extension view no longer exists")));
+        GetIsolate(), "Module system no longer exists")));
     return;
   }
   module_registry->LoadModule(

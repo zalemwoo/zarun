@@ -22,10 +22,12 @@ class NativeSourceMap : public JavaScriptModuleSystem::SourceMap {
   void RegisterModule(const std::string& name, const std::string& source);
 
  private:
+  std::map<std::string, std::string> source_map_;
+
   NativeSourceMap();
   friend class zarun::Environment;
 
-  std::map<std::string, std::string> source_map_;
+  DISALLOW_COPY_AND_ASSIGN(NativeSourceMap);
 };
 
 }  // namespace zarun

@@ -14,7 +14,8 @@ namespace zarun {
 
 NativeSourceMap::NativeSourceMap() {
   const _zarun_native* natives_ptr = natives;
-  while (natives_ptr->source_len) {
+  while (natives_ptr->name) {
+    CHECK(natives_ptr->source && natives_ptr->source_len);
     RegisterModule(natives_ptr->name,
                    std::string(natives_ptr->source, natives_ptr->source_len));
     natives_ptr++;

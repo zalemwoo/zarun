@@ -5,9 +5,10 @@
 #include <stdio.h>   // NOLINT
 #include <string.h>  // NOLINT
 
-#ifdef READLINE_EDITOR
-#include <readline/readline.h>  // NOLINT
-#include <readline/history.h>   // NOLINT
+#include "build/build_config.h"
+
+#if defined(OS_POSIX)
+#include "third_party/linenoise/linenoise.h"
 #endif
 
 #include <string>
@@ -17,12 +18,6 @@
 #undef RETURN
 
 #include "zarun/line_editor.h"
-
-// There are incompatibilities between different versions and different
-// implementations of readline.  This smooths out one known incompatibility.
-#if RL_READLINE_VERSION >= 0x0500
-#define completion_matches rl_completion_matches
-#endif
 
 namespace zarun {
 
@@ -40,7 +35,22 @@ bool LineEditor::Close() {
   return true;
 }
 
-#ifdef READLINE_EDITOR
+#if defined(OS_POSIX)
+
+class ReadLineEditor : public LineEditor {
+ public:
+  ReadLineEditor() : LineEditor(LineEditor::READLINE, "readline") {}
+  virtual std::string Prompt(const char* prompt) override;
+  virtual bool Open() override;
+  virtual bool Close() override;
+  virtual void AddHistory(const char* str) override;
+
+  static const char* kHistoryFileName;
+  static const int kMaxHistoryEntries;
+
+ private:
+  static char kWordBreakCharacters[];
+};
 
 static ReadLineEditor read_line_editor;
 char ReadLineEditor::kWordBreakCharacters[] = {' ',
@@ -66,48 +76,32 @@ const char* ReadLineEditor::kHistoryFileName = ".zarun_history";
 const int ReadLineEditor::kMaxHistoryEntries = 1000;
 
 bool ReadLineEditor::Open() {
-  rl_initialize();
-  rl_basic_word_break_characters = kWordBreakCharacters;
-  rl_completer_word_break_characters = kWordBreakCharacters;
-  rl_bind_key('\t', rl_complete);
-  using_history();
-  stifle_history(kMaxHistoryEntries);
-  //  return read_history(kHistoryFileName) == 0;
+  linenoiseSetMultiLine(1);
+  linenoiseHistoryLoad(kHistoryFileName);
+  linenoiseHistorySetMaxLen(kMaxHistoryEntries);
   return true;
 }
 
 bool ReadLineEditor::Close() {
-  bool ret = (write_history(kHistoryFileName) == 0);
-  clear_history();
-  return ret;
+  return true;
 }
 
 std::string ReadLineEditor::Prompt(const char* prompt) {
   char* result = NULL;
-  result = readline(prompt);
-  if (result == NULL)
+  result = linenoise(prompt);
+  if (result[0] != '\0') {
+    AddHistory(result);
+    std::string str(result);
+    free(result);
+    return str;
+  } else {
+    free(result);
     return std::string();
-  std::string str(result);
-  free(result);
-  //  AddHistory(str.c_str());
-  return str;
-}
-
-void ReadLineEditor::AddHistory(const char* str) {
-  // Do not record empty input.
-  if (strlen(str) == 0)
-    return;
-  // Remove duplicate history entry.
-  history_set_pos(history_length - 1);
-  if (current_history()) {
-    do {
-      if (strcmp(current_history()->line, str) == 0) {
-        (void)remove_history(where_history());
-        break;
-      }
-    } while (previous_history());
   }
-  add_history(str);
+}
+void ReadLineEditor::AddHistory(const char* str) {
+  linenoiseHistoryAdd(str);
+  linenoiseHistorySave(kHistoryFileName);
 }
 
 #else
@@ -137,5 +131,5 @@ std::string DumbLineEditor::Prompt(const char* prompt) {
 }
 
 #endif
-
-}  // namespace zarun
+}
+// namespace zarun
