@@ -28,7 +28,7 @@ vars = {
   'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
   'base_revision': 'a941cf3c23918d164beb4a86995bbcecca4766e7',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
-  'gin_revision': '2e4b6303e0b229a59f8b1ef750d8b987612f9ec4',
+  'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
   'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
