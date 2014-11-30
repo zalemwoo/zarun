@@ -1,6 +1,7 @@
 var global = this;
 
-global.process = requireNative("process");
+global.node_util = require("node_util");
+node_util.process = requireNative("process");
 global.console = console;
 global.print = console.log;
 global.define = define;

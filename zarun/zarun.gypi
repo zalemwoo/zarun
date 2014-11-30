@@ -25,5 +25,9 @@
 	    './zarun_shell.cc',
 	    './zarun_main.cc',
     ],
+    'javascript_files': [
+      './modules/js/bootstrap.js',
+      './modules/js/node_util.js',
+    ],
   },
 }

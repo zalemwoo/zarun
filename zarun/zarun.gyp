@@ -4,9 +4,6 @@
   ],
   'variables': {
     'chromium_code': 1,
-    'javascript_files': [
-      './modules/js/bootstrap.js',
-    ],
   },
   'targets': [
     {
