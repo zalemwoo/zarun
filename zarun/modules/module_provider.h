@@ -15,12 +15,9 @@
 
 namespace zarun {
 
-typedef v8::Local<v8::Value>(*ModuleGetter)(v8::Isolate* isolate);
-
-class ModuleRegistry;
-
 class ModuleProvider {
  public:
+  typedef v8::Local<v8::Value>(*ModuleGetter)(v8::Isolate* isolate);
   typedef base::Callback<v8::Local<v8::Value>(v8::Isolate*)>
       ModuleGetterCallback;
 
@@ -32,8 +29,8 @@ class ModuleProvider {
                       const ModuleGetterCallback& getter);
 
  protected:
-  typedef std::map<std::string, ModuleGetterCallback> BuiltinModuleMap;
-  BuiltinModuleMap registered_modules_;
+  typedef std::map<std::string, ModuleGetterCallback> ModuleMap;
+  ModuleMap registered_modules_;
   virtual v8::Local<v8::Value> GetModule(v8::Isolate* isolate,
                                          const std::string& id) = 0;
 

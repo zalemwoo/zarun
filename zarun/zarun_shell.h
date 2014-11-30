@@ -33,10 +33,10 @@ class ZarunShell {
  public:
   ZarunShell();
   ~ZarunShell();
-  void Init();
   void Run();
 
  private:
+  void Init();
   void Repl();
   void OnDidRunScript(std::string result);
   void OnBackendApplicationEnd(

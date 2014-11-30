@@ -32,10 +32,10 @@ ZarunShell& ZarunShell::GetZarunShell() {
 ZarunShell::ZarunShell() {
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
-
   if (command_line->HasSwitch(zarun::switches::kRepl)) {
     shell_mode_ = ShellMode::Repl;
   }
+  Init();
 }
 
 ZarunShell::~ZarunShell() {
