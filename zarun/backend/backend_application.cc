@@ -42,6 +42,9 @@ void DidCreateEnvironmentCallback(zarun::Environment* env) {
   v8::Isolate* isolate = env->isolate();
   v8::HandleScope scope(isolate);
   JavaScriptModuleSystem* module_system = env->context()->module_system();
+  module_system->RegisterNativeModule(
+      "process",
+      scoped_ptr<NativeJavaScriptModule>(new Process(env->context())));
   // needed for enable requireNative() call from javascript.
   JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");

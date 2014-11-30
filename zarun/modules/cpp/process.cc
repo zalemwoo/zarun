@@ -21,17 +21,11 @@
 #include "base/process/process_handle.h"
 #include "base/process/kill.h"
 #include "base/files/file_util.h"
-#include "gin/arguments.h"
 #include "gin/converter.h"
-#include "gin/object_template_builder.h"
-#include "gin/per_isolate_data.h"
-#include "gin/per_context_data.h"
-#include "gin/public/wrapper_info.h"
-#include "gin/dictionary.h"
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_version.h"
-#include "gin/modules/module_registry.h"
+#include "zarun/script_context.h"
 
 #include "zarun/utils/path_util.h"
 
@@ -49,13 +43,6 @@ namespace zarun {
 
 namespace {
 
-// Key for base::SupportsUserData::Data.
-const char kSystemEnvironmentKey[] = "SystemEnvironment";
-
-struct SystemEnvironment : public base::SupportsUserData::Data {
-  scoped_ptr<base::Environment> environment;
-};
-
 #if defined(OS_MACOSX)
 #define PLATFORM "darwin"
 #elif defined(OS_LINUX)
@@ -72,7 +59,7 @@ struct SystemEnvironment : public base::SupportsUserData::Data {
 
 #if defined(ARCH_CPU_X86_FAMILY)
 #if defined(ARCH_CPU_X86_64)
-#define ARCH "x64"
+#define ARCH "x86_64"
 #elif defined(ARCH_CPU_X86)
 #define ARCH "x86"
 #else
@@ -112,19 +99,6 @@ std::string GetExecutablePath() {
   return zarun::util::ExecutionPath().AsUTF8Unsafe();
 }
 
-// process.moduleLoadList
-std::vector<std::string> ModuleListCallback(gin::Arguments* args) {
-  v8::Local<v8::Context> context = args->isolate()->GetCurrentContext();
-  gin::ModuleRegistry* module_registry = gin::ModuleRegistry::From(context);
-  std::set<std::string> modules = module_registry->available_modules();
-  return std::vector<std::string>(modules.begin(), modules.end());
-}
-
-// process.pid
-base::ProcessId ProcessIdCallback() {
-  return base::GetCurrentProcId();
-}
-
 // process.features
 v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
   v8::EscapableHandleScope scope(isolate);
@@ -138,85 +112,41 @@ v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
 #endif
                                                  );
   features->Set(gin::StringToV8(isolate, "debug"), debug);
-
   return scope.Escape(features);
 }
 
-// process.reallyExit
-void ExitCallback(gin::Arguments* args) {
-  int exit_code = 0;
-  args->GetNext(&exit_code);
-  fclose(stdout);
-  fclose(stderr);
-  exit(exit_code);
-}
-
-// process.kill
-int KillCallback(gin::Arguments* args) {
-  int pid;
-  if (args->Length() != 2 || !args->GetNext(&pid)) {
-    args->ThrowTypeError("Bad argument.");
-    return -1;
-  }
-  if (!base::KillProcess(pid, 0, false)) {
-    return -::logging::GetLastSystemErrorCode();
-  }
-  return 0;
-}
-
 // process.abort
-void AbortCallback() {
+void AbortCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   abort();
 }
 
 // process.chdir
-void ChdirCallback(gin::Arguments* args) {
-  std::string path;
-  if (args->Length() != 1 || !args->GetNext(&path)) {
-    args->ThrowTypeError("Bad argument.");
-    return;
+void ChdirCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  if (args.Length() != 1 || !args[0]->IsString()) {
+    return args.GetReturnValue().Set(
+        v8::Boolean::New(args.GetIsolate(), false));
   }
-
-  if (!base::SetCurrentDirectory(base::FilePath(path))) {
-    args->ThrowError();
-  }
+  std::string path = gin::V8ToString(args[0]);
+  bool success = base::SetCurrentDirectory(base::FilePath(path));
+  args.GetReturnValue().Set(v8::Boolean::New(args.GetIsolate(), success));
 }
 
 // process.cwd
-std::string CwdCallback(gin::Arguments* args) {
+void CwdCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   base::FilePath cwd;
   if (!base::GetCurrentDirectory(&cwd)) {
-    args->ThrowError();
-    return std::string();
+    args.GetReturnValue().SetUndefined();
   }
-  return cwd.AsUTF8Unsafe();
+  return args.GetReturnValue().Set(
+      gin::StringToV8(args.GetIsolate(), cwd.AsUTF8Unsafe()));
 }
 
 // process.env
-// static
-base::Environment* GetSystemEnvironment(v8::Handle<v8::Context> context) {
-  gin::PerContextData* per_context_data = gin::PerContextData::From(context);
-  if (!per_context_data)
-    return NULL;
-
-  SystemEnvironment* env_data = static_cast<SystemEnvironment*>(
-      per_context_data->GetUserData(kSystemEnvironmentKey));
-
-  if (!env_data) {
-    // PerContextData takes ownership of ModuleRegistryData.
-    env_data = new SystemEnvironment();
-    env_data->environment.reset(base::Environment::Create());
-    per_context_data->SetUserData(kSystemEnvironmentKey, env_data);
-  }
-  return env_data->environment.get();
-}
-
 void EnvGetter(v8::Local<v8::String> property,
                const v8::PropertyCallbackInfo<v8::Value>& info) {
   std::string prop = gin::V8ToString(property);
   v8::Isolate* isolate = info.GetIsolate();
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  base::Environment* env = GetSystemEnvironment(context);
+  scoped_ptr<base::Environment> env(base::Environment::Create());
 
   std::string env_value;
   bool ret = env->GetVar(prop.c_str(), &env_value);
@@ -233,9 +163,7 @@ void EnvSetter(v8::Local<v8::String> property,
                v8::Local<v8::Value> value,
                const v8::PropertyCallbackInfo<v8::Value>& info) {
   std::string prop = gin::V8ToString(property);
-  v8::Isolate* isolate = info.GetIsolate();
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  base::Environment* env = GetSystemEnvironment(context);
+  scoped_ptr<base::Environment> env(base::Environment::Create());
 
   std::string env_value(*v8::String::Utf8Value(value));
   env->SetVar(prop.c_str(), env_value);
@@ -247,9 +175,7 @@ void EnvSetter(v8::Local<v8::String> property,
 void EnvQuery(v8::Local<v8::String> property,
               const v8::PropertyCallbackInfo<v8::Integer>& info) {
   std::string prop = gin::V8ToString(property);
-  v8::Isolate* isolate = info.GetIsolate();
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  base::Environment* env = GetSystemEnvironment(context);
+  scoped_ptr<base::Environment> env(base::Environment::Create());
   bool ret = env->HasVar(prop.c_str());
   if (ret)
     info.GetReturnValue().Set(0);
@@ -258,9 +184,7 @@ void EnvQuery(v8::Local<v8::String> property,
 void EnvDeleter(v8::Local<v8::String> property,
                 const v8::PropertyCallbackInfo<v8::Boolean>& info) {
   std::string prop = gin::V8ToString(property);
-  v8::Isolate* isolate = info.GetIsolate();
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  base::Environment* env = GetSystemEnvironment(context);
+  scoped_ptr<base::Environment> env(base::Environment::Create());
   bool ret = env->UnSetVar(prop.c_str());
   info.GetReturnValue().Set(ret);
 }
@@ -323,70 +247,50 @@ v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   return env_templ->NewInstance();
 }
 
-void ModuleLoaded(gin::Arguments* args,
-                  std::string module_name,
-                  v8::Handle<v8::Value> module) {
-  v8::Isolate* isolate = args->isolate();
-  if (module.IsEmpty()) {
-    isolate->ThrowException(v8::Exception::ReferenceError(gin::StringToV8(
-        isolate,
-        base::StringPrintf("No such module: %s.", module_name.c_str()))));
-    return;
-  }
-  return args->Return(module);
-}
-
-// process.binding
-void BindingCallback(gin::Arguments* args) {
-  std::string module_name;
-  if (args->Length() != 1 || !args->GetNext(&module_name)) {
-    return args->ThrowTypeError("Bad argument.");
-  }
-
-  v8::Isolate* isolate = args->isolate();
-  v8::HandleScope scope(isolate);
-  v8::Handle<v8::Value> exports;
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  gin::ModuleRegistry* module_registry = gin::ModuleRegistry::From(context);
-
-  module_registry->LoadModule(isolate, module_name,
-                              base::Bind(&ModuleLoaded, args, module_name));
-}
-
 }  // namespace
 
-gin::WrapperInfo Process::kWrapperInfo = {gin::kEmbedderNativeGin};
-
-// static
-gin::Handle<Process> Process::Create(v8::Isolate* isolate) {
-  return gin::CreateHandle(isolate, new Process());
+Process::Process(ScriptContext* context) : ObjectBackedNativeModule(context) {
+  RouteFunction("cwd", base::Bind(&CwdCallback));
+  RouteFunction("abort", base::Bind(&AbortCallback));
+  RouteFunction("chdir", base::Bind(&ChdirCallback));
 }
 
-const char Process::kModuleName[] = "process";
+Process::~Process() {
+}
 
-gin::ObjectTemplateBuilder Process::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-    v8::Handle<v8::Value> eventsObject = v8::Object::New(isolate);
-    return gin::Wrappable<Process>::GetObjectTemplateBuilder(isolate)
-        .SetValue("version", GetVersion())
-        .SetValue("versions", GetVersions(isolate))
-        .SetValue("argv", GetArgv())
-        .SetValue("execPath", GetExecutablePath())
-        .SetValue("platform", std::string(PLATFORM))
-        .SetValue("arch", std::string(ARCH))
-        .SetProperty("moduleLoadList", &ModuleListCallback)
-        .SetValue("env", GetEnvironment(isolate))
-        .SetProperty("pid", &ProcessIdCallback)
-        .SetValue("features", GetFeatures(isolate))
-        .SetMethod("reallyExit", &ExitCallback)
-        .SetMethod("abort", &AbortCallback)
-        .SetMethod("_kill", &KillCallback)
-        .SetMethod("chdir", &ChdirCallback)
-        .SetMethod("cwd", &CwdCallback)
-        .SetMethod("binding", &BindingCallback)
-        .SetMethod("gc", base::Bind(&v8::Isolate::LowMemoryNotification,
-                                    base::Unretained(isolate)))
-        .SetValue("_events", eventsObject);
+v8::Handle<v8::Object> Process::NewInstance() {
+  ScriptContext* context = this->context();
+  v8::Isolate* isolate = context->isolate();
+  v8::EscapableHandleScope scope(isolate);
+
+  v8::Local<v8::Object> process = ObjectBackedNativeModule::NewInstance();
+
+  process->ForceSet(gin::StringToV8(isolate, "version"),
+                    gin::StringToV8(isolate, GetVersion()),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "versions"), GetVersions(isolate),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "features"), GetFeatures(isolate),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "argv"),
+                    gin::ConvertToV8(isolate, GetArgv()),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "execPath"),
+                    gin::StringToV8(isolate, GetExecutablePath()),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "platform"),
+                    gin::StringToV8(isolate, std::string(PLATFORM)),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "arch"),
+                    gin::StringToV8(isolate, std::string(ARCH)),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "env"), GetEnvironment(isolate),
+                    v8::PropertyAttribute::ReadOnly);
+  process->ForceSet(gin::StringToV8(isolate, "pid"),
+                    gin::ConvertToV8(isolate, base::GetCurrentProcId()),
+                    v8::PropertyAttribute::ReadOnly);
+
+  return scope.Escape(process);
 }
 
 }  // namespace zarun
