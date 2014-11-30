@@ -14,10 +14,10 @@ namespace zarun {
 
 class ScriptContext;
 
-class Process : public ObjectBackedNativeModule {
+class ProcessNative : public ObjectBackedNativeModule {
  public:
-  Process(ScriptContext* context);
-  ~Process() override;
+  ProcessNative(ScriptContext* context);
+  ~ProcessNative() override;
   v8::Handle<v8::Object> NewInstance() override;
 };
 

@@ -13,6 +13,7 @@
 
 #include "base/logging.h"
 #include "base/command_line.h"
+#include "base/debug/stack_trace.h"
 #include "base/sys_info.h"
 #include "base/environment.h"
 #include "base/strings/string_util.h"
@@ -117,6 +118,7 @@ v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
 
 // process.abort
 void AbortCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  base::debug::StackTrace().Print();
   abort();
 }
 
@@ -241,24 +243,36 @@ void EnvEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
 
 v8::Handle<v8::Object> GetEnvironment(v8::Isolate* isolate) {
   v8::Local<v8::ObjectTemplate> env_templ = v8::ObjectTemplate::New();
-
   env_templ->SetNamedPropertyHandler(EnvGetter, EnvSetter, EnvQuery, EnvDeleter,
                                      EnvEnumerator, v8::Object::New(isolate));
   return env_templ->NewInstance();
 }
 
+void ModulesCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  v8::Handle<v8::Object> global(context->Global());
+  v8::Local<v8::Value> modules =
+      global->GetHiddenValue(v8::String::NewFromUtf8(isolate, "modules"));
+  args.GetReturnValue().Set(modules);
+}
+
 }  // namespace
 
-Process::Process(ScriptContext* context) : ObjectBackedNativeModule(context) {
+ProcessNative::ProcessNative(ScriptContext* context)
+    : ObjectBackedNativeModule(context) {
   RouteFunction("cwd", base::Bind(&CwdCallback));
   RouteFunction("abort", base::Bind(&AbortCallback));
   RouteFunction("chdir", base::Bind(&ChdirCallback));
+  RouteFunction("modules", base::Bind(&ModulesCallback));
 }
 
-Process::~Process() {
+ProcessNative::~ProcessNative() {
+  Invalidate();
 }
 
-v8::Handle<v8::Object> Process::NewInstance() {
+v8::Handle<v8::Object> ProcessNative::NewInstance() {
   ScriptContext* context = this->context();
   v8::Isolate* isolate = context->isolate();
   v8::EscapableHandleScope scope(isolate);
