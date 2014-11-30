@@ -352,47 +352,40 @@ void BindingCallback(gin::Arguments* args) {
                               base::Bind(&ModuleLoaded, args, module_name));
 }
 
-gin::WrapperInfo g_wrapper_info = {gin::kEmbedderNativeGin};
-
 }  // namespace
+
+gin::WrapperInfo Process::kWrapperInfo = {gin::kEmbedderNativeGin};
+
+// static
+gin::Handle<Process> Process::Create(v8::Isolate* isolate) {
+  return gin::CreateHandle(isolate, new Process());
+}
 
 const char Process::kModuleName[] = "process";
 
-v8::Local<v8::Value> Process::GetModule(v8::Isolate* isolate) {
-  gin::PerIsolateData* data = gin::PerIsolateData::From(isolate);
-  v8::Local<v8::ObjectTemplate> templ =
-      data->GetObjectTemplate(&g_wrapper_info);
-  if (templ.IsEmpty()) {
+gin::ObjectTemplateBuilder Process::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
     v8::Handle<v8::Value> eventsObject = v8::Object::New(isolate);
-    templ = gin::ObjectTemplateBuilder(isolate)
-                .SetValue("versions", GetVersions(isolate))
-                .SetValue("argv", GetArgv())
-                .SetValue("execPath", GetExecutablePath())
-                .SetValue("platform", std::string(PLATFORM))
-                .SetValue("arch", std::string(ARCH))
-                .SetProperty("moduleLoadList", &ModuleListCallback)
-                .SetValue("env", GetEnvironment(isolate))
-                .SetProperty("pid", &ProcessIdCallback)
-                .SetValue("features", GetFeatures(isolate))
-                .SetMethod("reallyExit", &ExitCallback)
-                .SetMethod("abort", &AbortCallback)
-                .SetMethod("_kill", &KillCallback)
-                .SetMethod("chdir", &ChdirCallback)
-                .SetMethod("cwd", &CwdCallback)
-                .SetMethod("binding", &BindingCallback)
-                .SetMethod("gc", base::Bind(&v8::Isolate::LowMemoryNotification,
-                                            base::Unretained(isolate)))
-                .SetValue("_events", eventsObject)
-                .Build();
-
-    templ->Set(
-        gin::StringToV8(isolate, "version"),
-        gin::StringToV8(isolate, GetVersion()),
-        static_cast<v8::PropertyAttribute>(v8::ReadOnly | v8::DontDelete));
-
-    data->SetObjectTemplate(&g_wrapper_info, templ);
-  }
-  return templ->NewInstance();
+    return gin::Wrappable<Process>::GetObjectTemplateBuilder(isolate)
+        .SetValue("version", GetVersion())
+        .SetValue("versions", GetVersions(isolate))
+        .SetValue("argv", GetArgv())
+        .SetValue("execPath", GetExecutablePath())
+        .SetValue("platform", std::string(PLATFORM))
+        .SetValue("arch", std::string(ARCH))
+        .SetProperty("moduleLoadList", &ModuleListCallback)
+        .SetValue("env", GetEnvironment(isolate))
+        .SetProperty("pid", &ProcessIdCallback)
+        .SetValue("features", GetFeatures(isolate))
+        .SetMethod("reallyExit", &ExitCallback)
+        .SetMethod("abort", &AbortCallback)
+        .SetMethod("_kill", &KillCallback)
+        .SetMethod("chdir", &ChdirCallback)
+        .SetMethod("cwd", &CwdCallback)
+        .SetMethod("binding", &BindingCallback)
+        .SetMethod("gc", base::Bind(&v8::Isolate::LowMemoryNotification,
+                                    base::Unretained(isolate)))
+        .SetValue("_events", eventsObject);
 }
 
 }  // namespace zarun

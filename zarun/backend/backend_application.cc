@@ -6,11 +6,15 @@
 #include "zarun/backend/backend_application.h"
 
 #include "base/bind.h"
+#include "base/logging.h"
 #include "gin/array_buffer.h"
+#include "v8/include/v8.h"
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/utils/file_util.h"
 #include "zarun/modules/javascript_module_system.h"
+#include "zarun/modules/module_registry.h"
+#include "zarun/modules/cpp/process.h"
 
 namespace zarun {
 namespace backend {
@@ -19,11 +23,39 @@ namespace {
 
 static bool v8_inited = false;
 
+void InitiateV8() {
+  if (v8_inited)
+    return;
+
+  v8_inited = true;
+  gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
+                                 gin::ArrayBufferAllocator::SharedInstance());
+  const std::string& v8options = ::zarun::GetDefaultV8Options();
+  v8::V8::SetFlagsFromString(v8options.c_str(), v8options.length());
+}
+
+void DisposeV8() {
+  v8::V8::Dispose();
+  v8::V8::ShutdownPlatform();
+}
+
 void DidCreateEnvironmentCallback(zarun::Environment* env) {
+  v8::Isolate* isolate = env->isolate();
+  v8::HandleScope scope(isolate);
+
+  v8::Handle<v8::Context> v8_context = env->v8_context();
+  ModuleRegistry* registry = ModuleRegistry::From(v8_context);
+  // register builtin modules
+  // process
+  registry->AddBuiltinModule(isolate, zarun::Process::kModuleName,
+                             zarun::Process::Create(isolate).ToV8());
+
   JavaScriptModuleSystem* module_system = env->context()->module_system();
-  // enable for requireNative() js call.
+  // needed for enable requireNative() call from javascript.
   JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");
+
+  registry->AttemptToLoadMoreModules(isolate);
 }
 
 }  // namespace
@@ -36,27 +68,21 @@ BackendApplication::BackendApplication(
       termination_callback_(termination_callback),
       backend_context_delegate_(script_runner_delegate.Pass()),
       weak_factory_(this) {
+  InitiateV8();
 }
 
 BackendApplication::BackendApplication(
     scoped_refptr<base::TaskRunner> shell_runner,
     const base::Callback<void(BackendApplication*)>& termination_callback,
     const backend::RunScriptCallback& run_script_callback)
-    : shell_runner_(shell_runner),
-      termination_callback_(termination_callback),
-      backend_context_delegate_(
-          CreateBackendScriptContextDelegate(run_script_callback)),
-      weak_factory_(this) {
-  if (!v8_inited) {
-    v8_inited = true;
-    gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
-                                   gin::ArrayBufferAllocator::SharedInstance());
-    const std::string& v8options = ::zarun::GetDefaultV8Options();
-    v8::V8::SetFlagsFromString(v8options.c_str(), v8options.length());
-  }
+    : BackendApplication(
+          shell_runner,
+          termination_callback,
+          CreateBackendScriptContextDelegate(run_script_callback)) {
 }
 
 BackendApplication::~BackendApplication() {
+  DisposeV8();
 }
 
 void BackendApplication::Start() {

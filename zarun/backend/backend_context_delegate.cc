@@ -14,21 +14,9 @@
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_shell.h"
-#include "zarun/modules/module_registry.h"
-#include "zarun/modules/cpp/process.h"
 
 namespace zarun {
 namespace backend {
-
-namespace {
-void InstallGlobalModule(zarun::ScriptContext* context,
-                         std::string id,
-                         v8::Handle<v8::Value> module) {
-  v8::Isolate* isolate = context->isolate();
-  v8::Handle<v8::Object> globalObj = context->global();
-  globalObj->Set(gin::StringToSymbol(isolate, id), module);
-}
-}  // namespace
 
 BackendScriptContextDelegate::BackendScriptContextDelegate() {
 }
@@ -52,19 +40,6 @@ v8::Handle<v8::ObjectTemplate> BackendScriptContextDelegate::GetGlobalTemplate(
 
 void BackendScriptContextDelegate::DidCreateContext(
     zarun::ScriptContext* context) {
-  v8::Isolate* isolate = context->isolate();
-  v8::Handle<v8::Context> v8_context = context->v8_context();
-  ModuleRegistry* registry = ModuleRegistry::From(v8_context);
-  // register builtin modules
-  registry->AddBuiltinModule(isolate, zarun::Process::kModuleName,
-                             zarun::Process::GetModule(isolate));
-
-  // setup "process" module into global object
-  registry->LoadModule(
-      isolate, zarun::Process::kModuleName,
-      base::Bind(&InstallGlobalModule, context, zarun::Process::kModuleName));
-
-  registry->AttemptToLoadMoreModules(isolate);
 }
 
 void BackendScriptContextDelegate::UnhandledException(
