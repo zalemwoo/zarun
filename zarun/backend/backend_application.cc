@@ -13,7 +13,6 @@
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/utils/file_util.h"
 #include "zarun/modules/javascript_module_system.h"
-#include "zarun/modules/module_registry.h"
 #include "zarun/modules/cpp/process.h"
 
 namespace zarun {
@@ -42,20 +41,10 @@ void DisposeV8() {
 void DidCreateEnvironmentCallback(zarun::Environment* env) {
   v8::Isolate* isolate = env->isolate();
   v8::HandleScope scope(isolate);
-
-  v8::Handle<v8::Context> v8_context = env->v8_context();
-  ModuleRegistry* registry = ModuleRegistry::From(v8_context);
-  // register builtin modules
-  // process
-  registry->AddBuiltinModule(isolate, zarun::Process::kModuleName,
-                             zarun::Process::Create(isolate).ToV8());
-
   JavaScriptModuleSystem* module_system = env->context()->module_system();
   // needed for enable requireNative() call from javascript.
   JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");
-
-  registry->AttemptToLoadMoreModules(isolate);
 }
 
 }  // namespace

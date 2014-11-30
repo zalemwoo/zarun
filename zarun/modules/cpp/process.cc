@@ -27,10 +27,11 @@
 #include "gin/per_isolate_data.h"
 #include "gin/per_context_data.h"
 #include "gin/public/wrapper_info.h"
+#include "gin/dictionary.h"
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_version.h"
-#include "zarun/modules/module_registry.h"
+#include "gin/modules/module_registry.h"
 
 #include "zarun/utils/path_util.h"
 
@@ -93,7 +94,7 @@ v8::Handle<v8::Object> GetVersions(v8::Isolate* isolate) {
   v8::Local<v8::Object> versions_obj = v8::Object::New(isolate);
   versions_obj->ForceSet(
       gin::StringToV8(isolate, "v8"),
-      gin::StringToV8(isolate, std::string(v8::V8::GetVersion())),
+      gin::StringToV8(isolate, base::StringPiece(v8::V8::GetVersion())),
       v8::ReadOnly);
 
   return versions_obj;
@@ -114,7 +115,7 @@ std::string GetExecutablePath() {
 // process.moduleLoadList
 std::vector<std::string> ModuleListCallback(gin::Arguments* args) {
   v8::Local<v8::Context> context = args->isolate()->GetCurrentContext();
-  ModuleRegistry* module_registry = ModuleRegistry::From(context);
+  gin::ModuleRegistry* module_registry = gin::ModuleRegistry::From(context);
   std::set<std::string> modules = module_registry->available_modules();
   return std::vector<std::string>(modules.begin(), modules.end());
 }
@@ -346,7 +347,7 @@ void BindingCallback(gin::Arguments* args) {
   v8::HandleScope scope(isolate);
   v8::Handle<v8::Value> exports;
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  ModuleRegistry* module_registry = ModuleRegistry::From(context);
+  gin::ModuleRegistry* module_registry = gin::ModuleRegistry::From(context);
 
   module_registry->LoadModule(isolate, module_name,
                               base::Bind(&ModuleLoaded, args, module_name));

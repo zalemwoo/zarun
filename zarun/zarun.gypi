@@ -12,7 +12,6 @@
 	    './modules/object_backed_native_module.cc',
 	    './modules/native_source_map.cc',
 	    './modules/javascript_module_system.cc',
-	    './modules/module_registry.cc',
 	    './modules/module_provider.cc',
 	    './modules/cpp/console.cc',
 	    './modules/cpp/process.cc',

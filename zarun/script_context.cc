@@ -12,8 +12,6 @@
 #include "gin/converter.h"
 #include "gin/try_catch.h"
 
-#include "zarun/modules/module_registry.h"
-
 #include "gin/per_context_data.h"
 #include "zarun/zarun_shell.h"
 

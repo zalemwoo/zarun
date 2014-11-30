@@ -20,7 +20,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "v8/include/v8.h"
 
-#include "zarun/modules/module_registry_observer.h"
+#include "gin/modules/module_registry_observer.h"
 #include "zarun/modules/native_javascript_module.h"
 #include "zarun/modules/object_backed_native_module.h"
 
@@ -44,7 +44,7 @@ class ScriptContext;
 // Note that a ModuleSystem must be used only in conjunction with a single
 // v8::Context.
 class JavaScriptModuleSystem : public ObjectBackedNativeModule,
-                               public zarun::ModuleRegistryObserver {
+                               public gin::ModuleRegistryObserver {
  public:
   class SourceMap {
    public:
@@ -117,31 +117,6 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   v8::Handle<v8::Value> RunString(const std::string& code,
                                   const std::string& name);
 
-  // Make |object|.|field| lazily evaluate to the result of
-  // require(|module_name|)[|module_field|].
-  //
-  // TODO(kalman): All targets for this method are ObjectBackedNativeModules,
-  //               move this logic into those classes (in fact, the chrome
-  //               object is the only client, only that needs to implement it).
-  void SetLazyField(v8::Handle<v8::Object> object,
-                    const std::string& field,
-                    const std::string& module_name,
-                    const std::string& module_field);
-
-  void SetLazyField(v8::Handle<v8::Object> object,
-                    const std::string& field,
-                    const std::string& module_name,
-                    const std::string& module_field,
-                    v8::AccessorGetterCallback getter);
-
-  // Make |object|.|field| lazily evaluate to the result of
-  // requireNative(|module_name|)[|module_field|].
-  // TODO(kalman): Same as above.
-  void SetNativeLazyField(v8::Handle<v8::Object> object,
-                          const std::string& field,
-                          const std::string& module_name,
-                          const std::string& module_field);
-
   // Passes exceptions to |handler| rather than console::Fatal.
   void SetExceptionHandlerForTest(scoped_ptr<ExceptionHandler> handler) {
     exception_handler_ = handler.Pass();
@@ -155,29 +130,11 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   typedef std::map<std::string, linked_ptr<NativeJavaScriptModule> >
       NativeModuleMap;
 
-  // Retrieves the lazily defined field specified by |property|.
-  static void LazyFieldGetter(v8::Local<v8::String> property,
-                              const v8::PropertyCallbackInfo<v8::Value>& info);
-  // Retrieves the lazily defined field specified by |property| on a native
-  // object.
-  static void NativeLazyFieldGetter(
-      v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
-
   // Called when an exception is thrown but not caught.
   void HandleException(const v8::TryCatch& try_catch);
 
   void RequireForJs(const v8::FunctionCallbackInfo<v8::Value>& args);
   v8::Local<v8::Value> RequireForJsInner(v8::Handle<v8::String> module_name);
-
-  typedef v8::Handle<v8::Value>(JavaScriptModuleSystem::*RequireFunction)(
-      const std::string&);
-  // Base implementation of a LazyFieldGetter which uses |require_fn| to require
-  // modules.
-  static void LazyFieldGetterInner(
-      v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info,
-      RequireFunction require_function);
 
   // Return the named source file stored in the source map.
   // |args[0]| - the name of a source file in source_map_.
@@ -208,7 +165,7 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
       scoped_ptr<v8::UniquePersistent<v8::Promise::Resolver> > resolver,
       v8::Handle<v8::Value> value);
 
-  // zarun::ModuleRegistryObserver overrides.
+  // gin::ModuleRegistryObserver overrides.
   void OnDidAddPendingModule(
       const std::string& id,
       const std::vector<std::string>& dependencies) override;

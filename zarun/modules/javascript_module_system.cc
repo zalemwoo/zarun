@@ -16,7 +16,7 @@
 #include "base/strings/stringprintf.h"
 #include "zarun/console.h"
 #include "zarun/script_context.h"
-#include "zarun/modules/module_registry.h"
+#include "gin/modules/module_registry.h"
 
 #include "zarun/zarun_shell.h"
 
@@ -25,8 +25,6 @@ namespace zarun {
 namespace {
 
 const char* kModuleSystem = "module_system";
-const char* kModuleName = "module_name";
-const char* kModuleField = "module_field";
 const char* kModulesField = "modules";
 
 // Logs a fatal error for the calling context, with some added metadata about
@@ -127,7 +125,7 @@ JavaScriptModuleSystem::JavaScriptModuleSystem(ScriptContext* context,
   global->SetHiddenValue(v8::String::NewFromUtf8(isolate, kModuleSystem),
                          v8::External::New(isolate, this));
 
-  zarun::ModuleRegistry::From(context->v8_context())->AddObserver(this);
+  gin::ModuleRegistry::From(context->v8_context())->AddObserver(this);
 }
 
 JavaScriptModuleSystem::~JavaScriptModuleSystem() {
@@ -297,132 +295,6 @@ v8::Handle<v8::Value> JavaScriptModuleSystem::RunString(
   return handle_scope.Escape(result);
 }
 
-// static
-void JavaScriptModuleSystem::NativeLazyFieldGetter(
-    v8::Local<v8::String> property,
-    const v8::PropertyCallbackInfo<v8::Value>& info) {
-  LazyFieldGetterInner(property, info,
-                       &JavaScriptModuleSystem::RequireNativeFromString);
-}
-
-// static
-void JavaScriptModuleSystem::LazyFieldGetter(
-    v8::Local<v8::String> property,
-    const v8::PropertyCallbackInfo<v8::Value>& info) {
-  LazyFieldGetterInner(property, info, &JavaScriptModuleSystem::Require);
-}
-
-// static
-void JavaScriptModuleSystem::LazyFieldGetterInner(
-    v8::Local<v8::String> property,
-    const v8::PropertyCallbackInfo<v8::Value>& info,
-    RequireFunction require_function) {
-  CHECK(!info.Data().IsEmpty());
-  CHECK(info.Data()->IsObject());
-  v8::HandleScope handle_scope(info.GetIsolate());
-  v8::Handle<v8::Object> parameters = v8::Handle<v8::Object>::Cast(info.Data());
-  // This context should be the same as context()->v8_context().
-  v8::Handle<v8::Context> context = parameters->CreationContext();
-  v8::Handle<v8::Object> global(context->Global());
-  v8::Handle<v8::Value> module_system_value = global->GetHiddenValue(
-      v8::String::NewFromUtf8(info.GetIsolate(), kModuleSystem));
-  if (module_system_value.IsEmpty() || !module_system_value->IsExternal()) {
-    // JavaScriptModuleSystem has been deleted.
-    // TODO(kalman): See comment in header file.
-    Warn(info.GetIsolate(), "Module system has been deleted.");
-    return;
-  }
-
-  JavaScriptModuleSystem* module_system = static_cast<JavaScriptModuleSystem*>(
-      v8::Handle<v8::External>::Cast(module_system_value)->Value());
-
-  std::string name = *v8::String::Utf8Value(parameters->Get(
-      v8::String::NewFromUtf8(info.GetIsolate(), kModuleName)));
-
-  // Switch to our v8 context because we need functions created while running
-  // the require()d module to belong to our context, not the current one.
-  v8::Context::Scope context_scope(context);
-  NativesEnabledScope natives_enabled_scope(module_system);
-
-  v8::TryCatch try_catch;
-  v8::Handle<v8::Value> module_value = (module_system->*require_function)(name);
-  if (try_catch.HasCaught()) {
-    module_system->HandleException(try_catch);
-    return;
-  }
-  if (module_value.IsEmpty() || !module_value->IsObject()) {
-    // require_function will have already logged this, we don't need to.
-    return;
-  }
-
-  v8::Handle<v8::Object> module = v8::Handle<v8::Object>::Cast(module_value);
-  v8::Handle<v8::String> field =
-      parameters->Get(v8::String::NewFromUtf8(info.GetIsolate(), kModuleField))
-          ->ToString(info.GetIsolate());
-
-  if (!module->Has(field)) {
-    std::string field_str = *v8::String::Utf8Value(field);
-    Fatal(module_system->context_, "Lazy require of " + name + "." + field_str +
-                                       " did not set the " + field_str +
-                                       " field");
-    return;
-  }
-
-  v8::Local<v8::Value> new_field = module->Get(field);
-  if (try_catch.HasCaught()) {
-    module_system->HandleException(try_catch);
-    return;
-  }
-
-  // Ok for it to be undefined, among other things it's how bindings signify
-  // that the extension doesn't have permission to use them.
-  CHECK(!new_field.IsEmpty());
-
-  // Delete the getter and set this field to |new_field| so the same object is
-  // returned every time a certain API is accessed.
-  v8::Handle<v8::Value> val = info.This();
-  if (val->IsObject()) {
-    v8::Handle<v8::Object> object = v8::Handle<v8::Object>::Cast(val);
-    object->Delete(property);
-    object->Set(property, new_field);
-  } else {
-    NOTREACHED();
-  }
-  info.GetReturnValue().Set(new_field);
-}
-
-void JavaScriptModuleSystem::SetLazyField(v8::Handle<v8::Object> object,
-                                          const std::string& field,
-                                          const std::string& module_name,
-                                          const std::string& module_field) {
-  SetLazyField(object, field, module_name, module_field,
-               &JavaScriptModuleSystem::LazyFieldGetter);
-}
-
-void JavaScriptModuleSystem::SetLazyField(v8::Handle<v8::Object> object,
-                                          const std::string& field,
-                                          const std::string& module_name,
-                                          const std::string& module_field,
-                                          v8::AccessorGetterCallback getter) {
-  v8::HandleScope handle_scope(GetIsolate());
-  v8::Handle<v8::Object> parameters = v8::Object::New(GetIsolate());
-  parameters->Set(v8::String::NewFromUtf8(GetIsolate(), kModuleName),
-                  v8::String::NewFromUtf8(GetIsolate(), module_name.c_str()));
-  parameters->Set(v8::String::NewFromUtf8(GetIsolate(), kModuleField),
-                  v8::String::NewFromUtf8(GetIsolate(), module_field.c_str()));
-  object->SetAccessor(v8::String::NewFromUtf8(GetIsolate(), field.c_str()),
-                      getter, NULL, parameters);
-}
-
-void JavaScriptModuleSystem::SetNativeLazyField(
-    v8::Handle<v8::Object> object,
-    const std::string& field,
-    const std::string& module_name,
-    const std::string& module_field) {
-  SetLazyField(object, field, module_name, module_field,
-               &JavaScriptModuleSystem::NativeLazyFieldGetter);
-}
-
 v8::Handle<v8::Value> JavaScriptModuleSystem::RunString(
     v8::Handle<v8::String> code,
     v8::Handle<v8::String> name) {
@@ -499,8 +371,8 @@ void JavaScriptModuleSystem::RequireAsync(
   args.GetReturnValue().Set(resolver->GetPromise());
   scoped_ptr<v8::UniquePersistent<v8::Promise::Resolver> > persistent_resolver(
       new v8::UniquePersistent<v8::Promise::Resolver>(GetIsolate(), resolver));
-  zarun::ModuleRegistry* module_registry =
-      zarun::ModuleRegistry::From(context_->v8_context());
+  gin::ModuleRegistry* module_registry =
+      gin::ModuleRegistry::From(context_->v8_context());
   if (!module_registry) {
     Warn(GetIsolate(), "Module system no longer exists");
     resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(
@@ -576,7 +448,7 @@ v8::Handle<v8::Value> JavaScriptModuleSystem::LoadModule(
   v8::Handle<v8::Function> func = v8::Handle<v8::Function>::Cast(func_as_value);
 
   v8::Handle<v8::Object> define_object = v8::Object::New(GetIsolate());
-  zarun::ModuleRegistry::InstallGlobals(GetIsolate(), define_object);
+  gin::ModuleRegistry::InstallGlobals(GetIsolate(), define_object);
 
   v8::Local<v8::Value> exports = v8::Object::New(GetIsolate());
   v8::Handle<v8::Object> natives(NewInstance());
@@ -625,8 +497,8 @@ void JavaScriptModuleSystem::OnDidAddPendingModule(
   if (!source_map_->Contains(id))
     return;
 
-  zarun::ModuleRegistry* registry =
-      zarun::ModuleRegistry::From(context_->v8_context());
+  gin::ModuleRegistry* registry =
+      gin::ModuleRegistry::From(context_->v8_context());
   DCHECK(registry);
   for (std::vector<std::string>::const_iterator it = dependencies.begin();
        it != dependencies.end(); ++it) {
