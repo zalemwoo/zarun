@@ -34,6 +34,7 @@ executable("zarun") {
     ":js2c",
     "//base",
     "//base:i18n",
+    "//net",
     "//gin:gin",
     "//v8",
     "//third_party/linenoise:linenoise_lib",

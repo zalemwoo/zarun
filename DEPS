@@ -28,7 +28,9 @@ vars = {
   'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
   'base_revision': 'a941cf3c23918d164beb4a86995bbcecca4766e7',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
+  'crypto_revision': '1183d30a671bd41b1c9a549af396ce32399ba5f9',
   'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
+  'sqlite_revision': '0dc369ea1e8b37a031fe715642504fc6e94c430c',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
   'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
@@ -37,7 +39,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling V8 
   # and V8 without interference from each other.
-  'v8_revision': '3cfdc7ee8314e64f09b7ba2ad21102ddd789d005', # 3.31.30
+  'v8_revision': '5dfdcc548040199fa1ebe006af8e82944762bf20', # 3.31.33
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling WebRTC
   # and V8 without interference from each other.
@@ -56,7 +58,7 @@ vars = {
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling BoringSSL
   # and whatever else without interference from each other.
-  'boringssl_revision': '2f3ba910a2bdb9e7d19e712a827cdc80c8d8c777',
+  'boringssl_revision': '4e0a7e5a1d222395afab19335c685ed9f1dfb9d5',
   # Three lines of non-changing comments so that
   # the commit queue can handle CLs rolling lss
   # and whatever else without interference from each other.
@@ -84,8 +86,8 @@ deps = {
   'src/buildtools':
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
-#  'src/sdch/open-vcdiff':
-#   Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
+  'src/sdch/open-vcdiff':
+   Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '54e65be534dac90b78a621ab3cb87a741af50b70',
 
   'src/testing/gtest':
    Var('chromium_git') + '/external/googletest.git' + '@' + '8245545b6dc9c4703e6496d1efd19e975ad2b038', 
@@ -104,6 +106,9 @@ deps = {
 
   'src/third_party/libc++abi/trunk':
    Var('chromium_git') + '/chromium/llvm-project/libcxxabi.git' + '@' +  Var('libcxxabi_revision'),
+   
+  'src/third_party/sqlite':
+   Var('chromium_git') + '/chromium/src/third_party/sqlite.git' + '@' + Var('sqlite_revision'),
 
   'src/third_party/zlib':
    Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + Var('zlib_revision'),
@@ -132,12 +137,18 @@ deps = {
   'src/net':
     Var('chromium_git') + '/chromium/src/net.git' + '@' +  Var('net_revision'),
 
+  'src/crypto':
+    Var('chromium_git') + '/chromium/src/crypto.git' + '@' +  Var('crypto_revision'),
+
   'src/gin':
     'https://github.com/zalemwoo' + '/gin.git' + '@' +  Var('gin_revision'),
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
     
+  'src/third_party/boringssl/src':
+   'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
+   
   'src/third_party/linenoise':
     'https://github.com/zalemwoo' + '/linenoise.git' + '@' +  Var('linenoise_revision'),
 
@@ -153,8 +164,8 @@ deps = {
 #  'src/third_party/brotli/src':
 #   Var('chromium_git') + '/external/font-compression-reference.git' + '@' + '65cb3326e30ef8a67eb1d4411ec563e91be6e9ae',
 
-#  'src/third_party/yasm/source/patched-yasm':
-#   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + 'c960eb11ccda80b10ed50be39df4f0663b371d1d',
+  'src/third_party/yasm/source/patched-yasm':
+   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
 
 #  'src/third_party/libjpeg_turbo':
 #   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '034e9a9747e0983bc19808ea70e469bc8342081f',
@@ -170,9 +181,6 @@ deps = {
 
 #  'src/third_party/pdfium':
 #   'https://pdfium.googlesource.com/pdfium.git' + '@' +  Var('pdfium_revision'),
-
-#  'src/third_party/boringssl/src':
-#   'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
 }
 
 

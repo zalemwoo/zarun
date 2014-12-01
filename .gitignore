@@ -401,6 +401,7 @@ v8.log
 /third_party/yasm/generate_files.xml
 /third_party/yasm/source/patched-yasm
 /third_party/yasm/yasm.xml
+/third_party/sqlite
 /third_party/linenoise
 /tools/deps2git/
 /tools/distcc
@@ -442,4 +443,5 @@ v8.log
 /base
 /gin
 /net
+/crypto
 /third_party/zlib
