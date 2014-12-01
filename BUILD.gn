@@ -1,0 +1,12 @@
+group("root") {
+  testonly = true
+
+  deps = [
+    "//zarun:zarun_exec",
+    "//gin:gin_shell",
+  ]
+
+  if (!is_android && !is_win) {
+    deps += [ "//tools/xdisplaycheck" ]
+  }
+}

@@ -66,7 +66,7 @@ vars = {
   # and whatever else without interference from each other.
   'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
   
-  'linenoise_revision': 'eee5ee32a133bd6856376edda4689544f7348062',
+  'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.

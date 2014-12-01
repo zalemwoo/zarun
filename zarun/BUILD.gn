@@ -1,0 +1,81 @@
+
+executable("zarun") {
+  include_dirs = [
+    "$target_gen_dir", # for zarun_native.h
+  ]
+
+  sources = [
+    "utils/file_util.cc",
+    "utils/path_util.cc",
+    
+    "backend/backend_context_delegate.cc",
+    "backend/backend_thread.cc",
+    "backend/backend_application.cc",
+    
+    "modules/native_javascript_module.cc",
+    "modules/object_backed_native_module.cc",
+    "modules/native_source_map.cc",
+    "modules/javascript_module_system.cc",
+    "modules/module_provider.cc",
+    "modules/cpp/console.cc",
+    "modules/cpp/process.cc",
+    
+    "console.cc",
+    "switches.cc",
+    "line_editor.cc",
+    "safe_builtins.cc",
+    "script_context.cc",
+    "environment.cc",
+    "zarun_shell.cc",
+    "zarun_main.cc",
+  ]
+
+  deps = [
+    ":js2c",
+    "//base",
+    "//base:i18n",
+    "//gin:gin",
+    "//v8",
+    "//third_party/linenoise:linenoise_lib",
+  ]
+  
+  cflags = [
+    "-std=c++11",
+  ]
+  
+  cflags_cc = [
+    "-fno-rtti",
+    "-fno-exceptions",
+  ]
+}
+
+action("js2c") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+
+  script = "tools/zarun_js2c.py"
+
+  # The script depends on this other script, this rule causes a rebuild if it
+  # changes.
+  source_prereqs = [ "tools/jsmin.py" ]
+
+  sources = [
+    "modules/js/bootstrap.js",
+    "modules/js/node_util.js",
+  ]
+
+  outputs = [
+    "$target_gen_dir/zarun_natives.h"
+  ]
+
+  args = [
+    rebase_path("$target_gen_dir/zarun_natives.h", root_build_dir),
+  ] + rebase_path(sources, root_build_dir)
+}
+
+group("zarun_exec") {
+  testonly = true
+  
+  deps = [
+    ":zarun",
+  ]
+}
