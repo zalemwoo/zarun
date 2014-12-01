@@ -20,3 +20,8 @@ build
 $ gn gen out/Debug(or Release or anything else)
 $ ninja -C out/Debug zarun
 ```
+
+build(64bit, for more run "gn help")
+```bash
+$ gn gen out/Debug --args="cpu_arch=\"x64\""
+$ ninja -C out/Debug zarun
