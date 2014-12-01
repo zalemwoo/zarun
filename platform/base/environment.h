@@ -40,6 +40,7 @@ class PLATFORM_EXPORT Environment {
   // Returns true on success, otherwise returns false.
   bool UnSetVar(const char* variable_name);
 
+  // Returns all environment variable name;
   static std::vector<std::string> GetAll();
 
  private:

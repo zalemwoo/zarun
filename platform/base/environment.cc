@@ -99,7 +99,7 @@ std::vector<std::string> GetAllEnvVarNameImpl() {
 
 }  // namespace
 
-Environment::Environment() : env_(base::Environment::Create()) {
+Environment::Environment() : env_(::base::Environment::Create()) {
 }
 
 Environment::~Environment() {
