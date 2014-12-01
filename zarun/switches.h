@@ -7,7 +7,9 @@ namespace switches {
 // All switches in alphabetical order. The switches should be documented
 // alongside the definition of their values in the .cc file and, as needed,
 // in zarun_shell Usage() function.
+extern const char kColor[];
 extern const char kRepl[];
+extern const char kNoColor[];
 }
 }  // namespace zarun::switches
 

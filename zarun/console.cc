@@ -15,81 +15,35 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 
+#include "zarun/utils/standard_out.h"
+
 namespace zarun {
 namespace console {
 
 namespace {
 
-enum TerminalResetCode {
-  RESET_ALL = 0,
-  RESET_FONT = 10,
-  RESET_FRONT = 39,
-  RESET_BACK = 49,
-};
-
-enum TerminalFrontColorCode {
-  BLACK = 30,
-  RED = 31,
-  GREEN = 32,
-  YELLOW = 33,
-  BLUE = 34,
-  MAGENTA = 35,
-  CYAN = 36,
-  WHITE = 37,
-};
-
-enum TerminalBackColorCode {
-  B_BLACK = 40,
-  B_RED = 41,
-  B_GREEN = 42,
-  B_YELLOW = 43,
-  B_BLUE = 44,
-  B_MAGENTA = 45,
-  B_CYAN = 46,
-  B_WHITE = 47,
-};
-
-enum TerminalStyleCode {
-  BOLD = 1,
-  FAINT = 2,
-  ITALIC = 3,
-  UNDERLINE_SINGLE = 4,
-  BLINK_SLOW = 5,
-  BLINK_RAPID = 6,
-};
-
-std::ostream& operator<<(std::ostream& os, TerminalFrontColorCode code) {
-  return os << '\x1b' << "[1;" << static_cast<int>(code) << "m";
-}
-
-std::ostream& operator<<(std::ostream& os, TerminalResetCode code) {
-  return os << '\x1b' << "[" << static_cast<int>(code) << "m";
-}
-
 void AddMessage(v8::Handle<v8::Context> context,
                 console::ConsoleMessageLevel level,
                 const std::string& message) {
-  enum TerminalFrontColorCode color;
+  enum zarun::util::TextDecoration decoration;
   switch (level) {
     case console::ConsoleMessageLevel::CONSOLE_MESSAGE_LEVEL_DEBUG:
-      color = TerminalFrontColorCode::GREEN;
+      decoration = zarun::util::TextDecoration::DECORATION_BLUE;
       break;
     case console::ConsoleMessageLevel::CONSOLE_MESSAGE_LEVEL_LOG:
-      color = TerminalFrontColorCode::BLUE;
+      decoration = zarun::util::TextDecoration::DECORATION_GREEN;
       break;
     case console::ConsoleMessageLevel::CONSOLE_MESSAGE_LEVEL_WARNING:
-      color = TerminalFrontColorCode::YELLOW;
+      decoration = zarun::util::TextDecoration::DECORATION_YELLOW;
       break;
     case console::ConsoleMessageLevel::CONSOLE_MESSAGE_LEVEL_ERROR:
-      color = TerminalFrontColorCode::RED;
+      decoration = zarun::util::TextDecoration::DECORATION_RED;
       break;
     default:
-      color = TerminalFrontColorCode::BLUE;
+      decoration = zarun::util::TextDecoration::DECORATION_NONE;
       break;
   }
-
-  std::cerr << color << message << TerminalResetCode::RESET_ALL << std::endl
-            << std::flush;
+  zarun::util::OutputString(message + "\n", decoration);
 }
 
 // Writes |message| to stack to show up in minidump, then crashes.

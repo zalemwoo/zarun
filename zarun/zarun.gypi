@@ -3,6 +3,7 @@
     'zarun_sources': [
 	    './utils/file_util.cc',
 	    './utils/path_util.cc',
+	    './utils/standard_out.cc',
 	    
 	    './backend/backend_context_delegate.cc',
 	    './backend/backend_thread.cc',
