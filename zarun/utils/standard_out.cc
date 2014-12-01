@@ -134,7 +134,8 @@ void OutputString(const std::string& output, TextDecoration dec) {
   if (is_console && dec != DECORATION_NONE)
     WriteToStdOut("\e[0m");
 }
+
+#endif
 }
 }  // namespcae zarun::util
 
-#endif
