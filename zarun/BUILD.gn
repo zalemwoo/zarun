@@ -1,7 +1,7 @@
 
 executable("zarun") {
   include_dirs = [
-    "$target_gen_dir", # for zarun_native.h
+    "$target_gen_dir", # for zarun_natives.h
   ]
 
   sources = [

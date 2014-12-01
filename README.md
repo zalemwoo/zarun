@@ -17,6 +17,6 @@ $ gclient sync
 
 build
 ```bash
-$ ./gyp_zarun
-$ ninja -C out/Debug
+$ gn gen out/Debug(or Release or anything else)
+$ ninja -C out/Debug zarun
 ```
