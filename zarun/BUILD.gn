@@ -56,7 +56,7 @@ action("js2c") {
 
   # The script depends on this other script, this rule causes a rebuild if it
   # changes.
-  source_prereqs = [ "tools/jsmin.py" ]
+  source_prereqs = [ "../v8/tools/jsmin.py" ]
 
   sources = [
     "modules/js/bootstrap.js",

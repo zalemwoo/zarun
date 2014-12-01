@@ -37,9 +37,8 @@ import re
 import sys
 import string
 
-sys.path.append(dirname(__file__) + "/../deps/v8/tools");
+sys.path.append(dirname(__file__) + "/../../v8/tools")
 import jsmin
-
 
 def ToCArray(filename, lines):
   result = []
@@ -66,7 +65,7 @@ def CompressScript(lines, do_jsmin):
   # If we're not expecting this code to be user visible, we can run it through
   # a more aggressive minifier.
   if do_jsmin:
-    minifier = JavaScriptMinifier()
+    minifier = jsmin.JavaScriptMinifier()
     return minifier.JSMinify(lines)
 
   # Remove stuff from the source that we don't want to appear when
