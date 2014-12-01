@@ -87,6 +87,9 @@ deps = {
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
   'src/sdch/open-vcdiff':
+   Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
+   
+  'src/sdch/open-vcdiff':
    Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '54e65be534dac90b78a621ab3cb87a741af50b70',
 
   'src/testing/gtest':
