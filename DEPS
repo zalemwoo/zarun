@@ -295,6 +295,17 @@ hooks = [
     ],
   },
   {
+    'name': 'gn_mac',
+    'pattern': '.',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--platform=darwin',
+                '--no_auth',
+                '--bucket', 'chromium-gn',
+                '-s', 'src/buildtools/mac/gn.sha1',
+    ],
+  },
+  {
     'name': 'gn_win',
     'pattern': '.',
     'action': [ 'download_from_google_storage',
