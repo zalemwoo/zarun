@@ -1,0 +1,14 @@
+static_library("zarun_platform") {
+  sources = [
+    "base/environment.cc",
+    "base/system_info.cc",
+  ]
+  
+  public_deps = [
+    "//base",
+    "//base:i18n",
+    "//base:base_static",
+    "//net",
+  ]
+  
+ }
