@@ -56,9 +56,6 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src/build':
-    Var('chromium_git') + '/chromium/src/build.git' + '@' +  Var('build_revision'),
-
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 

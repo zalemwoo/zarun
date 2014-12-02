@@ -1,0 +1,9 @@
+include_rules = [
+  "+base",
+  "+build",
+  "+net",
+  "+gin",
+  "+v8",
+  "+platform",
+  "+third_party/linenoise",
+]
