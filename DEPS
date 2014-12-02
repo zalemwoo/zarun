@@ -29,50 +29,26 @@ vars = {
   'base_revision': 'a941cf3c23918d164beb4a86995bbcecca4766e7',
   'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
   'crypto_revision': '1183d30a671bd41b1c9a549af396ce32399ba5f9',
-  'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
   'sqlite_revision': '0dc369ea1e8b37a031fe715642504fc6e94c430c',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
   'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
   'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling V8 
-  # and V8 without interference from each other.
   'v8_revision': '5dfdcc548040199fa1ebe006af8e82944762bf20', # 3.31.33
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling WebRTC
-  # and V8 without interference from each other.
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling swarming_client
-  # and whatever else without interference from each other.
   'swarming_revision': '1f8ba359e84dc7f26b1ba286dfb4e28674efbff4',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling ANGLE
-  # and whatever else without interference from each other.
   "angle_revision": "560eef1627abdef65f71021b906e57dc609f47fa",
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling PDFium
-  # and whatever else without interference from each other.
   'pdfium_revision': '173f919d0ec99a1a973c9d3a82b474f761d5bce1',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling BoringSSL
-  # and whatever else without interference from each other.
   'boringssl_revision': '4e0a7e5a1d222395afab19335c685ed9f1dfb9d5',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling lss
-  # and whatever else without interference from each other.
   'lss_revision': '952107fa7cea0daaabead28c0e92d579bee517eb',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling nss
-  # and whatever else without interference from each other.
   'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
-  
+
+  'zarun_git': 'https://github.com/zalemwoo',
+  'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
-# If you need to add a new host, contact chrome infrastracture team.
 allowed_hosts = [
   'chromium.googlesource.com',
   'boringssl.googlesource.com',
@@ -81,37 +57,37 @@ allowed_hosts = [
 
 deps = {
   'src/build':
-   Var('chromium_git') + '/chromium/src/build.git' + '@' +  Var('build_revision'),
+    Var('chromium_git') + '/chromium/src/build.git' + '@' +  Var('build_revision'),
 
   'src/buildtools':
-   Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
+    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
   'src/sdch/open-vcdiff':
-   Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
+    Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
 
   'src/testing/gtest':
-   Var('chromium_git') + '/external/googletest.git' + '@' + '8245545b6dc9c4703e6496d1efd19e975ad2b038', 
+    Var('chromium_git') + '/external/googletest.git' + '@' + '8245545b6dc9c4703e6496d1efd19e975ad2b038', 
 
   'src/testing/gmock':
-   Var('chromium_git') + '/external/gmock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
+    Var('chromium_git') + '/external/gmock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
 
 #  'src/third_party/angle':
 #   Var('chromium_git') + '/angle/angle.git' + '@' +  Var('angle_revision'),
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu52.git' + '@' + 'd8b2a9d7b0039a4950ee008c5b1d998902c44c60', # from svn revision 292476
+    Var('chromium_git') + '/chromium/deps/icu52.git' + '@' + 'd8b2a9d7b0039a4950ee008c5b1d998902c44c60', # from svn revision 292476
 
   'src/third_party/libc++/trunk':
-   Var('chromium_git') + '/chromium/llvm-project/libcxx.git' + '@' +  Var('libcxx_revision'),
+    Var('chromium_git') + '/chromium/llvm-project/libcxx.git' + '@' +  Var('libcxx_revision'),
 
   'src/third_party/libc++abi/trunk':
-   Var('chromium_git') + '/chromium/llvm-project/libcxxabi.git' + '@' +  Var('libcxxabi_revision'),
+    Var('chromium_git') + '/chromium/llvm-project/libcxxabi.git' + '@' +  Var('libcxxabi_revision'),
    
   'src/third_party/sqlite':
-   Var('chromium_git') + '/chromium/src/third_party/sqlite.git' + '@' + Var('sqlite_revision'),
+    Var('chromium_git') + '/chromium/src/third_party/sqlite.git' + '@' + Var('sqlite_revision'),
 
   'src/third_party/zlib':
-   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + Var('zlib_revision'),
+    Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + Var('zlib_revision'),
 
   'src/tools/grit':
     Var('chromium_git') + '/external/grit-i18n.git' + '@' + '740badd5e3e44434a9a47b5d16749daac1e8ea80', # from svn revision 176
@@ -120,7 +96,7 @@ deps = {
     Var('chromium_git') + '/external/gyp.git' + '@' + '487c0b6ae8b44932e45347211bca0e8387718436', # from svn revision 1998
 
   'src/tools/swarming_client':
-   Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
+    Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
 
   'src/tools/clang':
     Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + 'a7bf977931de9c904335bd0e0ae2b11860dc510b',
@@ -140,35 +116,29 @@ deps = {
   'src/crypto':
     Var('chromium_git') + '/chromium/src/crypto.git' + '@' +  Var('crypto_revision'),
 
-  'src/gin':
-    'https://github.com/zalemwoo' + '/gin.git' + '@' +  Var('gin_revision'),
-
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
     
   'src/third_party/boringssl/src':
-   'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
-   
-  'src/third_party/linenoise':
-    'https://github.com/zalemwoo' + '/linenoise.git' + '@' +  Var('linenoise_revision'),
+    'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
 
 #  'src/third_party/sfntly/cpp/src':
 #    Var('chromium_git') + '/external/sfntly/cpp/src.git' + '@' +  Var('sfntly_revision'),
 
 #  'src/third_party/skia':
-#   Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
+#    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
 #  'src/third_party/ots':
 #    Var('chromium_git') + '/external/ots.git' + '@' + '98897009f3ea8a5fa3e20a4a74977da7aaa8e61a',
 
 #  'src/third_party/brotli/src':
-#   Var('chromium_git') + '/external/font-compression-reference.git' + '@' + '65cb3326e30ef8a67eb1d4411ec563e91be6e9ae',
+#    Var('chromium_git') + '/external/font-compression-reference.git' + '@' + '65cb3326e30ef8a67eb1d4411ec563e91be6e9ae',
 
   'src/third_party/yasm/source/patched-yasm':
-   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
+    Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
 
 #  'src/third_party/libjpeg_turbo':
-#   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '034e9a9747e0983bc19808ea70e469bc8342081f',
+#    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '034e9a9747e0983bc19808ea70e469bc8342081f',
 
 #  'src/third_party/smhasher/src':
 #    Var('chromium_git') + '/external/smhasher.git' + '@' + 'e87738e57558e0ec472b2fc3a643b838e5b6e88f',
@@ -177,10 +147,16 @@ deps = {
 #    Var('chromium_git') + '/external/pywebsocket/src.git' + '@' + 'cb349e87ddb30ff8d1fa1a89be39cec901f4a29c',
 
 #  'src/third_party/mesa/src':
-#   Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '9731cb962963bca8a05f3d0f6ea40c3a781f0537',
+#    Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '9731cb962963bca8a05f3d0f6ea40c3a781f0537',
 
 #  'src/third_party/pdfium':
 #   'https://pdfium.googlesource.com/pdfium.git' + '@' +  Var('pdfium_revision'),
+   
+  'src/gin':
+    Var('zarun_git') + '/gin.git' + '@' +  Var('gin_revision'),
+
+  'src/third_party/linenoise':
+    Var('zarun_git') + '/linenoise.git' + '@' +  Var('linenoise_revision'),
 }
 
 
@@ -227,10 +203,10 @@ include_rules = [
   '+base',
   '+build',
 
+  '+url',
   '+testing',
   '+third_party/icu/source/common/unicode',
   '+third_party/icu/source/i18n/unicode',
-  '+url',
 ]
 
 
