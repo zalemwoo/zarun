@@ -11,7 +11,7 @@ and run the following commands:
 
 ```bash
 $ mkdir zarun && cd zarun
-$ echo "solutions = [{u'managed': False, u'name': u'src', u'url': u'https://github.com/zalemwoo/zarun.git', u'custom_deps': {}, u'deps_file': u'DEPS', u'safesync_url': u''}]"  > .gclient
+$ gclient config --name=src https://github.com/zalemwoo/zarun.git
 $ gclient sync
 ```
 
