@@ -15,7 +15,7 @@
 	    './modules/javascript_module_system.cc',
 	    './modules/module_provider.cc',
         './modules/cpp/internal/system_env.cc',
-	    './modules/cpp/os.cc',
+        './modules/cpp/os.cc',
 	    
 	    './console.cc',
 	    './switches.cc',
