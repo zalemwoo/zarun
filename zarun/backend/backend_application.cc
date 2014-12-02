@@ -13,7 +13,7 @@
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/utils/file_util.h"
 #include "zarun/modules/javascript_module_system.h"
-#include "zarun/modules/cpp/process.h"
+#include "zarun/modules/cpp/os.h"
 
 namespace zarun {
 namespace backend {
@@ -43,8 +43,8 @@ void DidCreateEnvironmentCallback(zarun::Environment* env) {
   v8::HandleScope scope(isolate);
   JavaScriptModuleSystem* module_system = env->context()->module_system();
   module_system->RegisterNativeModule(
-      "process", scoped_ptr<NativeJavaScriptModule>(
-                     new ProcessNative(env->context())).Pass());
+      "os",
+      scoped_ptr<NativeJavaScriptModule>(new OSNative(env->context())).Pass());
   // needed for enable requireNative() call from javascript.
   JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");

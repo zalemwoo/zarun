@@ -13,6 +13,8 @@ namespace platform {
 
 namespace {
 
+#if defined(OS_POSIX)
+#define IS_POSIX true
 #if defined(OS_MACOSX)
 #define PLATFORM "darwin"
 #elif defined(OS_IOS)
@@ -23,7 +25,10 @@ namespace {
 #define PLATFORM "freebsd"
 #elif defined(OS_ANDROID)
 #define PLATFORM "android"
+#endif
+
 #elif defined(OS_WIN)
+#define IS_POSIX false
 #define PLATFORM "windows"
 #else
 #error unknown platform
@@ -53,6 +58,11 @@ std::string SystemInfo::OperatingSystemCodeName() {
 // static
 std::string SystemInfo::PlatformArchitecture() {
   return ARCH;
+}
+
+// static
+bool SystemInfo::IsPosix() {
+  return IS_POSIX;
 }
 }
 }  // namespace zarun::platform

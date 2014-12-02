@@ -14,8 +14,8 @@
 	    './modules/native_source_map.cc',
 	    './modules/javascript_module_system.cc',
 	    './modules/module_provider.cc',
-	    './modules/cpp/console.cc',
-	    './modules/cpp/process.cc',
+        './modules/cpp/internal/system_env.cc',
+	    './modules/cpp/os.cc',
 	    
 	    './console.cc',
 	    './switches.cc',

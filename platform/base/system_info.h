@@ -17,6 +17,7 @@ class PLATFORM_EXPORT SystemInfo {
  public:
   static std::string OperatingSystemCodeName();
   static std::string PlatformArchitecture();
+  static bool IsPosix();
 };
 }
 }  // namespace zarun::platform
