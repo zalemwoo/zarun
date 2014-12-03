@@ -18,8 +18,12 @@ executable("zarun") {
     "modules/native_source_map.cc",
     "modules/javascript_module_system.cc",
     "modules/module_provider.cc",
+    "modules/per_isolate_wrappable_data.cc",
+    "modules/wrappable.cc",
+    "modules/cpp/internal/process_handle_wrapper.cc",
     "modules/cpp/internal/system_env.cc",
     "modules/cpp/os.cc",
+    "modules/cpp/subprocess.cc",
     
     "console.cc",
     "switches.cc",

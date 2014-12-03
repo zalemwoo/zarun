@@ -80,40 +80,40 @@ v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
 }
 
 // os.abort
-void AbortCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void AbortCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
   base::debug::StackTrace().Print();
   abort();
 }
 
 // os.chdir
-void ChdirCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (args.Length() != 1 || !args[0]->IsString()) {
-    return args.GetReturnValue().Set(
-        v8::Boolean::New(args.GetIsolate(), false));
+void ChdirCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  if (info.Length() != 1 || !info[0]->IsString()) {
+    return info.GetReturnValue().Set(
+        v8::Boolean::New(info.GetIsolate(), false));
   }
-  std::string path = gin::V8ToString(args[0]);
+  std::string path = gin::V8ToString(info[0]);
   bool success = base::SetCurrentDirectory(base::FilePath(path));
-  args.GetReturnValue().Set(v8::Boolean::New(args.GetIsolate(), success));
+  info.GetReturnValue().Set(v8::Boolean::New(info.GetIsolate(), success));
 }
 
 // os.cwd
-void CwdCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void CwdCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
   base::FilePath cwd;
   if (!base::GetCurrentDirectory(&cwd)) {
-    args.GetReturnValue().SetUndefined();
+    info.GetReturnValue().SetUndefined();
   }
-  return args.GetReturnValue().Set(
-      gin::StringToV8(args.GetIsolate(), cwd.AsUTF8Unsafe()));
+  return info.GetReturnValue().Set(
+      gin::StringToV8(info.GetIsolate(), cwd.AsUTF8Unsafe()));
 }
 
-void ModulesCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  v8::Isolate* isolate = args.GetIsolate();
+void ModulesCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  v8::Isolate* isolate = info.GetIsolate();
   v8::HandleScope scope(isolate);
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Handle<v8::Object> global(context->Global());
   v8::Local<v8::Value> modules =
       global->GetHiddenValue(v8::String::NewFromUtf8(isolate, "modules"));
-  args.GetReturnValue().Set(modules);
+  info.GetReturnValue().Set(modules);
 }
 
 }  // namespace

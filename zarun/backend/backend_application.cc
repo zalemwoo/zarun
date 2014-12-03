@@ -14,6 +14,7 @@
 #include "zarun/utils/file_util.h"
 #include "zarun/modules/javascript_module_system.h"
 #include "zarun/modules/cpp/os.h"
+#include "zarun/modules/cpp/subprocess.h"
 
 namespace zarun {
 namespace backend {
@@ -45,6 +46,9 @@ void DidCreateEnvironmentCallback(zarun::Environment* env) {
   module_system->RegisterNativeModule(
       "os",
       scoped_ptr<NativeJavaScriptModule>(new OSNative(env->context())).Pass());
+  module_system->RegisterNativeModule(
+      "subprocess", scoped_ptr<NativeJavaScriptModule>(
+                        new SubProcessNative(env->context())).Pass());
   // needed for enable requireNative() call from javascript.
   JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");
