@@ -16,7 +16,6 @@
 namespace zarun {
 
 struct WrapperInfo;
-class WrappableBase;
 
 // There is one instance of PerIsolateWrappableData per v8::Isolate managed by
 // Gin. This
