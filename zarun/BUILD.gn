@@ -22,6 +22,7 @@ executable("zarun") {
     "modules/cpp/os.cc",
     "modules/cpp/process.cc",
     "modules/cpp/subprocess.cc",
+    "modules/cpp/sys_info.cc",
     
     "console.cc",
     "switches.cc",

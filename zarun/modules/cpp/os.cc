@@ -35,12 +35,12 @@ namespace zarun {
 namespace {
 
 // os.version
-std::string GetVersion() {
+std::string GetSelfVersion() {
   return std::string(ZARUN_VERSION_FULL);
 }
 
 // os.versions
-v8::Handle<v8::Object> GetVersions(v8::Isolate* isolate) {
+v8::Handle<v8::Object> GetThirdPartyVersions(v8::Isolate* isolate) {
   v8::Local<v8::Object> versions_obj = v8::Object::New(isolate);
   versions_obj->ForceSet(
       gin::StringToV8(isolate, "v8"),
@@ -84,7 +84,7 @@ void AbortCallback() {
 }
 
 // os.chdir
-void ChdirCallback(gin::Arguments* args) {
+void ChangeDirectoryCallback(gin::Arguments* args) {
   std::string path;
   if (args->Length() != 1 || !args->GetNext(&path)) {
     return args->Return(false);
@@ -93,8 +93,8 @@ void ChdirCallback(gin::Arguments* args) {
   args->Return(success);
 }
 
-// os.cwd
-void CwdCallback(gin::Arguments* args) {
+// os.getcwd
+void GetCurrentWorkingDirectoryCallback(gin::Arguments* args) {
   base::FilePath cwd;
   if (!base::GetCurrentDirectory(&cwd)) {
     args->Return((v8::Handle<v8::Value>)(v8::Undefined(args->isolate())));
@@ -128,11 +128,11 @@ gin::ObjectTemplateBuilder OSNative::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return ThinNativeModule<OSNative>::GetObjectTemplateBuilder(isolate)
       .SetMethod("abort", AbortCallback)
-      .SetMethod("chdir", ChdirCallback)
-      .SetMethod("cwd", CwdCallback)
+      .SetMethod("chdir", ChangeDirectoryCallback)
+      .SetMethod("getcwd", GetCurrentWorkingDirectoryCallback)
       .SetMethod("modules", ModulesCallback)
-      .SetValue("version", GetVersion())
-      .SetValue("versions", GetVersions(isolate))
+      .SetValue("version", GetSelfVersion())
+      .SetValue("versions", GetThirdPartyVersions(isolate))
       .SetValue("features", GetFeatures(isolate))
       .SetValue("argv", GetArgv())
       .SetValue("execPath", GetExecutablePath())

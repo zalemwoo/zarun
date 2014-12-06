@@ -15,6 +15,7 @@
 #include "zarun/modules/common_module_system.h"
 
 #include "zarun/modules/cpp/os.h"
+#include "zarun/modules/cpp/sys_info.h"
 #include "zarun/modules/cpp/subprocess.h"
 
 namespace zarun {
@@ -48,6 +49,9 @@ void DidCreateEnvironmentCallback(zarun::Environment* env) {
   // os
   module_system->RegisterNativeModule(OSNative::kModuleName,
                                       OSNative::GetModule(env->context()));
+  // sys_info
+  module_system->RegisterNativeModule(SysinfoNative::kModuleName,
+                                      SysinfoNative::GetModule(env->context()));
   // subprocess
   module_system->RegisterNativeModule(
       SubProcessNative::kModuleName,

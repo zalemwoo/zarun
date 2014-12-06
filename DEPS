@@ -19,16 +19,16 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'libcxx_revision': '5a7a7efa07180f34a29e1433a979a03c709e37a8',
+  'libcxx_revision': 'a7628463dc34c6c94cfc10b5b4b6a99627a2aaa2',
   'libcxxabi_revision': '63cbbb329969436e3efbf0b7ad7105d0e7a6316d',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
   'build_revision': '461a1f8cc3a4dfc9fd3c1329816cf7f720c8d2bc',
   'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
-  'base_revision': 'a941cf3c23918d164beb4a86995bbcecca4766e7',
-  'net_revision': 'a1bc135268d7fc2281e1d61e00fcfe12f0bb033b',
-  'crypto_revision': '1183d30a671bd41b1c9a549af396ce32399ba5f9',
+  'base_revision': '54da47e40d24881452a1d686f76dbee00f9de9ed',
+  'net_revision': '88a53df131f7eb36e65c257ff99e928f03323148',
+  'crypto_revision': '6c86e2c6de535b061d695aacb254fa50e8abbee6',
   'sqlite_revision': '0dc369ea1e8b37a031fe715642504fc6e94c430c',
   'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
 
