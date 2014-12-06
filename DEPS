@@ -35,7 +35,6 @@ vars = {
   'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
   'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
-  'v8_revision': '5dfdcc548040199fa1ebe006af8e82944762bf20', # 3.31.33
   'swarming_revision': '1f8ba359e84dc7f26b1ba286dfb4e28674efbff4',
   "angle_revision": "560eef1627abdef65f71021b906e57dc609f47fa",
   'pdfium_revision': '173f919d0ec99a1a973c9d3a82b474f761d5bce1',
@@ -44,6 +43,7 @@ vars = {
   'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
 
   'zarun_git': 'https://github.com/zalemwoo',
+  'v8_revision': '3e08df1bb48fd9626e99c6298819865808a693b2', # 3.31.44
   'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
 }
@@ -113,9 +113,6 @@ deps = {
   'src/crypto':
     Var('chromium_git') + '/chromium/src/crypto.git' + '@' +  Var('crypto_revision'),
 
-  'src/v8':
-    Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
-    
   'src/third_party/boringssl/src':
     'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
 
@@ -149,6 +146,9 @@ deps = {
 #  'src/third_party/pdfium':
 #   'https://pdfium.googlesource.com/pdfium.git' + '@' +  Var('pdfium_revision'),
    
+  'src/v8':
+    Var('zarun_git') + '/v8-git-mirror.git' + '@' +  Var('v8_revision'),
+    
   'src/gin':
     Var('zarun_git') + '/gin.git' + '@' +  Var('gin_revision'),
 
