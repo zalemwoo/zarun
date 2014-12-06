@@ -14,6 +14,7 @@
 #include "v8/include/v8.h"
 
 #include "zarun/script_context.h"
+#include "zarun/modules/module_macros.h"
 
 namespace zarun {
 
