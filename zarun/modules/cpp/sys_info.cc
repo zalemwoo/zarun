@@ -17,8 +17,10 @@ namespace zarun {
 
 namespace {
 
-int Uptime() {
-  return static_cast<int>(base::SysInfo::Uptime());
+void Uptime(gin::Arguments* args) {
+  int64 uptime = base::SysInfo::Uptime();
+  v8::Handle<v8::Value> ret = v8::Number::New(args->isolate(), (double)uptime);
+  args->Return(ret);
 }
 
 }  // namespace
@@ -39,7 +41,7 @@ gin::ObjectTemplateBuilder SysinfoNative::GetObjectTemplateBuilder(
       .SetValue("physMemMB", base::SysInfo::AmountOfPhysicalMemoryMB())
       .SetProperty("virtMemMB", base::SysInfo::AmountOfVirtualMemoryMB)
       .SetProperty("uptime", Uptime)
-      .SetValue("hwModel", base::SysInfo::HardwareModelName())
+      .SetValue("hardware", base::SysInfo::HardwareModelName())
       .SetValue("osName", base::SysInfo::OperatingSystemName())
       .SetValue("osVersion", base::SysInfo::OperatingSystemVersion())
       .SetValue("osArch", base::SysInfo::OperatingSystemArchitecture())
