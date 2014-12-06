@@ -13,7 +13,6 @@
 
 #include "base/logging.h"
 #include "base/command_line.h"
-#include "base/debug/stack_trace.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/process/process.h"
@@ -81,7 +80,6 @@ v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
 
 // os.abort
 void AbortCallback() {
-  base::debug::StackTrace().Print();
   abort();
 }
 
@@ -117,8 +115,7 @@ void ModulesCallback(gin::Arguments* args) {
 
 }  // namespace
 
-gin::WrapperInfo OSNative::kWrapperInfo = {gin::kEmbedderNativeGin};
-const char OSNative::kModuleName[] = "os";
+DEFINE_WRAPPER_INFO(OSNative);
 
 OSNative::OSNative(ScriptContext* context)
     : ThinNativeModule<OSNative>(context) {
@@ -133,56 +130,18 @@ gin::ObjectTemplateBuilder OSNative::GetObjectTemplateBuilder(
       .SetMethod("abort", AbortCallback)
       .SetMethod("chdir", ChdirCallback)
       .SetMethod("cwd", CwdCallback)
-      .SetMethod("modules", ModulesCallback);
-}
-
-v8::Handle<v8::Object> OSNative::NewInstance() {
-  v8::Isolate* isolate = this->isolate();
-  v8::EscapableHandleScope scope(isolate);
-
-  v8::Local<v8::Object> module = ThinNativeModule<OSNative>::NewInstance();
-
-  module->ForceSet(gin::StringToV8(isolate, "version"),
-                   gin::StringToV8(isolate, GetVersion()),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "versions"), GetVersions(isolate),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "features"), GetFeatures(isolate),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "argv"),
-                   gin::ConvertToV8(isolate, GetArgv()),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "execPath"),
-                   gin::StringToV8(isolate, GetExecutablePath()),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "name"),
-                   gin::StringToV8(isolate, "javascript"),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(
-      gin::StringToV8(isolate, "platform"),
-      gin::StringToV8(
-          isolate,
-          std::string(zarun::platform::SystemInfo::OperatingSystemCodeName())),
-      v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(
-      gin::StringToV8(isolate, "arch"),
-      gin::StringToV8(
-          isolate,
-          std::string(zarun::platform::SystemInfo::PlatformArchitecture())),
-      v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(
-      gin::StringToV8(isolate, "is_posix"),
-      gin::ConvertToV8(isolate, zarun::platform::SystemInfo::IsPosix()),
-      v8::PropertyAttribute::ReadOnly);
-
-  module->ForceSet(gin::StringToV8(isolate, "environ"),
-                   zarun::internal::CreateSystemEnv(isolate),
-                   v8::PropertyAttribute::ReadOnly);
-  module->ForceSet(gin::StringToV8(isolate, "pid"),
-                   gin::ConvertToV8(isolate, base::GetCurrentProcId()),
-                   v8::PropertyAttribute::ReadOnly);
-
-  return scope.Escape(module);
+      .SetMethod("modules", ModulesCallback)
+      .SetValue("version", GetVersion())
+      .SetValue("versions", GetVersions(isolate))
+      .SetValue("features", GetFeatures(isolate))
+      .SetValue("argv", GetArgv())
+      .SetValue("execPath", GetExecutablePath())
+      .SetValue("name", std::string("javascript"))
+      .SetValue("platform", platform::SystemInfo::OperatingSystemCodeName())
+      .SetValue("arch", platform::SystemInfo::PlatformArchitecture())
+      .SetValue("is_posix", platform::SystemInfo::IsPosix())
+      .SetValue("pid", base::GetCurrentProcId())
+      .SetValue("environ", internal::CreateSystemEnv(isolate));
 }
 
 void OSNative::Invalidate() {

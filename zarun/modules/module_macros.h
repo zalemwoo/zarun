@@ -3,19 +3,49 @@
  *
  */
 
-#ifndef MODULE_MACROS_H_
-#define MODULE_MACROS_H_
+#ifndef ZARUN_MODULES_MODULE_MACROS_H_
+#define ZARUN_MODULES_MODULE_MACROS_H_
 
-#define DECLARE_THIN_MODULE(mod_name)                  \
-  class mod_name : public ThinNativeModule<mod_name> { \
-   public:                                             \
-    static const char kModuleName[];                   \
-    static WrapperInfo kWrapperInfo;
+// Start declare ThinNativeModule
+#define DECLARE_THIN_MODULE(class_name, module_name)        \
+  class class_name : public ThinNativeModule<class_name> {  \
+   public:                                                  \
+    static constexpr const char* kModuleName = module_name; \
+    static WrapperInfo kWrapperInfo;                        \
+                                                            \
+   private:                                                 \
+    class_name(ScriptContext* context);                     \
+    ~class_name() override;                                 \
+    gin::ObjectTemplateBuilder GetObjectTemplateBuilder(    \
+        v8::Isolate* isolate) override;                     \
+    void Invalidate() override;                             \
+    friend base::DefaultDeleter<class_name>;                \
+    friend ThinNativeModule<class_name>;
 
-#define DECLARE_THIN_MODULE_END(mod_name) \
- private:                                 \
-  friend ThinNativeModule<mod_name>;      \
-  }                                       \
-  ;
+// End declare ThinNativeModule
+#define DECLARE_THIN_MODULE_END \
+  }                             \
+  ;  // end class declaration
 
-#endif  // MODULE_MACROS_H_
+// Start declare WrappableNativeObject
+#define DECLARE_NATIVE_OBJECT(class_name)                       \
+  class class_name : public WrappableNativeObject<class_name> { \
+   public:                                                      \
+    static WrapperInfo kWrapperInfo;                            \
+                                                                \
+   private:                                                     \
+    ~class_name() override;                                     \
+    gin::ObjectTemplateBuilder GetObjectTemplateBuilder(        \
+        v8::Isolate* isolate) override;                         \
+    friend WrappableNativeObject<class_name>;
+
+// End declare WrappableNativeObject
+#define DECLARE_NATIVE_OBJECT_END \
+  }                               \
+  ;  // end class declaration
+
+// In C++ file, define the kWrapperInfo declared prev.
+#define DEFINE_WRAPPER_INFO(class_name) \
+  gin::WrapperInfo class_name::kWrapperInfo = {gin::kEmbedderNativeGin}
+
+#endif  // ZARUN_MODULES_MODULE_MACROS_H_

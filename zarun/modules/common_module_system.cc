@@ -100,7 +100,7 @@ std::string CommonModuleSystem::ExceptionHandler::CreateExceptionString(
                             message->GetLineNumber(), error_message.c_str());
 }
 
-gin::WrapperInfo CommonModuleSystem::kWrapperInfo = {gin::kEmbedderNativeGin};
+DEFINE_WRAPPER_INFO(CommonModuleSystem);
 
 CommonModuleSystem::CommonModuleSystem(ScriptContext* context,
                                        SourceMap* source_map)

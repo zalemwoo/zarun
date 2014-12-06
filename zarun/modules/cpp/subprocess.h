@@ -12,19 +12,8 @@
 
 namespace zarun {
 
-DECLARE_THIN_MODULE(SubProcessNative)
-public:
-  static void ProcessOpenCallback(gin::Arguments* args);
-
- protected:
-  SubProcessNative(ScriptContext* context);
-  ~SubProcessNative() override;
-  void Invalidate() override;
-
-  gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
-
-  DECLARE_THIN_MODULE_END(SubProcessNative)
+DECLARE_THIN_MODULE(SubProcessNative, "subprocess")
+DECLARE_THIN_MODULE_END
 
 }  // namespace zarun
 

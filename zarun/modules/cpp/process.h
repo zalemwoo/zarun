@@ -14,25 +14,19 @@
 
 namespace zarun {
 
-class ProcessNative : public WrappableNativeObject<ProcessNative> {
- public:
-  static WrapperInfo kWrapperInfo;
+DECLARE_NATIVE_OBJECT(ProcessNative)
 
+private:
+ProcessNative(ScriptContext* context, base::ProcessHandle process_handle);
+
+public:
   void CloseCallback();
   void IsValidCallback(gin::Arguments* args);
-
- protected:
-  ProcessNative(ScriptContext* context, base::ProcessHandle process_handle);
-  ~ProcessNative() override;
-
-  gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
 
  private:
   scoped_ptr<base::Process> process_;
 
-  friend WrappableNativeObject<ProcessNative>;
-};
+  DECLARE_NATIVE_OBJECT_END
 
 }  // namespace zarun
 

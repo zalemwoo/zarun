@@ -10,18 +10,8 @@
 
 namespace zarun {
 
-DECLARE_THIN_MODULE(OSNative)
- protected:
-  OSNative(ScriptContext* context);
-  ~OSNative() override;
-
-  void Invalidate() override;
-
-  gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
-  v8::Handle<v8::Object> NewInstance() override;
-
-  DECLARE_THIN_MODULE_END(OSNative)
+DECLARE_THIN_MODULE(OSNative, "os")
+DECLARE_THIN_MODULE_END
 
 }  // namespace zarun
 

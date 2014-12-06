@@ -7,8 +7,6 @@
 
 namespace zarun {
 
-gin::WrapperInfo ProcessNative::kWrapperInfo = {gin::kEmbedderNativeGin};
-
 void ProcessNative::CloseCallback() {
   process_->Close();
 }
@@ -16,6 +14,8 @@ void ProcessNative::CloseCallback() {
 void ProcessNative::IsValidCallback(gin::Arguments* args) {
   args->Return(process_->IsValid());
 }
+
+DEFINE_WRAPPER_INFO(ProcessNative);
 
 ProcessNative::ProcessNative(ScriptContext* context,
                              base::ProcessHandle process_handle)

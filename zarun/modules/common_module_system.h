@@ -75,11 +75,7 @@ class CommonModuleSystem : public ThinNativeModule<CommonModuleSystem>,
   static WrapperInfo kWrapperInfo;
   static scoped_ptr<CommonModuleSystem> Create(ScriptContext* context,
                                                SourceMap* source_map) {
-    scoped_ptr<ThinNativeModule<CommonModuleSystem>> module_system =
-        ThinNativeModule<CommonModuleSystem>::GetModule(context, source_map);
-    scoped_ptr<CommonModuleSystem> ms(
-        static_cast<CommonModuleSystem*>(module_system.release()));
-    return ms.Pass();
+    return GetModule(context, source_map).Pass();
   }
 
   // Require the specified module. This is the equivalent of calling

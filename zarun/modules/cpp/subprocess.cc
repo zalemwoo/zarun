@@ -18,8 +18,10 @@
 
 namespace zarun {
 
+namespace {
+
 // static
-void SubProcessNative::ProcessOpenCallback(gin::Arguments* args) {
+void ProcessOpenCallback(gin::Arguments* args) {
   std::vector<std::string> strargs;
   if (!args->GetNext(&strargs)) {
     return args->ThrowError();
@@ -43,8 +45,9 @@ void SubProcessNative::ProcessOpenCallback(gin::Arguments* args) {
   args->Return(process);
 }
 
-gin::WrapperInfo SubProcessNative::kWrapperInfo = {gin::kEmbedderNativeGin};
-const char SubProcessNative::kModuleName[] = "subprocess";
+}  // namespace
+
+DEFINE_WRAPPER_INFO(SubProcessNative);
 
 SubProcessNative::SubProcessNative(ScriptContext* context)
     : ThinNativeModule<SubProcessNative>(context) {
@@ -56,7 +59,7 @@ SubProcessNative::~SubProcessNative() {
 gin::ObjectTemplateBuilder SubProcessNative::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return ThinNativeModule<SubProcessNative>::GetObjectTemplateBuilder(isolate)
-      .SetMethod("popen", &SubProcessNative::ProcessOpenCallback);
+      .SetMethod("popen", ProcessOpenCallback);
 }
 
 void SubProcessNative::Invalidate() {

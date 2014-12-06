@@ -35,16 +35,14 @@ template <typename T>
 class ThinNativeModule : public NativeObject, public NativeModule {
  public:
   template <typename... Args>
-  static scoped_ptr<ThinNativeModule<T>> GetModule(ScriptContext* context,
-                                                   Args... args) {
+  static scoped_ptr<T> GetModule(ScriptContext* context, Args... args) {
     v8::HandleScope scope(context->isolate());
     gin::PerIsolateData* data = gin::PerIsolateData::From(context->isolate());
     v8::Handle<v8::ObjectTemplate> templ =
         data->GetObjectTemplate(&T::kWrapperInfo);
     DCHECK(templ.IsEmpty());
-    scoped_ptr<ThinNativeModule<T>> module(new T(context, args...));
-    templ = module->GetObjectTemplateBuilder(context->isolate())
-                .Build();  // Customize point.
+    scoped_ptr<T> module(new T(context, args...));
+    templ = module->GetObjectTemplateBuilder(context->isolate()).Build();
     data->SetObjectTemplate(&T::kWrapperInfo, templ);
     return module.Pass();
   }
@@ -58,11 +56,11 @@ class ThinNativeModule : public NativeObject, public NativeModule {
     return templ->NewInstance();
   }
 
-  virtual ~ThinNativeModule() {}
-
  protected:
   ThinNativeModule(ScriptContext* context)
       : NativeObject(context), NativeModule(true) {}
+
+  virtual ~ThinNativeModule() {}
 
   virtual void Invalidate() override { NativeModule::Invalidate(); }
 
