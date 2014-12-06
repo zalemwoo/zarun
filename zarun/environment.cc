@@ -15,7 +15,7 @@
 #include "zarun/utils/path_util.h"
 #include "zarun/safe_builtins.h"
 #include "zarun/modules/native_source_map.h"
-#include "zarun/modules/javascript_module_system.h"
+#include "zarun/modules/common_module_system.h"
 
 namespace zarun {
 
@@ -79,11 +79,8 @@ Environment::Environment(v8::Isolate* isolate,
   script_context_.reset(new ScriptContext(script_context_delegate, v8_context));
   script_context_->v8_context()->Enter();
 
-  {
-    scoped_ptr<JavaScriptModuleSystem> module_system(
-        new JavaScriptModuleSystem(script_context_.get(), source_map_.get()));
-    script_context_->set_module_system(module_system.Pass());
-  }
+  script_context_->set_module_system(
+      CommonModuleSystem::Create(script_context_.get(), source_map_.get()));
 
   created_callback.Run(this);
 }

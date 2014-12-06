@@ -80,60 +80,67 @@ v8::Handle<v8::Object> GetFeatures(v8::Isolate* isolate) {
 }
 
 // os.abort
-void AbortCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void AbortCallback() {
   base::debug::StackTrace().Print();
   abort();
 }
 
 // os.chdir
-void ChdirCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.Length() != 1 || !info[0]->IsString()) {
-    return info.GetReturnValue().Set(
-        v8::Boolean::New(info.GetIsolate(), false));
+void ChdirCallback(gin::Arguments* args) {
+  std::string path;
+  if (args->Length() != 1 || !args->GetNext(&path)) {
+    return args->Return(false);
   }
-  std::string path = gin::V8ToString(info[0]);
   bool success = base::SetCurrentDirectory(base::FilePath(path));
-  info.GetReturnValue().Set(v8::Boolean::New(info.GetIsolate(), success));
+  args->Return(success);
 }
 
 // os.cwd
-void CwdCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+void CwdCallback(gin::Arguments* args) {
   base::FilePath cwd;
   if (!base::GetCurrentDirectory(&cwd)) {
-    info.GetReturnValue().SetUndefined();
+    args->Return((v8::Handle<v8::Value>)(v8::Undefined(args->isolate())));
   }
-  return info.GetReturnValue().Set(
-      gin::StringToV8(info.GetIsolate(), cwd.AsUTF8Unsafe()));
+  args->Return(cwd.AsUTF8Unsafe());
 }
 
-void ModulesCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
+// os.modules
+void ModulesCallback(gin::Arguments* args) {
+  v8::Isolate* isolate = args->isolate();
   v8::HandleScope scope(isolate);
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Handle<v8::Object> global(context->Global());
-  v8::Local<v8::Value> modules =
+  v8::Handle<v8::Value> modules =
       global->GetHiddenValue(v8::String::NewFromUtf8(isolate, "modules"));
-  info.GetReturnValue().Set(modules);
+  args->Return(modules);
 }
 
 }  // namespace
 
-OSNative::OSNative(ScriptContext* context) : ObjectBackedNativeModule(context) {
-  RouteFunction("cwd", base::Bind(&CwdCallback));
-  RouteFunction("abort", base::Bind(&AbortCallback));
-  RouteFunction("chdir", base::Bind(&ChdirCallback));
-  RouteFunction("modules", base::Bind(&ModulesCallback));
+gin::WrapperInfo OSNative::kWrapperInfo = {gin::kEmbedderNativeGin};
+const char OSNative::kModuleName[] = "os";
+
+OSNative::OSNative(ScriptContext* context)
+    : ThinNativeModule<OSNative>(context) {
 }
 
 OSNative::~OSNative() {
-  Invalidate();
+}
+
+gin::ObjectTemplateBuilder OSNative::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
+  return ThinNativeModule<OSNative>::GetObjectTemplateBuilder(isolate)
+      .SetMethod("abort", base::Bind(&AbortCallback))
+      .SetMethod("chdir", base::Bind(&ChdirCallback))
+      .SetMethod("cwd", base::Bind(&CwdCallback))
+      .SetMethod("modules", base::Bind(&ModulesCallback));
 }
 
 v8::Handle<v8::Object> OSNative::NewInstance() {
-  v8::Isolate* isolate = this->context()->isolate();
+  v8::Isolate* isolate = this->isolate();
   v8::EscapableHandleScope scope(isolate);
 
-  v8::Local<v8::Object> module = ObjectBackedNativeModule::NewInstance();
+  v8::Local<v8::Object> module = ThinNativeModule<OSNative>::NewInstance();
 
   module->ForceSet(gin::StringToV8(isolate, "version"),
                    gin::StringToV8(isolate, GetVersion()),
@@ -176,6 +183,10 @@ v8::Handle<v8::Object> OSNative::NewInstance() {
                    v8::PropertyAttribute::ReadOnly);
 
   return scope.Escape(module);
+}
+
+void OSNative::Invalidate() {
+  ThinNativeModule<OSNative>::Invalidate();
 }
 
 }  // namespace zarun

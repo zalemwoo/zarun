@@ -10,48 +10,59 @@
 #include "base/process/launch.h"
 #include "gin/converter.h"
 #include "gin/arguments.h"
+#include "gin/object_template_builder.h"
 
-#include "zarun/modules/cpp/internal/process_handle_wrapper.h"
+#include "zarun/script_context.h"
+
+#include "zarun/modules/cpp/process.h"
 
 namespace zarun {
 
-void SubProcessNative::ProcessOpen(
-    const v8::FunctionCallbackInfo<v8::Value>& info) {
-  gin::Arguments args(info);
-  if ((info.Length()) != 1 || (!info[0]->IsArray())) {
-    return args.ThrowTypeError("args must be array");
-  }
-
+// static
+void SubProcessNative::ProcessOpenCallback(gin::Arguments* args) {
   std::vector<std::string> strargs;
-  if (!args.GetNext(&strargs)) {
-    return args.ThrowError();
+  if (!args->GetNext(&strargs)) {
+    return args->ThrowError();
   }
 
   base::CommandLine cmdline(strargs);
   base::LaunchOptions options;
-  base::ProcessHandle process;
+  base::ProcessHandle process_handle;
 
-  bool ret = base::LaunchProcess(cmdline, options, &process);
+  bool ret = base::LaunchProcess(cmdline, options, &process_handle);
 
   if (!ret) {
-    args.isolate()->ThrowException(v8::Exception::Error(
-        gin::StringToV8(args.isolate(), std::string("IOError"))));
-    return args.Return(NULL);
+    args->isolate()->ThrowException(v8::Exception::Error(
+        gin::StringToV8(args->isolate(), std::string("IOError"))));
+    return;
   }
 
-  gin::Handle<zarun::internal::ProcessHandleWrapper> handle =
-      zarun::internal::ProcessHandleWrapper::Create(args.isolate(), process);
-  args.Return(handle.ToV8());
+  ScriptContext* context =
+      ScriptContext::FromV8Context(args->isolate()->GetCurrentContext());
+
+  gin::Handle<zarun::ProcessNative> process =
+      zarun::ProcessNative::Create(context, process_handle);
+  args->Return(process.ToV8());
 }
 
+gin::WrapperInfo SubProcessNative::kWrapperInfo = {gin::kEmbedderNativeGin};
+const char SubProcessNative::kModuleName[] = "subprocess";
+
 SubProcessNative::SubProcessNative(ScriptContext* context)
-    : ObjectBackedNativeModule(context) {
-  RouteFunction("popen", base::Bind(&SubProcessNative::ProcessOpen,
-                                    base::Unretained(this)));
+    : ThinNativeModule<SubProcessNative>(context) {
 }
 
 SubProcessNative::~SubProcessNative() {
-  Invalidate();
+}
+
+gin::ObjectTemplateBuilder SubProcessNative::GetObjectTemplateBuilder(
+    v8::Isolate* isolate) {
+  return ThinNativeModule<SubProcessNative>::GetObjectTemplateBuilder(isolate)
+      .SetMethod("popen", &SubProcessNative::ProcessOpenCallback);
+}
+
+void SubProcessNative::Invalidate() {
+  ThinNativeModule<SubProcessNative>::Invalidate();
 }
 
 }  // namespace zarun

@@ -7,9 +7,11 @@
 #define ZARUN_SCRIPT_CONTEXT_H_
 
 #include "gin/runner.h"
+#include "gin/handle.h"
+#include "gin/per_context_data.h"
 #include "zarun/zarun_export.h"
-#include "zarun/modules/javascript_module_system.h"
 #include "zarun/safe_builtins.h"
+#include "zarun/scoped_persistent.h"
 #include "v8/include/v8.h"
 
 namespace gin {
@@ -20,6 +22,7 @@ class PerContextData;
 namespace zarun {
 
 class ScriptContext;
+class CommonModuleSystem;
 
 // Subclass ScriptContextDelegate to customize the behavior of ScriptContext.
 // Typical embedders will want to subclass one of the specialized
@@ -44,6 +47,11 @@ class ZARUN_EXPORT ScriptContextDelegate {
 // destroyed when the ScriptContext is deleted.
 class ZARUN_EXPORT ScriptContext : public gin::Runner {
  public:
+  static ScriptContext* FromV8Context(v8::Handle<v8::Context> context) {
+    return static_cast<ScriptContext*>(
+        gin::PerContextData::From(context)->runner());
+  }
+
   ScriptContext(ScriptContextDelegate* delegate,
                 const v8::Handle<v8::Context>& v8_context);
   ~ScriptContext() override;
@@ -59,11 +67,9 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                                     int argc,
                                     v8::Handle<v8::Value> argv[]) const;
 
-  void set_module_system(scoped_ptr<JavaScriptModuleSystem> module_system) {
-    module_system_ = module_system.Pass();
-  }
+  void set_module_system(gin::Handle<CommonModuleSystem> module_system);
 
-  JavaScriptModuleSystem* module_system() { return module_system_.get(); }
+  CommonModuleSystem* module_system() { return module_system_.get(); }
 
   SafeBuiltins* safe_builtins() { return &safe_builtins_; }
   const SafeBuiltins* safe_builtins() const { return &safe_builtins_; }
@@ -93,7 +99,7 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   // The v8 context the bindings are accessible to.
   ScopedPersistent<v8::Context> v8_context_;
   // Owns and structures the JS that is injected to set up extension bindings.
-  scoped_ptr<JavaScriptModuleSystem> module_system_;
+  gin::Handle<CommonModuleSystem> module_system_;
   // Contains safe copies of builtin objects like Function.prototype.
   SafeBuiltins safe_builtins_;
 

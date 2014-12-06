@@ -47,7 +47,7 @@ void EnvQuery(v8::Local<v8::String> property,
   zarun::platform::Environment env;
   bool ret = env.HasVar(prop.c_str());
   if (ret)
-    info.GetReturnValue().Set(0);
+    info.GetReturnValue().Set(0u);
 }
 
 void EnvDeleter(v8::Local<v8::String> property,

@@ -14,7 +14,6 @@
 
 #include "zarun/zarun_export.h"
 #include "zarun/script_context.h"
-#include "zarun/modules/javascript_module_system.h"
 
 namespace gin {
 class ContextHolder;
@@ -24,6 +23,7 @@ namespace zarun {
 
 // TODO(zalemwoo) : SourceMap is temporary used,  ModuleProvider is preferred.
 class NativeSourceMap;
+class CommonModuleSystem;
 
 class ZARUN_EXPORT Environment {
  public:
@@ -43,7 +43,7 @@ class ZARUN_EXPORT Environment {
   void RegisterModuleFileForTest(const std::string& name,
                                  const base::FilePath& relate_path);
 
-  JavaScriptModuleSystem* module_system() {
+  CommonModuleSystem* module_system() {
     return script_context_->module_system();
   }
 

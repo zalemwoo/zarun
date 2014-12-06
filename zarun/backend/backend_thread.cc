@@ -5,7 +5,6 @@
 #include "gin/public/isolate_holder.h"
 
 #include "zarun/backend/backend_application.h"
-#include "zarun/modules/per_isolate_wrappable_data.h"
 
 namespace zarun {
 
@@ -27,7 +26,6 @@ void BackendThread::Init() {
   v8::Isolate* isolate = isolate_holder_->isolate();
   v8::Isolate::Scope isolate_scope(isolate);
 
-  wrappable_data_.reset(new zarun::PerIsolateWrappableData(isolate));
   v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   if (application_.get()) {
     application_.get()->CreateEnvironment(isolate);
@@ -39,7 +37,6 @@ void BackendThread::CleanUp() {
     application_.get()->DisposeEnvironment();
   }
   application_.reset();
-  wrappable_data_.reset();
 
   // do GC for clean heap.
   v8::Isolate* isolate = isolate_holder_->isolate();

@@ -1,5 +1,5 @@
 /*
- * javascript_module_system.h
+ * common_module_system.h
  *
  */
 
@@ -7,8 +7,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef ZARUN_MODULES_JAVASCRIPT_MODULE_SYSTEM_H_
-#define ZARUN_MODULES_JAVASCRIPT_MODULE_SYSTEM_H_
+#ifndef ZARUN_MODULES_COMMON_MODULE_SYSTEM_H_
+#define ZARUN_MODULES_COMMON_MODULE_SYSTEM_H_
 
 #include <map>
 #include <set>
@@ -16,13 +16,12 @@
 #include <vector>
 
 #include "base/compiler_specific.h"
-#include "base/memory/linked_ptr.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/memory/linked_ptr.h"
 #include "v8/include/v8.h"
 
 #include "gin/modules/module_registry_observer.h"
-#include "zarun/modules/native_javascript_module.h"
-#include "zarun/modules/object_backed_native_module.h"
+#include "zarun/modules/native_module.h"
 
 namespace zarun {
 
@@ -43,8 +42,8 @@ class ScriptContext;
 //
 // Note that a ModuleSystem must be used only in conjunction with a single
 // v8::Context.
-class JavaScriptModuleSystem : public ObjectBackedNativeModule,
-                               public gin::ModuleRegistryObserver {
+class CommonModuleSystem : public WrappableNativeModule<CommonModuleSystem>,
+                           public gin::ModuleRegistryObserver {
  public:
   class SourceMap {
    public:
@@ -67,17 +66,16 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   // Enables native bindings for the duration of its lifetime.
   class NativesEnabledScope {
    public:
-    explicit NativesEnabledScope(JavaScriptModuleSystem* module_system);
+    explicit NativesEnabledScope(CommonModuleSystem* module_system);
     ~NativesEnabledScope();
 
    private:
-    JavaScriptModuleSystem* module_system_;
+    CommonModuleSystem* module_system_;
     DISALLOW_COPY_AND_ASSIGN(NativesEnabledScope);
   };
 
-  // |source_map| is a weak pointer.
-  JavaScriptModuleSystem(ScriptContext* context, SourceMap* source_map);
-  ~JavaScriptModuleSystem() override;
+  static WrapperInfo kWrapperInfo;
+  using WrappableNativeModule<CommonModuleSystem>::Create;
 
   // Require the specified module. This is the equivalent of calling
   // require('module_name') from the loaded JS files.
@@ -106,7 +104,7 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   // calls to requireNative(|name|) from JS will return a new object created by
   // |native_handler|.
   void RegisterNativeModule(const std::string& name,
-                            scoped_ptr<NativeJavaScriptModule> native_handler);
+                            scoped_ptr<NativeModule> native_handler);
 
   // Causes requireNative(|name|) to look for its module in |source_map_|
   // instead of using a registered native handler. This can be used in unit
@@ -122,18 +120,25 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
     exception_handler_ = handler.Pass();
   }
 
+  ~CommonModuleSystem() override;
+
  protected:
   friend class ScriptContext;
-  void Invalidate() override;
+
+  // |source_map| is a weak pointer.
+  CommonModuleSystem(ScriptContext* context, SourceMap* source_map);
+  gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
+      v8::Isolate* isolate) override;
 
  private:
-  typedef std::map<std::string, linked_ptr<NativeJavaScriptModule> >
-      NativeModuleMap;
+  typedef std::map<std::string, linked_ptr<NativeModule> > NativeModuleMap;
+
+  void Invalidate() override;
 
   // Called when an exception is thrown but not caught.
   void HandleException(const v8::TryCatch& try_catch);
 
-  void RequireForJs(const v8::FunctionCallbackInfo<v8::Value>& args);
+  void RequireForJs(gin::Arguments* args);
   v8::Local<v8::Value> RequireForJsInner(v8::Handle<v8::String> module_name);
 
   // Return the named source file stored in the source map.
@@ -144,17 +149,17 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
   // NativeModule.
   // |args[0]| - the name of a native handler object.
   v8::Handle<v8::Value> RequireNativeFromString(const std::string& native_name);
-  void RequireNative(const v8::FunctionCallbackInfo<v8::Value>& args);
+  void RequireNative(gin::Arguments* args);
 
   // Return a promise for a requested module.
   // |args[0]| - the name of a module.
-  void RequireAsync(const v8::FunctionCallbackInfo<v8::Value>& args);
+  void RequireAsync(gin::Arguments* args);
 
   // Wraps |source| in a (function(define, require, requireNative, ...) {...}).
   v8::Handle<v8::String> WrapSource(v8::Handle<v8::String> source);
 
   // NativeModule implementation which returns the private area of an Object.
-  void Private(const v8::FunctionCallbackInfo<v8::Value>& args);
+  void Private(gin::Arguments* args);
 
   // Loads and runs a Javascript module.
   v8::Handle<v8::Value> LoadModule(const std::string& module_name);
@@ -189,11 +194,13 @@ class JavaScriptModuleSystem : public ObjectBackedNativeModule,
 
   std::set<std::string> overridden_native_handlers_;
 
-  base::WeakPtrFactory<JavaScriptModuleSystem> weak_factory_;
+  base::WeakPtrFactory<CommonModuleSystem> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(JavaScriptModuleSystem);
+  friend WrappableNativeModule<CommonModuleSystem>;
+
+  DISALLOW_COPY_AND_ASSIGN(CommonModuleSystem);
 };
 
 }  // namespace zarun
 
-#endif  // ZARUN_MODULES_JAVASCRIPT_MODULE_SYSTEM_H_
+#endif  // ZARUN_MODULES_COMMON_MODULE_SYSTEM_H_

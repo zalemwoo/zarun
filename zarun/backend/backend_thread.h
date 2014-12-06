@@ -13,8 +13,6 @@ class IsolateHolder;
 
 namespace zarun {
 
-class PerIsolateWrappableData;
-
 namespace backend {
 
 class BackendApplication;
@@ -42,7 +40,6 @@ class ZARUN_EXPORT BackendThread : public base::Thread {
   base::WeakPtr<BackendApplication> application_;
   ThreadTerminateCallback termination_callback_;
   scoped_ptr<gin::IsolateHolder> isolate_holder_;
-  scoped_ptr<PerIsolateWrappableData> wrappable_data_;  // for wrap object
   friend BackendApplication;
 
   DISALLOW_COPY_AND_ASSIGN(BackendThread);

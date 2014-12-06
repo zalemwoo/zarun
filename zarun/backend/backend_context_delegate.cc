@@ -59,6 +59,8 @@ void BackendScriptContextDelegate::DidRunScript(zarun::ScriptContext* context) {
     v8::String::Utf8Value utf8_value(result);
     std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
     runscript_callback_.Run(str);
+    context->global()->DeleteHiddenValue(
+        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName));
   }
 }
 

@@ -12,7 +12,8 @@
 
 #include "zarun/zarun_shell.h"  // for GetDefaultV8Options()
 #include "zarun/utils/file_util.h"
-#include "zarun/modules/javascript_module_system.h"
+#include "zarun/modules/common_module_system.h"
+
 #include "zarun/modules/cpp/os.h"
 #include "zarun/modules/cpp/subprocess.h"
 
@@ -42,15 +43,18 @@ void DisposeV8() {
 void DidCreateEnvironmentCallback(zarun::Environment* env) {
   v8::Isolate* isolate = env->isolate();
   v8::HandleScope scope(isolate);
-  JavaScriptModuleSystem* module_system = env->context()->module_system();
+  CommonModuleSystem* module_system = env->context()->module_system();
+  // register native modules.
+  // os
+  module_system->RegisterNativeModule(OSNative::kModuleName,
+                                      OSNative::GetModule(env->context()));
+  // subprocess
   module_system->RegisterNativeModule(
-      "os",
-      scoped_ptr<NativeJavaScriptModule>(new OSNative(env->context())).Pass());
-  module_system->RegisterNativeModule(
-      "subprocess", scoped_ptr<NativeJavaScriptModule>(
-                        new SubProcessNative(env->context())).Pass());
+      SubProcessNative::kModuleName,
+      SubProcessNative::GetModule(env->context()));
+
   // needed for enable requireNative() call from javascript.
-  JavaScriptModuleSystem::NativesEnabledScope natives_scope(module_system);
+  CommonModuleSystem::NativesEnabledScope natives_scope(module_system);
   module_system->Require("bootstrap");
 }
 

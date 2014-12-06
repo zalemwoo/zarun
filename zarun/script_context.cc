@@ -14,6 +14,7 @@
 
 #include "gin/per_context_data.h"
 #include "zarun/zarun_shell.h"
+#include "zarun/modules/common_module_system.h"
 
 using gin::TryCatch;
 using gin::ContextHolder;
@@ -84,8 +85,10 @@ v8::Local<v8::Value> ScriptContext::CallFunction(
 void ScriptContext::Invalidate() {
   if (!is_valid())
     return;
-  if (module_system_)
+  if (!module_system_.IsEmpty()) {
     module_system_->Invalidate();
+    module_system_.Clear();
+  }
   v8_context_.reset();
 }
 
@@ -95,6 +98,11 @@ bool ScriptContext::is_valid() const {
 
 v8::Handle<v8::Context> ScriptContext::v8_context() const {
   return v8_context_.NewHandle(isolate());
+}
+
+void ScriptContext::set_module_system(
+    gin::Handle<CommonModuleSystem> module_system) {
+  module_system_ = module_system;
 }
 
 void ScriptContext::Run(const std::string& source,

@@ -6,13 +6,13 @@
 #ifndef ZARUN_MODULES_NATIVE_SOURCE_MAP_H_
 #define ZARUN_MODULES_NATIVE_SOURCE_MAP_H_
 
-#include "zarun/modules/javascript_module_system.h"
+#include "zarun/modules/common_module_system.h"
 
 namespace zarun {
 
 class Environment;
 // TODO(zalemwoo) : make it inherit ModuleProvider
-class NativeSourceMap : public JavaScriptModuleSystem::SourceMap {
+class NativeSourceMap : public CommonModuleSystem::SourceMap {
  public:
   virtual ~NativeSourceMap() override;
   virtual v8::Handle<v8::Value> GetSource(v8::Isolate* isolate,
