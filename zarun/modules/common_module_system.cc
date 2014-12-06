@@ -140,6 +140,7 @@ gin::ObjectTemplateBuilder CommonModuleSystem::GetObjectTemplateBuilder(
                                         base::Unretained(this)));
   return builder;
 }
+
 void CommonModuleSystem::Invalidate() {
   if (!is_valid())
     return;

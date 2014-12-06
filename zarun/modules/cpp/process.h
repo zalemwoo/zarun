@@ -17,7 +17,6 @@ namespace zarun {
 class ProcessNative : public WrappableNativeObject<ProcessNative> {
  public:
   static WrapperInfo kWrapperInfo;
-  using WrappableNativeObject<ProcessNative>::Create;
 
   void CloseCallback();
   void IsValidCallback(gin::Arguments* args);

@@ -105,7 +105,7 @@ void ZarunShell::Repl() {
 }
 
 void ZarunShell::OnDidRunScript(std::string result) {
-  std::cerr << result << std::endl << std::flush;
+  std::cout << result << std::endl << std::flush;
   task_runner_->PostTask(FROM_HERE,
                          base::Bind(&ZarunShell::Repl, base::Unretained(this)));
 }

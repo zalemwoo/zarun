@@ -4,6 +4,18 @@
 
 #include "zarun/modules/native_object.h"
 
+#define DECLARE_THIN_MODULE(mod_name)                  \
+  class mod_name : public ThinNativeModule<mod_name> { \
+   public:                                             \
+    static const char kModuleName[];                   \
+    static WrapperInfo kWrapperInfo;
+
+#define DECLARE_THIN_MODULE_END(mod_name) \
+ private:                                 \
+  friend ThinNativeModule<mod_name>;      \
+  }                                       \
+  ;
+
 namespace zarun {
 
 // NativeModule are intended to be used with a ModuleSystem.

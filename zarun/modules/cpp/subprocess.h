@@ -12,14 +12,8 @@
 
 namespace zarun {
 
-class ScriptContext;
-
-class SubProcessNative : public ThinNativeModule<SubProcessNative> {
- public:
-  static const char kModuleName[];
-  static WrapperInfo kWrapperInfo;
-  using ThinNativeModule<SubProcessNative>::GetModule;
-
+DECLARE_THIN_MODULE(SubProcessNative)
+public:
   static void ProcessOpenCallback(gin::Arguments* args);
 
  protected:
@@ -30,9 +24,7 @@ class SubProcessNative : public ThinNativeModule<SubProcessNative> {
   gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
       v8::Isolate* isolate) override;
 
- private:
-  friend ThinNativeModule<SubProcessNative>;
-};
+  DECLARE_THIN_MODULE_END(SubProcessNative)
 
 }  // namespace zarun
 

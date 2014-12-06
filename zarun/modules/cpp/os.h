@@ -10,12 +10,7 @@
 
 namespace zarun {
 
-class OSNative : public ThinNativeModule<OSNative> {
- public:
-  static const char kModuleName[];
-  static WrapperInfo kWrapperInfo;
-  using ThinNativeModule<OSNative>::GetModule;
-
+DECLARE_THIN_MODULE(OSNative)
  protected:
   OSNative(ScriptContext* context);
   ~OSNative() override;
@@ -26,9 +21,7 @@ class OSNative : public ThinNativeModule<OSNative> {
       v8::Isolate* isolate) override;
   v8::Handle<v8::Object> NewInstance() override;
 
- private:
-  friend ThinNativeModule<OSNative>;
-};
+  DECLARE_THIN_MODULE_END(OSNative)
 
 }  // namespace zarun
 
