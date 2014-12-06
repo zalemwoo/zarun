@@ -1,6 +1,6 @@
 
-#ifndef ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
-#define ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
+#ifndef ZARUN_MODULES_NATIVE_MODULE_H_
+#define ZARUN_MODULES_NATIVE_MODULE_H_
 
 #include "zarun/modules/native_object.h"
 
@@ -91,4 +91,4 @@ class WrappableNativeModule : public WrappableNativeObject<T>,
 
 }  // namespace zarun
 
-#endif  // ZARUN_MODULES_NATIVE_JAVASCRIPT_MODULE_H_
+#endif  // ZARUN_MODULES_NATIVE_MODULE_H_
