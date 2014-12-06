@@ -17,13 +17,8 @@ namespace zarun {
 
 namespace {
 
-size_t Uptime() {
-  return static_cast<size_t>(base::SysInfo::Uptime());
-}
-
-long AmountOfFreeDiskSpace(std::string path) {
-  base::FilePath file_path(path);
-  return static_cast<long>(base::SysInfo::AmountOfFreeDiskSpace(file_path));
+int Uptime() {
+  return static_cast<int>(base::SysInfo::Uptime());
 }
 
 }  // namespace
@@ -43,7 +38,6 @@ gin::ObjectTemplateBuilder SysinfoNative::GetObjectTemplateBuilder(
       .SetValue("cpus", base::SysInfo::NumberOfProcessors())
       .SetValue("physMemMB", base::SysInfo::AmountOfPhysicalMemoryMB())
       .SetProperty("virtMemMB", base::SysInfo::AmountOfVirtualMemoryMB)
-      .SetMethod("diskFree", AmountOfFreeDiskSpace)
       .SetProperty("uptime", Uptime)
       .SetValue("hwModel", base::SysInfo::HardwareModelName())
       .SetValue("osName", base::SysInfo::OperatingSystemName())
