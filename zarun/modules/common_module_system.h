@@ -25,8 +25,6 @@
 
 namespace zarun {
 
-class ScriptContext;
-
 // A module system for JS similar to node.js' require() function.
 // Each module has three variables in the global scope:
 //   - exports, an object returned to dependencies who require() this
@@ -42,7 +40,7 @@ class ScriptContext;
 //
 // Note that a ModuleSystem must be used only in conjunction with a single
 // v8::Context.
-class CommonModuleSystem : public WrappableNativeModule<CommonModuleSystem>,
+class CommonModuleSystem : public ThinNativeModule<CommonModuleSystem>,
                            public gin::ModuleRegistryObserver {
  public:
   class SourceMap {
@@ -75,7 +73,14 @@ class CommonModuleSystem : public WrappableNativeModule<CommonModuleSystem>,
   };
 
   static WrapperInfo kWrapperInfo;
-  using WrappableNativeModule<CommonModuleSystem>::Create;
+  static scoped_ptr<CommonModuleSystem> Create(ScriptContext* context,
+                                               SourceMap* source_map) {
+    scoped_ptr<ThinNativeModule<CommonModuleSystem>> module_system =
+        ThinNativeModule<CommonModuleSystem>::GetModule(context, source_map);
+    scoped_ptr<CommonModuleSystem> ms(
+        static_cast<CommonModuleSystem*>(module_system.release()));
+    return ms.Pass();
+  }
 
   // Require the specified module. This is the equivalent of calling
   // require('module_name') from the loaded JS files.
@@ -123,8 +128,6 @@ class CommonModuleSystem : public WrappableNativeModule<CommonModuleSystem>,
   ~CommonModuleSystem() override;
 
  protected:
-  friend class ScriptContext;
-
   // |source_map| is a weak pointer.
   CommonModuleSystem(ScriptContext* context, SourceMap* source_map);
   gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
@@ -196,7 +199,8 @@ class CommonModuleSystem : public WrappableNativeModule<CommonModuleSystem>,
 
   base::WeakPtrFactory<CommonModuleSystem> weak_factory_;
 
-  friend WrappableNativeModule<CommonModuleSystem>;
+  friend class ScriptContext;
+  friend ThinNativeModule<CommonModuleSystem>;
 
   DISALLOW_COPY_AND_ASSIGN(CommonModuleSystem);
 };

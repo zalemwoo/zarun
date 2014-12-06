@@ -85,10 +85,7 @@ v8::Local<v8::Value> ScriptContext::CallFunction(
 void ScriptContext::Invalidate() {
   if (!is_valid())
     return;
-  if (!module_system_.IsEmpty()) {
-    module_system_->Invalidate();
-    module_system_.Clear();
-  }
+  module_system_.reset();
   v8_context_.reset();
 }
 
@@ -101,8 +98,8 @@ v8::Handle<v8::Context> ScriptContext::v8_context() const {
 }
 
 void ScriptContext::set_module_system(
-    gin::Handle<CommonModuleSystem> module_system) {
-  module_system_ = module_system;
+    scoped_ptr<CommonModuleSystem> module_system) {
+  module_system_ = module_system.Pass();
 }
 
 void ScriptContext::Run(const std::string& source,

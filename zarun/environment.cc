@@ -80,7 +80,8 @@ Environment::Environment(v8::Isolate* isolate,
   script_context_->v8_context()->Enter();
 
   script_context_->set_module_system(
-      CommonModuleSystem::Create(script_context_.get(), source_map_.get()));
+      CommonModuleSystem::Create(script_context_.get(), source_map_.get())
+          .Pass());
 
   created_callback.Run(this);
 }

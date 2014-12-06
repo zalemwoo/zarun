@@ -9,8 +9,12 @@ namespace zarun {
 
 gin::WrapperInfo ProcessNative::kWrapperInfo = {gin::kEmbedderNativeGin};
 
-void ProcessNative::Close() {
+void ProcessNative::CloseCallback() {
   process_->Close();
+}
+
+void ProcessNative::IsValidCallback(gin::Arguments* args) {
+  args->Return(process_->IsValid());
 }
 
 ProcessNative::ProcessNative(ScriptContext* context,
@@ -30,8 +34,8 @@ gin::ObjectTemplateBuilder ProcessNative::GetObjectTemplateBuilder(
   gin::ObjectTemplateBuilder builder =
       WrappableNativeObject<ProcessNative>::GetObjectTemplateBuilder(isolate);
 
-  builder.SetMethod("close",
-                    base::Bind(&ProcessNative::Close, base::Unretained(this)));
+  builder.SetMethod("close", &ProcessNative::CloseCallback)
+      .SetProperty("is_valid", &ProcessNative::IsValidCallback);
 
   return builder;
 }

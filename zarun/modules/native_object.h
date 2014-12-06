@@ -27,8 +27,7 @@ class NativeObject {
   v8::Handle<v8::Context> v8_context() const;
   ScriptContext* context() const { return context_; }
 
-  virtual v8::Handle<v8::Object> NewInstance();
-  virtual v8::Handle<v8::ObjectTemplate> GetObjectTemplate() = 0;
+  virtual v8::Handle<v8::Object> NewInstance() = 0;
 
  protected:
   NativeObject(ScriptContext* context);
@@ -55,14 +54,9 @@ class WrappableNativeObject : public NativeObject, public gin::Wrappable<T> {
     return this->GetWrapper(this->isolate());
   }
 
-  v8::Handle<v8::ObjectTemplate> GetObjectTemplate() override {
-    gin::PerIsolateData* data = gin::PerIsolateData::From(isolate());
-    return data->GetObjectTemplate(&T::kWrapperInfo);
-  }
-
   WrappableNativeObject(ScriptContext* context)
       : NativeObject(context), gin::Wrappable<T>() {}
-  virtual ~WrappableNativeObject() {}
+  virtual ~WrappableNativeObject() override {}
 };
 
 }  // namespace zarun

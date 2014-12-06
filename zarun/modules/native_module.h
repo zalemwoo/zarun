@@ -34,35 +34,35 @@ class NativeModule {
 template <typename T>
 class ThinNativeModule : public NativeObject, public NativeModule {
  public:
-  static scoped_ptr<ThinNativeModule> GetModule(ScriptContext* context) {
+  template <typename... Args>
+  static scoped_ptr<ThinNativeModule<T>> GetModule(ScriptContext* context,
+                                                   Args... args) {
     v8::HandleScope scope(context->isolate());
     gin::PerIsolateData* data = gin::PerIsolateData::From(context->isolate());
     v8::Handle<v8::ObjectTemplate> templ =
         data->GetObjectTemplate(&T::kWrapperInfo);
     DCHECK(templ.IsEmpty());
-    scoped_ptr<ThinNativeModule> module(new T(context));
+    scoped_ptr<ThinNativeModule<T>> module(new T(context, args...));
     templ = module->GetObjectTemplateBuilder(context->isolate())
                 .Build();  // Customize point.
-
     data->SetObjectTemplate(&T::kWrapperInfo, templ);
     return module.Pass();
   }
 
-  virtual ~ThinNativeModule() {}
-
-  v8::Handle<v8::Object> NewInstance() override {
-    return NativeObject::NewInstance();
+  virtual v8::Handle<v8::Object> NewInstance() override {
+    gin::PerIsolateData* data =
+        gin::PerIsolateData::From(NativeObject::isolate());
+    v8::Handle<v8::ObjectTemplate> templ =
+        data->GetObjectTemplate(&T::kWrapperInfo);
+    DCHECK(!templ.IsEmpty());
+    return templ->NewInstance();
   }
+
+  virtual ~ThinNativeModule() {}
 
  protected:
   ThinNativeModule(ScriptContext* context)
       : NativeObject(context), NativeModule(true) {}
-
-  virtual v8::Handle<v8::ObjectTemplate> GetObjectTemplate() override {
-    gin::PerIsolateData* data =
-        gin::PerIsolateData::From(NativeObject::isolate());
-    return data->GetObjectTemplate(&T::kWrapperInfo);
-  }
 
   virtual void Invalidate() override { NativeModule::Invalidate(); }
 
@@ -72,16 +72,12 @@ class ThinNativeModule : public NativeObject, public NativeModule {
   }
 };
 
+#if ENABLE_WRAPPABLE_MODULE  // seems useless
 template <typename T>
 class WrappableNativeModule : public WrappableNativeObject<T>,
                               public NativeModule {
  public:
-  template <typename... Args>
-  static gin::Handle<T> Create(ScriptContext* context, Args... args) {
-    return gin::CreateHandle(context->isolate(), new T(context, args...));
-  }
-
-  v8::Handle<v8::Object> NewInstance() override {
+  v8::Handle<v8::Object> NewInstance() override final {
     return WrappableNativeObject<T>::NewInstance();
   }
 
@@ -91,6 +87,7 @@ class WrappableNativeModule : public WrappableNativeObject<T>,
   virtual ~WrappableNativeModule() {}
   virtual void Invalidate() override { NativeModule::Invalidate(); }
 };
+#endif
 
 }  // namespace zarun
 

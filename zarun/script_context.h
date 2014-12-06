@@ -67,7 +67,7 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
                                     int argc,
                                     v8::Handle<v8::Value> argv[]) const;
 
-  void set_module_system(gin::Handle<CommonModuleSystem> module_system);
+  void set_module_system(scoped_ptr<CommonModuleSystem> module_system);
 
   CommonModuleSystem* module_system() { return module_system_.get(); }
 
@@ -99,7 +99,7 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   // The v8 context the bindings are accessible to.
   ScopedPersistent<v8::Context> v8_context_;
   // Owns and structures the JS that is injected to set up extension bindings.
-  gin::Handle<CommonModuleSystem> module_system_;
+  scoped_ptr<CommonModuleSystem> module_system_;
   // Contains safe copies of builtin objects like Function.prototype.
   SafeBuiltins safe_builtins_;
 

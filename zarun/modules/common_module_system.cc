@@ -26,7 +26,6 @@ namespace zarun {
 
 namespace {
 
-const char* kModuleSystemInstance = "module_system_instance";
 const char* kModuleSystem = "module_system";
 const char* kModulesField = "modules";
 
@@ -105,7 +104,7 @@ gin::WrapperInfo CommonModuleSystem::kWrapperInfo = {gin::kEmbedderNativeGin};
 
 CommonModuleSystem::CommonModuleSystem(ScriptContext* context,
                                        SourceMap* source_map)
-    : WrappableNativeModule<CommonModuleSystem>(context),
+    : ThinNativeModule<CommonModuleSystem>(context),
       context_(context),
       source_map_(source_map),
       natives_enabled_(0),
@@ -118,10 +117,6 @@ CommonModuleSystem::CommonModuleSystem(ScriptContext* context,
                          v8::Object::New(isolate));
   global->SetHiddenValue(v8::String::NewFromUtf8(isolate, kModuleSystem),
                          v8::External::New(isolate, this));
-  global->SetHiddenValue(
-      v8::String::NewFromUtf8(isolate, kModuleSystemInstance),
-      this->NewInstance());
-
   gin::ModuleRegistry::From(context->v8_context())->AddObserver(this);
 }
 
@@ -132,19 +127,17 @@ CommonModuleSystem::~CommonModuleSystem() {
 gin::ObjectTemplateBuilder CommonModuleSystem::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   gin::ObjectTemplateBuilder builder =
-      WrappableNativeModule<CommonModuleSystem>::GetObjectTemplateBuilder(
+      ThinNativeModule<CommonModuleSystem>::GetObjectTemplateBuilder(
           this->isolate());
 
   builder.SetMethod("require", base::Bind(&CommonModuleSystem::RequireForJs,
-                                          base::Unretained(this)));
-  builder.SetMethod(
-      "requireNative",
-      base::Bind(&CommonModuleSystem::RequireNative, base::Unretained(this)));
-  builder.SetMethod(
-      "requireAsync",
-      base::Bind(&CommonModuleSystem::RequireAsync, base::Unretained(this)));
-  builder.SetMethod("privates", base::Bind(&CommonModuleSystem::Private,
-                                           base::Unretained(this)));
+                                          base::Unretained(this)))
+      .SetMethod("requireNative", base::Bind(&CommonModuleSystem::RequireNative,
+                                             base::Unretained(this)))
+      .SetMethod("requireAsync", base::Bind(&CommonModuleSystem::RequireAsync,
+                                            base::Unretained(this)))
+      .SetMethod("privates", base::Bind(&CommonModuleSystem::Private,
+                                        base::Unretained(this)));
   return builder;
 }
 void CommonModuleSystem::Invalidate() {
@@ -158,8 +151,6 @@ void CommonModuleSystem::Invalidate() {
     v8::Handle<v8::Object> global = context()->v8_context()->Global();
     global->DeleteHiddenValue(v8::String::NewFromUtf8(isolate, kModulesField));
     global->DeleteHiddenValue(v8::String::NewFromUtf8(isolate, kModuleSystem));
-    global->DeleteHiddenValue(
-        v8::String::NewFromUtf8(isolate, kModuleSystemInstance));
   }
 
   // Invalidate all of the successfully required handlers we own.

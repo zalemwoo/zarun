@@ -37,12 +37,10 @@ void SubProcessNative::ProcessOpenCallback(gin::Arguments* args) {
     return;
   }
 
-  ScriptContext* context =
-      ScriptContext::FromV8Context(args->isolate()->GetCurrentContext());
-
-  gin::Handle<zarun::ProcessNative> process =
-      zarun::ProcessNative::Create(context, process_handle);
-  args->Return(process.ToV8());
+  gin::Handle<zarun::ProcessNative> process = zarun::ProcessNative::Create(
+      ScriptContext::FromV8Context(args->isolate()->GetCurrentContext()),
+      process_handle);
+  args->Return(process);
 }
 
 gin::WrapperInfo SubProcessNative::kWrapperInfo = {gin::kEmbedderNativeGin};

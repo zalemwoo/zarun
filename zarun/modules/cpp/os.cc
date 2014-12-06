@@ -130,10 +130,10 @@ OSNative::~OSNative() {
 gin::ObjectTemplateBuilder OSNative::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return ThinNativeModule<OSNative>::GetObjectTemplateBuilder(isolate)
-      .SetMethod("abort", base::Bind(&AbortCallback))
-      .SetMethod("chdir", base::Bind(&ChdirCallback))
-      .SetMethod("cwd", base::Bind(&CwdCallback))
-      .SetMethod("modules", base::Bind(&ModulesCallback));
+      .SetMethod("abort", AbortCallback)
+      .SetMethod("chdir", ChdirCallback)
+      .SetMethod("cwd", CwdCallback)
+      .SetMethod("modules", ModulesCallback);
 }
 
 v8::Handle<v8::Object> OSNative::NewInstance() {

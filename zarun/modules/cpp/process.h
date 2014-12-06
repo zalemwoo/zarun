@@ -19,7 +19,8 @@ class ProcessNative : public WrappableNativeObject<ProcessNative> {
   static WrapperInfo kWrapperInfo;
   using WrappableNativeObject<ProcessNative>::Create;
 
-  void Close();
+  void CloseCallback();
+  void IsValidCallback(gin::Arguments* args);
 
  protected:
   ProcessNative(ScriptContext* context, base::ProcessHandle process_handle);
