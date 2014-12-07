@@ -28,7 +28,8 @@ static const struct CoreException {
 static const CoreException* getErrorEntry(ExceptionCode ec) {
   size_t tableSize = arraysize(coreExceptions);
   size_t tableIndex = ec - IndexSizeError;
-  return tableIndex < tableSize ? &coreExceptions[tableIndex] : 0;
+  return tableIndex < tableSize ? &coreExceptions[tableIndex]
+                                : &coreExceptions[0];
 }
 
 }  // namespace
@@ -50,8 +51,7 @@ ZarunExceptionWrapper::ZarunExceptionWrapper(ScriptContext* context,
                                              unsigned short code,
                                              const char* name,
                                              const char* message)
-    : WrappableNativeObject<ZarunExceptionWrapper>(context),
-      gin::NamedPropertyInterceptor(context->isolate(), this) {
+    : WrappableNativeObject<ZarunExceptionWrapper>(context) {
   CHECK(name);
   code_ = code;
   name_ = name;
@@ -64,22 +64,7 @@ ZarunExceptionWrapper::~ZarunExceptionWrapper() {
 gin::ObjectTemplateBuilder ZarunExceptionWrapper::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return WrappableNativeObject<ZarunExceptionWrapper>::GetObjectTemplateBuilder(
-             isolate).AddNamedPropertyInterceptor();
-}
-
-v8::Local<v8::Value> ZarunExceptionWrapper::GetNamedProperty(
-    v8::Isolate* isolate,
-    const std::string& property) {
-  v8::Local<v8::Object> wrapper = this->GetWrapper(isolate);
-  return wrapper->Get(gin::StringToV8(isolate, "stack"));
-}
-
-bool ZarunExceptionWrapper::SetNamedProperty(v8::Isolate* isolate,
-                                             const std::string& property,
-                                             v8::Local<v8::Value> value) {
-  v8::Local<v8::Object> wrapper = this->GetWrapper(isolate);
-  return wrapper->Set(gin::StringToV8(isolate, "stack"), value);
-  return true;
+      isolate);
 }
 
 // static

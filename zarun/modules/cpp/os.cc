@@ -30,6 +30,8 @@
 
 #include "zarun/modules/cpp/internal/system_env.h"
 
+#include "zarun/exception/exception_code.h"
+
 namespace zarun {
 
 namespace {
@@ -113,6 +115,61 @@ void ModulesCallback(gin::Arguments* args) {
   args->Return(modules);
 }
 
+// os.throw
+void ThrowCallback(gin::Arguments* args) {
+  int code = V8GeneralError;
+  std::string message;
+  int errorno;
+  std::string api;
+  std::string path;
+
+  int length = args->Length();
+
+  if (length > 5) {
+    return args->ThrowTypeError("Arguments length error.");
+  }
+
+  if (length >= 1 && !args->GetNext(&code)) {
+    return args->ThrowError();
+  }
+  if (length >= 2 && !args->GetNext(&message)) {
+    return args->ThrowError();
+  }
+  if (length >= 3 && !args->GetNext(&errorno)) {
+    return args->ThrowError();
+  }
+  if (length >= 4 && !args->GetNext(&api)) {
+    return args->ThrowError();
+  }
+  if (length == 5 && !args->GetNext(&path)) {
+    return args->ThrowError();
+  }
+
+  switch (length) {
+    case 0:
+    case 1:
+      ScriptContext::GetCurrent()->ThrowException(code, NULL);
+      return;
+    case 2:
+      ScriptContext::GetCurrent()->ThrowException(code, message.c_str());
+      return;
+    case 3:
+      ScriptContext::GetCurrent()->ThrowException(code, message.c_str(),
+                                                  errorno);
+      return;
+    case 4:
+      ScriptContext::GetCurrent()->ThrowException(code, message.c_str(),
+                                                  errorno, api.c_str());
+      return;
+    case 5:
+      ScriptContext::GetCurrent()->ThrowException(
+          code, message.c_str(), errorno, api.c_str(), path.c_str());
+      return;
+    default:
+      return;
+  }
+}
+
 }  // namespace
 
 DEFINE_WRAPPER_INFO(OSNative);
@@ -141,7 +198,8 @@ gin::ObjectTemplateBuilder OSNative::GetObjectTemplateBuilder(
       .SetValue("arch", platform::SystemInfo::PlatformArchitecture())
       .SetValue("is_posix", platform::SystemInfo::IsPosix())
       .SetValue("pid", base::GetCurrentProcId())
-      .SetValue("environ", internal::CreateSystemEnv(isolate));
+      .SetValue("environ", internal::CreateSystemEnv(isolate))
+      .SetMethod("throw", ThrowCallback);
 }
 
 void OSNative::Invalidate() {

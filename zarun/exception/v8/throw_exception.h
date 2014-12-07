@@ -1,5 +1,5 @@
 /*
- * throw_exception.h
+ * Throw_exception.h
  *
  */
 
@@ -16,41 +16,41 @@ namespace zarun {
 
 class ScriptContext;
 
-class ThrowException {
+class V8ThrowException {
  public:
-  static v8::Handle<v8::Value> createException(ScriptContext* context,
+  static v8::Handle<v8::Value> CreateException(ScriptContext* context,
                                                int errorcode,
                                                const char* message,
                                                int errorno = 0,
-                                               const char* syscall = nullptr,
+                                               const char* api = nullptr,
                                                const char* path = nullptr);
-  static v8::Handle<v8::Value> throwException(ScriptContext* context,
+  static v8::Handle<v8::Value> ThrowException(ScriptContext* context,
                                               int errorcode,
                                               const char* message,
                                               int errorno = 0,
-                                              const char* syscall = nullptr,
+                                              const char* api = nullptr,
                                               const char* path = nullptr);
-  static v8::Handle<v8::Value> throwException(v8::Isolate*,
+  static v8::Handle<v8::Value> ThrowException(v8::Isolate*,
                                               v8::Handle<v8::Value>);
-  static v8::Handle<v8::Value> createGeneralError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> CreateGeneralError(v8::Isolate* isolate,
                                                   const std::string& message);
-  static v8::Handle<v8::Value> throwGeneralError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> ThrowGeneralError(v8::Isolate* isolate,
                                                  const std::string& message);
-  static v8::Handle<v8::Value> createTypeError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> CreateTypeError(v8::Isolate* isolate,
                                                const std::string& message);
-  static v8::Handle<v8::Value> throwTypeError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> ThrowTypeError(v8::Isolate* isolate,
                                               const std::string& message);
-  static v8::Handle<v8::Value> createRangeError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> CreateRangeError(v8::Isolate* isolate,
                                                 const std::string& message);
-  static v8::Handle<v8::Value> throwRangeError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> ThrowRangeError(v8::Isolate* isolate,
                                                const std::string& message);
-  static v8::Handle<v8::Value> createSyntaxError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> CreateSyntaxError(v8::Isolate* isolate,
                                                  const std::string& message);
-  static v8::Handle<v8::Value> throwSyntaxError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> ThrowSyntaxError(v8::Isolate* isolate,
                                                 const std::string& message);
-  static v8::Handle<v8::Value> createReferenceError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> CreateReferenceError(v8::Isolate* isolate,
                                                     const std::string& message);
-  static v8::Handle<v8::Value> throwReferenceError(v8::Isolate* isolate,
+  static v8::Handle<v8::Value> ThrowReferenceError(v8::Isolate* isolate,
                                                    const std::string& message);
 };
 

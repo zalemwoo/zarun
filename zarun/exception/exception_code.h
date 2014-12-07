@@ -73,13 +73,12 @@ enum {
 
 enum ZarunErrorType {
   V8GeneralError = 1000,
-  V8TypeError,
-  V8RangeError,
-  V8SyntaxError,
-  V8ReferenceError,
-  ZarunErrnoError,
-  ZarunError,
-  ExceptionTypeMax,
+  V8TypeError = 1001,
+  V8RangeError = 1002,
+  V8SyntaxError = 1003,
+  V8ReferenceError = 1004,
+  ZarunErrnoError = 1005,
+  ZarunError = 1006
 };
 
 }  // namespace zarun

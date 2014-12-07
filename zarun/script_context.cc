@@ -15,6 +15,7 @@
 #include "gin/per_context_data.h"
 #include "zarun/zarun_shell.h"
 #include "zarun/modules/common_module_system.h"
+#include "zarun/exception/v8/throw_exception.h"
 
 using gin::TryCatch;
 using gin::ContextHolder;
@@ -87,6 +88,15 @@ void ScriptContext::Invalidate() {
     return;
   module_system_.reset();
   v8_context_.reset();
+}
+
+void ScriptContext::ThrowException(int errorcode,
+                                   const char* message,
+                                   int errorno,
+                                   const char* api,
+                                   const char* path) {
+  zarun::V8ThrowException::ThrowException(this, errorcode, message, errorno,
+                                          api, path);
 }
 
 bool ScriptContext::is_valid() const {

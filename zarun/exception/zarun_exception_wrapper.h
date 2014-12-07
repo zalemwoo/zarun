@@ -9,7 +9,6 @@
 #include <string>
 
 #include "zarun/modules/native_object.h"
-#include "gin/interceptor.h"
 
 namespace zarun {
 
@@ -17,15 +16,13 @@ class ScriptContext;
 
 typedef int ExceptionCode;
 
-DECLARE_NATIVE_OBJECT(ZarunExceptionWrapper),
-    public gin::NamedPropertyInterceptor
-    DECLARE_NATIVE_OBJECT_START(ZarunExceptionWrapper)
+DECLARE_NATIVE_OBJECT(ZarunExceptionWrapper)
+DECLARE_NATIVE_OBJECT_START(ZarunExceptionWrapper)
 
-        public :
-
-    static gin::Handle<ZarunExceptionWrapper> Create(ScriptContext* context,
-                                                     int code,
-                                                     const char* message);
+public:
+static gin::Handle<ZarunExceptionWrapper> Create(ScriptContext* context,
+                                                 int code,
+                                                 const char* message);
 
 private:
 ZarunExceptionWrapper(ScriptContext* context,
@@ -34,11 +31,6 @@ ZarunExceptionWrapper(ScriptContext* context,
                       const char* message);
 
 public:
-v8::Local<v8::Value> GetNamedProperty(v8::Isolate* isolate,
-                                      const std::string& property) override;
-bool SetNamedProperty(v8::Isolate* isolate,
-                      const std::string& property,
-                      v8::Local<v8::Value> value) override;
 
 unsigned short code() const {
   return code_;
@@ -49,11 +41,11 @@ std::string name() const {
 std::string message() const {
   return message_;
 }
-std::string syscall() const {
-  return syscall_;
+std::string api() const {
+  return api_;
 }
-void set_syscall(const char* syscall) {
-  syscall_ = syscall;
+void set_api(const char* api) {
+  api_ = api;
 }
 std::string path() const {
   return path_;
@@ -69,7 +61,7 @@ private:
 unsigned short code_;
 std::string name_;
 std::string message_;
-std::string syscall_;
+std::string api_;
 std::string path_;
 
 DECLARE_NATIVE_OBJECT_END

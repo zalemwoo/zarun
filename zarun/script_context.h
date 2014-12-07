@@ -52,6 +52,10 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
         gin::PerContextData::From(context)->runner());
   }
 
+  static ScriptContext* GetCurrent() {
+    return FromV8Context(v8::Isolate::GetCurrent()->GetCurrentContext());
+  }
+
   ScriptContext(ScriptContextDelegate* delegate,
                 const v8::Handle<v8::Context>& v8_context);
   ~ScriptContext() override;
@@ -79,6 +83,12 @@ class ZARUN_EXPORT ScriptContext : public gin::Runner {
   // Returns true if this context is still valid, false if it isn't.
   // A context becomes invalid via Invalidate().
   bool is_valid() const;
+
+  void ThrowException(int errorcode,
+                      const char* message,
+                      int errorno = 0,
+                      const char* api = nullptr,
+                      const char* path = nullptr);
 
   // Before running script in this context, you'll need to enter the runner's
   // context by creating an instance of Runner::Scope on the stack.
