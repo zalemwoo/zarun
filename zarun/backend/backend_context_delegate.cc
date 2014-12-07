@@ -6,11 +6,8 @@
 #include "zarun/backend/backend_context_delegate.h"
 
 #include "base/logging.h"
-#include "base/command_line.h"
 #include "base/bind.h"
-#include "base/files/file_util.h"
 #include "gin/object_template_builder.h"
-#include "gin/converter.h"
 #include "v8/include/v8.h"
 
 #include "zarun/zarun_shell.h"
@@ -51,16 +48,13 @@ void BackendScriptContextDelegate::UnhandledException(
 void BackendScriptContextDelegate::DidRunScript(zarun::ScriptContext* context) {
   if ((ZarunShell::Mode() == ShellMode::Repl) &&
       (!runscript_callback_.is_null())) {
-    v8::Isolate* isolate = context->isolate();
-    v8::Local<v8::Value> result = context->global()->GetHiddenValue(
-        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName));
+    v8::Local<v8::Value> result =
+        context->global()->GetHiddenValue(gin::StringToV8(
+            context->isolate(), ScriptContext::kReplResultVariableName));
     if (result.IsEmpty())
       return;
-    v8::String::Utf8Value utf8_value(result);
-    std::string str(*utf8_value ? *utf8_value : "<string conversion failed>");
+    std::string str(*v8::String::Utf8Value(result));
     runscript_callback_.Run(str);
-    context->global()->DeleteHiddenValue(
-        gin::StringToV8(isolate, ScriptContext::kReplResultVariableName));
   }
 }
 
