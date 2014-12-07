@@ -25,6 +25,8 @@ namespace zarun {
 class NativeSourceMap;
 class CommonModuleSystem;
 
+// Environment owns a ContextHolder and v8::Context, both of which are
+// destroyed when the Environment is deleted.
 class ZARUN_EXPORT Environment {
  public:
   typedef base::Callback<void(Environment*)> EnvironmentCreatedCallback;

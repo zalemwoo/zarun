@@ -1,5 +1,5 @@
 /*
- * scrpt_CONTEXT.h
+ * script_context.h
  *
  */
 
@@ -43,8 +43,6 @@ class ZARUN_EXPORT ScriptContextDelegate {
 };
 
 // ScriptContext executes the script/functions directly in a v8::Context.
-// ScriptContext owns a ContextHolder and v8::Context, both of which are
-// destroyed when the ScriptContext is deleted.
 class ZARUN_EXPORT ScriptContext : public gin::Runner {
  public:
   static ScriptContext* FromV8Context(v8::Handle<v8::Context> context) {

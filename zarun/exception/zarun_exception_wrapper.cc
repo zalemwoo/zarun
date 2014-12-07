@@ -81,20 +81,16 @@ gin::ObjectTemplateBuilder ZarunExceptionWrapper::GetObjectTemplateBuilder(
 // static
 const char* ZarunExceptionWrapper::getErrorName(ExceptionCode ec) {
   const CoreException* entry = getErrorEntry(ec);
-  CHECK(entry);
   if (!entry)
     return "UnknownError";
-
   return entry->name;
 }
 
 // static
 const char* ZarunExceptionWrapper::getErrorMessage(ExceptionCode ec) {
   const CoreException* entry = getErrorEntry(ec);
-  CHECK(entry);
   if (!entry)
     return "Unknown error.";
-
   return entry->message;
 }
 
