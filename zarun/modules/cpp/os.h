@@ -10,7 +10,8 @@
 
 namespace zarun {
 
-DECLARE_THIN_MODULE(OSNative, "os")
+DECLARE_THIN_MODULE(OSNative)
+DECLARE_THIN_MODULE_START(OSNative, "os")
 DECLARE_THIN_MODULE_END
 
 }  // namespace zarun

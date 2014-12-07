@@ -287,10 +287,6 @@ void CommonModuleSystem::RegisterNativeModule(
   native_module_map_[name].reset(native_module.release());
 }
 
-void CommonModuleSystem::OverrideNativeModuleForTest(const std::string& name) {
-  overridden_native_handlers_.insert(name);
-}
-
 v8::Handle<v8::Value> CommonModuleSystem::RunString(const std::string& code,
                                                     const std::string& name) {
   v8::EscapableHandleScope handle_scope(isolate());
@@ -351,11 +347,6 @@ v8::Handle<v8::Value> CommonModuleSystem::RequireNativeFromString(
     }
     Fatal(context_, "Natives disabled for requireNative(" + native_name + ")");
     return v8::Undefined(isolate());
-  }
-
-  if (overridden_native_handlers_.count(native_name) > 0u) {
-    return RequireForJsInner(
-        v8::String::NewFromUtf8(isolate(), native_name.c_str()));
   }
 
   NativeModuleMap::iterator i = native_module_map_.find(native_name);

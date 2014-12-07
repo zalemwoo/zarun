@@ -14,7 +14,7 @@
 
 #include "zarun/script_context.h"
 
-#include "zarun/modules/cpp/process.h"
+#include "zarun/modules/cpp/process_wrapper.h"
 
 namespace zarun {
 
@@ -39,7 +39,7 @@ void ProcessOpenCallback(gin::Arguments* args) {
     return;
   }
 
-  gin::Handle<zarun::ProcessNative> process = zarun::ProcessNative::Create(
+  gin::Handle<zarun::ProcessWrapper> process = zarun::ProcessWrapper::Create(
       ScriptContext::FromV8Context(args->isolate()->GetCurrentContext()),
       process_handle);
   args->Return(process);

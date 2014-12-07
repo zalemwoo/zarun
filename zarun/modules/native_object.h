@@ -18,9 +18,7 @@
 
 namespace zarun {
 
-typedef gin::WrapperInfo WrapperInfo;
-
-class ScriptContext;
+typedef ::gin::WrapperInfo WrapperInfo;
 
 class NativeObject {
  public:

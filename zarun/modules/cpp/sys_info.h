@@ -11,7 +11,8 @@
 
 namespace zarun {
 
-DECLARE_THIN_MODULE(SysinfoNative, "sys_info")
+DECLARE_THIN_MODULE(SysinfoNative)
+DECLARE_THIN_MODULE_START(SysinfoNative, "sys_info")
 DECLARE_THIN_MODULE_END
 
 }  // namespace zarun

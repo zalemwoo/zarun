@@ -107,11 +107,6 @@ class CommonModuleSystem : public ThinNativeModule<CommonModuleSystem>,
   void RegisterNativeModule(const std::string& name,
                             scoped_ptr<NativeModule> native_handler);
 
-  // Causes requireNative(|name|) to look for its module in |source_map_|
-  // instead of using a registered native handler. This can be used in unit
-  // tests to mock out native modules.
-  void OverrideNativeModuleForTest(const std::string& name);
-
   // Executes |code| in the current context with |name| as the filename.
   v8::Handle<v8::Value> RunString(const std::string& code,
                                   const std::string& name);
@@ -190,8 +185,6 @@ class CommonModuleSystem : public ThinNativeModule<CommonModuleSystem>,
   // Called when an exception is thrown but not caught in JS. Overridable by
   // tests.
   scoped_ptr<ExceptionHandler> exception_handler_;
-
-  std::set<std::string> overridden_native_handlers_;
 
   base::WeakPtrFactory<CommonModuleSystem> weak_factory_;
 

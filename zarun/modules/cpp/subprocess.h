@@ -12,7 +12,8 @@
 
 namespace zarun {
 
-DECLARE_THIN_MODULE(SubProcessNative, "subprocess")
+DECLARE_THIN_MODULE(SubProcessNative)
+DECLARE_THIN_MODULE_START(SubProcessNative, "subprocess")
 DECLARE_THIN_MODULE_END
 
 }  // namespace zarun
