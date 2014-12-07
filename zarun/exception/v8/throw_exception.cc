@@ -80,18 +80,17 @@ v8::Handle<v8::Value> V8ThrowException::CreateException(ScriptContext* context,
     return v8::Handle<v8::Value>();
   }
 
-  ZarunExceptionWrapper* ze = exception_handle.get();
   if (api) {
-    ze->set_api(api);
+    exception_handle->set_api(api);
   }
   if (path) {
-    ze->set_path(path);
+    exception_handle->set_path(path);
   }
 
-  // Attach an Error object to the DOMException. This is then lazily used to get
+  // Attach an Error object to the Exception. This is then lazily used to get
   // the stack value.
-  v8::Handle<v8::Value> error =
-      v8::Exception::Error(gin::StringToV8(isolate, ze->message()));
+  v8::Handle<v8::Value> error = v8::Exception::Error(
+      gin::StringToV8(isolate, exception_handle->message()));
 
   CHECK(!error.IsEmpty());
   CHECK(exception->IsObject());
