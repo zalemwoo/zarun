@@ -48,19 +48,7 @@ v8::Handle<v8::Value> V8ThrowException::CreateException(ScriptContext* context,
 
   v8::Isolate* isolate = context->isolate();
 
-  std::string error_message;
-
-  if (errorcode == ZarunErrnoError) {
-    std::stringstream ss;
-    if (message != NULL && message[0] != '\0') {
-      ss << message << ": ";
-    }
-    ss << strerror(errorno) << ": " << errno_string(errorno) << "(" << errorno
-       << ")";
-    error_message = ss.str();
-  } else {
-    error_message = std::string(message ? message : "");
-  }
+  std::string error_message(message ? message : "");
 
   if (errorcode == V8GeneralError)
     return V8ThrowException::CreateGeneralError(isolate, error_message);
@@ -72,6 +60,21 @@ v8::Handle<v8::Value> V8ThrowException::CreateException(ScriptContext* context,
     return V8ThrowException::CreateSyntaxError(isolate, error_message);
   if (errorcode == V8ReferenceError)
     return V8ThrowException::CreateReferenceError(isolate, error_message);
+
+  if (errorcode == ZarunErrnoError) {
+    errorcode |= errorno;
+    std::stringstream ss;
+    if (message != NULL && message[0] != '\0') {
+      ss << message << ": ";
+    }
+    ss << strerror(errorno) << ": " << errno_string(errorno) << "(" << errorno
+       << ")";
+    error_message = ss.str();
+  } else if (errorcode == ZarunError) {
+    errorcode |= errorno;
+  } else {
+    return v8::Handle<v8::Value>();
+  }
 
   gin::Handle<ZarunExceptionWrapper> exception_handle =
       ZarunExceptionWrapper::Create(context, errorcode, error_message.c_str());

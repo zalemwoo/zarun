@@ -31,9 +31,8 @@ ZarunExceptionWrapper(ScriptContext* context,
                       const char* message);
 
 public:
-
-unsigned short code() const {
-  return code_;
+ int code() const {
+   return (int)code_;
 }
 std::string name() const {
   return name_;

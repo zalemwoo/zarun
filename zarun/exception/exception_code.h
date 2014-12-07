@@ -72,13 +72,13 @@ enum {
 };
 
 enum ZarunErrorType {
-  V8GeneralError = 1000,
-  V8TypeError = 1001,
-  V8RangeError = 1002,
-  V8SyntaxError = 1003,
-  V8ReferenceError = 1004,
-  ZarunErrnoError = 1005,
-  ZarunError = 1006
+  V8GeneralError = 0x1000,
+  V8TypeError = 0x1001,
+  V8RangeError = 0x1002,
+  V8SyntaxError = 0x1003,
+  V8ReferenceError = 0x1004,
+  ZarunErrnoError = 0x2000,  // error code with system errno, as bit mask
+  ZarunError = 0x4000,       // error code with zarun internal, as bit mask
 };
 
 }  // namespace zarun

@@ -16,7 +16,6 @@ executable("zarun") {
     "exception/zarun_exception_wrapper.cc",
     "exception/v8/throw_exception.cc",
     
-    "modules/native_object.cc",
     "modules/native_module.cc",
     "modules/native_source_map.cc",
     "modules/common_module_system.cc",

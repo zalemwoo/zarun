@@ -35,10 +35,16 @@ static const CoreException* getErrorEntry(ExceptionCode ec) {
 }  // namespace
 
 // static
+// TODO(zalemwoo) need refactor.
 gin::Handle<ZarunExceptionWrapper> ZarunExceptionWrapper::Create(
     ScriptContext* context,
     int code,
     const char* message) {
+  if (code & ZarunErrnoError) {
+    int errorno = code - ZarunErrnoError;
+    return WrappableNativeObject<ZarunExceptionWrapper>::Create(
+        context, errorno, "ErrnoError", message ? message : "Unknown error.");
+  }
   const CoreException* entry = getErrorEntry(code);
   return WrappableNativeObject<ZarunExceptionWrapper>::Create(
       context, entry->code, entry->name ? entry->name : "Error",
@@ -64,7 +70,12 @@ ZarunExceptionWrapper::~ZarunExceptionWrapper() {
 gin::ObjectTemplateBuilder ZarunExceptionWrapper::GetObjectTemplateBuilder(
     v8::Isolate* isolate) {
   return WrappableNativeObject<ZarunExceptionWrapper>::GetObjectTemplateBuilder(
-      isolate);
+             isolate)
+      .SetProperty("code", &ZarunExceptionWrapper::code)
+      .SetProperty("type", &ZarunExceptionWrapper::name)
+      .SetProperty("message", &ZarunExceptionWrapper::message)
+      .SetProperty("api", &ZarunExceptionWrapper::api)
+      .SetProperty("path", &ZarunExceptionWrapper::path);
 }
 
 // static
