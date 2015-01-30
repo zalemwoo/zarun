@@ -43,7 +43,7 @@ vars = {
   'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
 
   'zarun_git': 'https://github.com/zalemwoo',
-  'v8_revision': '3e08df1bb48fd9626e99c6298819865808a693b2', # 3.31.44
+  'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
   'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
 }
