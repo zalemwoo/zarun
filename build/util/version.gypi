@@ -6,7 +6,7 @@
   'variables': {
     'variables': {
       'version_py_path': '<(DEPTH)/build/util/version.py',
-      'version_path': '<(DEPTH)/VERSION',
+      'version_path': '<(DEPTH)/chrome/VERSION',
       'lastchange_path': '<(DEPTH)/build/util/LASTCHANGE',
     },
     'version_py_path': '<(version_py_path)',

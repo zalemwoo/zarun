@@ -161,10 +161,6 @@
         # build system.
         'android_webview_build%': 0,
 
-        # This is set when building the Android WebView in ninja for the
-        # telemetry bot.
-        'android_webview_telemetry_build%': 0,
-
         # Set ARM architecture version.
         'arm_version%': 7,
 
@@ -213,8 +209,8 @@
             'enable_hidpi%': 1,
           }],
 
-          # Enable the OpenSSL backend on Mac OS.
-          ['OS=="mac"', {
+          # Enable the OpenSSL backend on Mac OS and Windows.
+          ['OS=="mac" or OS=="win"', {
             'use_openssl%': 1,
           }],
 
@@ -296,7 +292,6 @@
       'enable_hidpi%': '<(enable_hidpi)',
       'android_channel%': '<(android_channel)',
       'android_webview_build%': '<(android_webview_build)',
-      'android_webview_telemetry_build%': '<(android_webview_telemetry_build)',
       'use_goma%': '<(use_goma)',
       'gomadir%': '<(gomadir)',
       'enable_app_list%': '<(enable_app_list)',
@@ -436,11 +431,11 @@
       # -fsanitize=undefined only works with clang, but ubsan=1 implies clang=1
       # See http://clang.llvm.org/docs/UsersManual.html
       'ubsan%': 0,
+      'ubsan_blacklist%': '<(PRODUCT_DIR)/../../tools/ubsan/blacklist.txt',
 
       # Enable building with UBsan's vptr (Clang's -fsanitize=vptr option).
       # -fsanitize=vptr only works with clang, but ubsan_vptr=1 implies clang=1
       'ubsan_vptr%': 0,
-      'ubsan_vptr_blacklist%': '<(PRODUCT_DIR)/../../tools/ubsan_vptr/blacklist.txt',
 
       # Use the dynamic libraries instrumented by one of the sanitizers
       # instead of the standard system libraries.
@@ -592,8 +587,8 @@
 
       'wix_path%': '<(DEPTH)/third_party/wix',
 
-      # Managed users are enabled by default.
-      'enable_managed_users%': 1,
+      # Supervised users are enabled by default.
+      'enable_supervised_users%': 1,
 
       # Platform natively supports discardable memory.
       'native_discardable_memory%': 0,
@@ -614,13 +609,6 @@
       # Enable hole punching for the protected video.
       'video_hole%': 0,
 
-      # Temporary hack to allow us to unify blink's definitions of load
-      # completion. blink uses a crazy set of constraints to determine load
-      # completion, but only actually requires them for layout tests. However,
-      # we need to maintain all the old behaviors while the plumbing is put in
-      # place on both sides of the repo boundary.
-      'enable_load_completion_hacks%': 1,
-
       # Automatically select platforms under ozone. Turn this off to
       # build only explicitly selected platforms.
       'ozone_auto_platforms%': 1,
@@ -638,6 +626,9 @@
       'use_lto%': 0,
       # Enable LTO on code compiled with -O2.
       'use_lto_o2%': 0,
+
+      # Libxkbcommon usage.
+      'use_xkbcommon%': 0,
 
       'conditions': [
         # A flag for POSIX platforms
@@ -801,7 +792,7 @@
           'notifications%': 0,
           'remoting%': 0,
           'safe_browsing%': 0,
-          'enable_managed_users%': 0,
+          'enable_supervised_users%': 0,
           'enable_task_manager%': 0,
           'use_system_libcxx%': 1,
           'support_pre_M6_history_database%': 0,
@@ -971,16 +962,16 @@
         }],
 
         # By default, use ICU data file (icudtl.dat) on all platforms
-        # except when building Android WebView or Chromecast.
+        # except when building Android WebView.
         # TODO(jshin): Handle 'use_system_icu' on Linux (Chromium).
         # Set the data reduction proxy origin for Android Webview.
-        ['android_webview_build==0 and android_webview_telemetry_build==0 and chromecast==0', {
+        ['android_webview_build==0', {
           'icu_use_data_file_flag%' : 1,
         }, {
           'icu_use_data_file_flag%' : 0,
         }],
         ['OS=="win" or OS=="mac"', {
-            'enable_wifi_bootstrapping%' : 1,
+          'enable_wifi_bootstrapping%' : 1,
         }],
 
         # Path to sas.dll, which provides the SendSAS function.
@@ -998,12 +989,12 @@
           'optimize_jni_generation%': 0,
         }],
 
-        # TODO(baixo): Enable v8_use_external_startup_data
+        # TODO(rmcilroy): Enable v8_use_external_startup_data on ChromeOS
         # http://crbug.com/421063
-        ['android_webview_build==0 and android_webview_telemetry_build==0 and chromecast==0 and chromeos==0 and (OS=="android" or OS=="linux" or OS=="mac")', {
-          'v8_use_external_startup_data': 1,
+        ['android_webview_build==0 and chromecast==0 and chromeos==0 and OS!="ios"', {
+          'v8_use_external_startup_data%': 1,
         }, {
-          'v8_use_external_startup_data': 0,
+          'v8_use_external_startup_data%': 0,
         }],
       ],
 
@@ -1087,6 +1078,7 @@
     'use_cairo%': '<(use_cairo)',
     'use_ozone%': '<(use_ozone)',
     'use_ozone_evdev%': '<(use_ozone_evdev)',
+    'use_xkbcommon%': '<(use_xkbcommon)',
     'use_clipboard_aurax11%': '<(use_clipboard_aurax11)',
     'desktop_linux%': '<(desktop_linux)',
     'use_x11%': '<(use_x11)',
@@ -1138,8 +1130,8 @@
     'tsan%': '<(tsan)',
     'tsan_blacklist%': '<(tsan_blacklist)',
     'ubsan%': '<(ubsan)',
+    'ubsan_blacklist%': '<(ubsan_blacklist)',
     'ubsan_vptr%': '<(ubsan_vptr)',
-    'ubsan_vptr_blacklist%': '<(ubsan_vptr_blacklist)',
     'use_instrumented_libraries%': '<(use_instrumented_libraries)',
     'use_custom_libcxx%': '<(use_custom_libcxx)',
     'use_system_libcxx%': '<(use_system_libcxx)',
@@ -1179,7 +1171,6 @@
     'use_system_libjpeg%': '<(use_system_libjpeg)',
     'android_channel%': '<(android_channel)',
     'android_webview_build%': '<(android_webview_build)',
-    'android_webview_telemetry_build%': '<(android_webview_telemetry_build)',
     'icu_use_data_file_flag%': '<(icu_use_data_file_flag)',
     'gyp_managed_install%': 0,
     'create_standalone_apk%': 1,
@@ -1189,7 +1180,7 @@
     'google_api_key%': '<(google_api_key)',
     'google_default_client_id%': '<(google_default_client_id)',
     'google_default_client_secret%': '<(google_default_client_secret)',
-    'enable_managed_users%': '<(enable_managed_users)',
+    'enable_supervised_users%': '<(enable_supervised_users)',
     'native_discardable_memory%': '<(native_discardable_memory)',
     'native_memory_pressure_signals%': '<(native_memory_pressure_signals)',
     'spdy_proxy_auth_property%': '<(spdy_proxy_auth_property)',
@@ -1205,12 +1196,8 @@
     'use_lto%': '<(use_lto)',
     'use_lto_o2%': '<(use_lto_o2)',
     'video_hole%': '<(video_hole)',
-    'enable_load_completion_hacks%': '<(enable_load_completion_hacks)',
     'support_pre_M6_history_database%': '<(support_pre_M6_history_database)',
-    'v8_use_external_startup_data': '<(v8_use_external_startup_data)',
-
-    # Whether or not we are building the Athena shell.
-    'use_athena%': '0',
+    'v8_use_external_startup_data%': '<(v8_use_external_startup_data)',
 
     # Use system protobuf instead of bundled one.
     'use_system_protobuf%': 0,
@@ -1262,7 +1249,7 @@
     #  'win_use_allocator_shim': 0,
     #  'win_release_RuntimeLibrary': 2
     # to ~/.gyp/include.gypi, gclient runhooks --force, and do a release build.
-    'win_use_allocator_shim%': 0, # 1 = shim allocator via libcmt; 0 = msvcrt
+    'win_use_allocator_shim%': 1, # 1 = shim allocator via libcmt; 0 = msvcrt
 
     # TODO(bradnelson): eliminate this when possible.
     # To allow local gyp files to prevent release.vsprops from being included.
@@ -1465,6 +1452,10 @@
 
     # Compile d8 for the host toolset.
     'v8_toolset_for_d8': 'host',
+
+    # Enable the V8 heap verification code. The verification itself is enabled
+    # via a command line option.
+    'v8_enable_verify_heap%': 1,
 
     # Use brlapi from brltty for braille display support.
     'use_brlapi%': 0,
@@ -1777,7 +1768,7 @@
         'use_openssl_certs%': 1,
 
         'proprietary_codecs%': '<(proprietary_codecs)',
-        'safe_browsing%': 1,
+        'safe_browsing%': 2,
         'enable_web_speech%': 0,
         'java_bridge%': 1,
         'build_ffmpegsumo%': 0,
@@ -1816,7 +1807,7 @@
       }],
       ['chromecast==1', {
         'enable_mpeg2ts_stream_parser%': 1,
-        'ffmpeg_branding%': 'Chrome',
+        'ffmpeg_branding%': 'ChromeOS',
         'ozone_platform_ozonex%': 1,
         'use_playready%': 0,
         'conditions': [
@@ -1960,6 +1951,8 @@
           # Native Client loader for 64-bit Windows.
           'NACL_WIN64',
         ],
+        # Need to include allocator target, but exclude tcmalloc files.
+        'use_allocator%': 'winheap',
       }],
 
       ['os_posix==1 and chromeos==0 and OS!="android" and OS!="ios" and embedded==0', {
@@ -1974,7 +1967,7 @@
         'enable_pepper_cdms%': 0,
       }],
 
-      ['OS=="android"', {
+      ['OS=="android" or chromecast==1', {
         'enable_browser_cdms%': 1,
       }, {
         'enable_browser_cdms%': 0,
@@ -2065,6 +2058,9 @@
         'grit_defines': ['-D', 'scale_factors=2x'],
       }],
       ['OS == "ios"', {
+        'variables': {
+          'enable_coverage%': 0,
+        },
         'grit_defines': [
           '-t', 'ios',
           # iOS uses a whitelist to filter resources.
@@ -2080,7 +2076,10 @@
 
           # TODO(sdefresne): Remove the target_subarch check once Apple has
           # upstreamed the support for "arm64". http://crbug.com/341453
-          ['target_subarch!="arm32" or "<(GENERATOR)"=="xcode"', {
+          # TODO(eugenebut): Remove enable_coverage check once
+          # libclang_rt.profile_ios.a is bundled with Chromium's clang.
+          # http://crbug.com/450379
+          ['target_subarch!="arm32" or enable_coverage or "<(GENERATOR)"=="xcode"', {
             'clang_xcode%': 1,
           }],
         ],
@@ -2141,6 +2140,18 @@
         'clang_chrome_plugins_flags': [
           '<!@(<(DEPTH)/tools/clang/scripts/plugin_flags.sh)'
         ],
+        'conditions': [
+          # TODO(dcheng): https://crbug.com/417463 -- work to enable this flag
+          # on all platforms is currently underway.
+          ['OS=="linux" or OS=="mac" or OS=="ios"', {
+            'clang_chrome_plugins_flags': [
+              '-Xclang',
+              '-plugin-arg-find-bad-constructs',
+              '-Xclang',
+              'strict-virtual-specifiers',
+            ],
+          }],
+        ],
       }],
       ['asan==1 or msan==1 or lsan==1 or tsan==1', {
         'clang%': 1,
@@ -2157,9 +2168,7 @@
         'clang%': 1,
       }],
       ['asan==1 and OS=="mac"', {
-        # TODO(glider): we do not strip ASan binaries until the dynamic ASan
-        # runtime is fully adopted. See http://crbug.com/242503.
-        'mac_strip_release': 0,
+        'mac_strip_release': 1,
       }],
       ['tsan==1', {
         'use_custom_libcxx%': 1,
@@ -2239,7 +2248,7 @@
         # Iterator debugging is slow.
         'win_debug_disable_iterator_debugging': '1',
         # Try to disable optimizations that mess up stacks in a release build.
-        # DrM-i#1054 (http://code.google.com/p/drmemory/issues/detail?id=1054)
+        # DrM-i#1054 (https://github.com/DynamoRIO/drmemory/issues/1054)
         # /O2 and /Ob0 (disable inline) cannot be used together because of a
         # compiler bug, so we use /Ob1 instead.
         'win_release_InlineFunctionExpansion': '1',
@@ -2349,12 +2358,6 @@
       }, {
          'use_seccomp_bpf%': 0,
       }],
-
-      # Set component build with LTO until all tests pass.
-      # This also reduces link time.
-      ['use_lto==1', {
-        'component%': "shared_library",
-      }],
     ],
 
     # older history files use fts2 instead of fts3
@@ -2388,7 +2391,7 @@
     # Whether to allow building of the GPU-related isolates.
     'archive_gpu_tests%': 0,
 
-    # Whether to allow building of chromoting related isolates.
+     # Whether to allow building of chromoting related isolates.
     'archive_chromoting_tests%': 0,
   },
   'target_defaults': {
@@ -2522,6 +2525,9 @@
         # code generated by flex (used in angle) contains that keyword.
         # http://crbug.com/255186
         '-Wno-deprecated-register',
+
+        # TODO(hans): Get this cleaned up.
+        '-Wno-inconsistent-missing-override',
       ],
     },
     'includes': [ 'set_clang_warning_flags.gypi', ],
@@ -2760,10 +2766,11 @@
       ['tracing_like_official_build!=0', {
         'defines': ['TRACING_IS_OFFICIAL_BUILD=1'],
       }],  # tracing_like_official_build!=0
-      ['win_use_allocator_shim==0', {
+      ['OS=="win"', {
+        'defines': ['NO_TCMALLOC'],
         'conditions': [
-          ['OS=="win"', {
-            'defines': ['NO_TCMALLOC'],
+          ['win_use_allocator_shim==1', {
+            'defines': ['ALLOCATOR_SHIM'],
           }],
         ],
       }],
@@ -2785,6 +2792,9 @@
             'SYZYASAN',
             'MEMORY_TOOL_REPLACES_ALLOCATOR',
             'MEMORY_SANITIZER_INITIAL_SIZE',
+        ],
+        'include_dirs': [
+          '<(DEPTH)/third_party/kasko/include',
         ],
       }],
       ['OS=="win"', {
@@ -2844,6 +2854,10 @@
                   '/wd28301', # Inconsistent SAL annotations
                   '/wd6340',  # Sign mismatch in function parameter
                   '/wd28182', # Dereferencing NULL pointer
+                  # C6285 is ~16% of raw warnings and has low value
+                  '/wd6285',  # non-zero constant || non-zero constant
+                  # C6334 is ~80% of raw warnings and has low value
+                  '/wd6334',  # sizeof applied to an expression with an operator
                 ],
               },
             },
@@ -2855,15 +2869,6 @@
           'LOG_DISABLED=0',
         ],
         'conditions': [
-          ['target_arch=="arm"', {
-            'defines': [
-              # TODO(lcwu): Work around an error when building Chromium
-              # with gcc-4.5.3 (e.g. v8/src/platform-linux.cc). Remove
-              # this define once the toolchain is updated.
-              # See crbug.com/388933.
-              '__SOFTFP',
-            ],
-          }],
           ['use_playready==1', {
             'defines': [
               'PLAYREADY_CDM_AVAILABLE',
@@ -2948,8 +2953,8 @@
       ['use_icu_alternatives_on_android==1', {
         'defines': ['USE_ICU_ALTERNATIVES_ON_ANDROID=1'],
       }],
-      ['enable_managed_users==1', {
-        'defines': ['ENABLE_MANAGED_USERS=1'],
+      ['enable_supervised_users==1', {
+        'defines': ['ENABLE_SUPERVISED_USERS=1'],
       }],
       ['spdy_proxy_auth_property != ""', {
         'defines': ['SPDY_PROXY_AUTH_PROPERTY="<(spdy_proxy_auth_property)"'],
@@ -2975,11 +2980,14 @@
       ['video_hole==1', {
         'defines': ['VIDEO_HOLE=1'],
       }],
-      ['enable_load_completion_hacks==1', {
-        'defines': ['ENABLE_LOAD_COMPLETION_HACKS=1'],
-      }],
       ['v8_use_external_startup_data==1', {
        'defines': ['V8_USE_EXTERNAL_STARTUP_DATA'],
+      }],
+      ['use_lto==1 and (target_arch=="ia32" or target_arch=="x64")', {
+        # Required for third_party/zlib/crc_folding.c and various other code
+        # that uses SSE. TODO(pcc): Remove this once we properly support
+        # subtarget specific code generation in LLVM.
+        'ldflags': ['-Wl,-plugin-opt,mcpu=corei7-avx'],
       }],
     ],  # conditions for 'target_defaults'
     'target_conditions': [
@@ -3379,6 +3387,14 @@
                 # "/Oy /Oy-" and warnings about overriding.
                 'AdditionalOptions': ['/Oy-'],
               }],
+              ['asan==0', {
+                # Put data in separate COMDATs. This allows the linker
+                # to put bit-identical constants at the same address even if
+                # they're unrelated constants, which saves binary size.
+                # This optimization can't be used when ASan is enabled because
+                # it is not compatible with the ASan ODR checker.
+                'AdditionalOptions': ['/Gw'],
+              }],
             ],
             'AdditionalOptions': [
                 '/d2Zi+',  # Improve debugging of Release builds.
@@ -3416,7 +3432,7 @@
               'WTF_USE_DYNAMIC_ANNOTATIONS=1',
             ],
           }],
-          ['OS=="win" and win_use_allocator_shim==0', {
+          ['OS=="win"', {
             'defines': ['NO_TCMALLOC'],
           }],
           # _FORTIFY_SOURCE isn't really supported by Clang now, see
@@ -3521,6 +3537,14 @@
       'target_defaults': {
         'ldflags': [
           '-Wl,--fatal-warnings',
+        ],
+      },
+    }],
+    # TODO(thakis): Enable this everywhere. http://crbug.com/371125
+    ['(OS=="linux" or OS=="android") and asan==0 and msan==0 and tsan==0 and ubsan==0 and ubsan_vptr==0 and use_ozone!=1', {
+      'target_defaults': {
+        'ldflags': [
+          '-Wl,-z,defs',
         ],
       },
     }],
@@ -4199,8 +4223,7 @@
               ['_toolset=="target"', {
                 'cflags': [
                   '-fsanitize=undefined',
-                  # -fsanitize=vptr is incompatible with -fno-rtti.
-                  '-fno-sanitize=vptr',
+                  '-fsanitize-blacklist=<(ubsan_blacklist)',
                   # Employ the experimental PBQP register allocator to avoid
                   # slow compilation on files with too many basic blocks.
                   # See http://crbug.com/426271.
@@ -4209,10 +4232,17 @@
                   # generated by PBQP regallocator. May increase compile time.
                   '-mllvm -pbqp-coalescing',
                 ],
+                'cflags_cc!': [
+                  '-fno-rtti',
+                ],
+                'cflags!': [
+                  '-fno-rtti',
+                ],
                 'ldflags': [
                   '-fsanitize=undefined',
-                  # -fsanitize=vptr is incompatible with -fno-rtti.
-                  '-fno-sanitize=vptr',
+                ],
+                'defines': [
+                  'UNDEFINED_SANITIZER',
                 ],
               }],
             ],
@@ -4222,7 +4252,7 @@
               ['_toolset=="target"', {
                 'cflags': [
                   '-fsanitize=vptr',
-                  '-fsanitize-blacklist=<(ubsan_vptr_blacklist)',
+                  '-fsanitize-blacklist=<(ubsan_blacklist)',
                 ],
                 'cflags_cc!': [
                   '-fno-rtti',
@@ -4243,7 +4273,7 @@
             'target_conditions': [
               ['_toolset=="target"', {
                 'cflags': [
-                  '-mllvm -asan-coverage=<(asan_coverage)',
+                  '-fsanitize-coverage=<(asan_coverage)',
                 ],
               }],
             ],
@@ -4315,7 +4345,7 @@
           }],
           ['use_custom_libcxx==1', {
             'dependencies': [
-              '<(DEPTH)/third_party/libc++/libc++.gyp:libcxx_proxy',
+              '<(DEPTH)/buildtools/third_party/libc++/libc++.gyp:libcxx_proxy',
             ],
           }],
           ['order_profiling!=0 and (chromeos==1 or OS=="linux" or OS=="android")', {
@@ -4381,7 +4411,7 @@
               }],
             ],
             'conditions': [
-              ['release_valgrind_build==0', {
+              ['release_valgrind_build==0 and order_profiling==0', {
                 'target_conditions': [
                   ['_toolset=="target"', {
                     'ldflags': [
@@ -4614,16 +4644,6 @@
                   # TODO(eugenis): find a way to reenable this.
                   '-mllvm -asan-globals=0',
                 ],
-                'conditions': [
-                  ['target_arch=="arm"', {
-                    'ldflags': [
-                      # TODO(hans): The ASan runtime is no longer automatically
-                      # added to the link line when using -nostdlib. Can we
-                      # stop adding -nostdlib? (crbug.com/423429)
-                      '<!(cd <(DEPTH) && pwd -P)/<(make_clang_dir)/lib/clang/3.6.0/lib/linux/libclang_rt.asan-arm-android.so',
-                    ],
-                  }],
-                ],
               }],
               ['android_webview_build==0', {
                 'defines': [
@@ -4638,19 +4658,10 @@
                   '--sysroot=<(android_ndk_sysroot)',
                   '-nostdlib',
                 ],
-                'variables': {
-                  'conditions': [
-                    ['target_arch=="arm" and arm_thumb==1', {
-                      'thumb_option%': '-mthumb',
-                    }, {
-                      'thumb_option%': '',
-                    }],
-                  ],
-                },
                 'libraries': [
                   '-l<(android_stlport_library)',
                   # Manually link the libgcc.a that the cross compiler uses.
-                  '<!(<(android_toolchain)/*-gcc <(thumb_option) -print-libgcc-file-name)',
+                  '<!(<(android_toolchain)/*-gcc -print-libgcc-file-name)',
                   '-lc',
                   '-ldl',
                   '-lm',
@@ -4699,7 +4710,7 @@
                   }],
                 ],
               }],
-              ['target_arch == "arm"', {
+              ['target_arch == "arm" and order_profiling==0', {
                 'ldflags': [
                   # Enable identical code folding to reduce size.
                   '-Wl,--icf=safe',
@@ -4715,12 +4726,8 @@
                 'cflags': [
                   '-isystem<(android_stlport_include)',
                 ],
-                'conditions': [
-                  ['target_arch=="arm" and arm_thumb==1', {
-                    'ldflags': [ '-L<(android_stlport_libs_dir)/thumb' ]
-                  }, {
-                    'ldflags': [ '-L<(android_stlport_libs_dir)' ]
-                  }],
+                'ldflags': [
+                  '-L<(android_stlport_libs_dir)',
                 ],
               }, { # else: android_webview_build!=0
                 'aosp_build_settings': {
@@ -4930,7 +4937,7 @@
             'target_conditions': [
               ['_toolset=="target"', {
                 'cflags': [
-                  '-mllvm -asan-coverage=<(asan_coverage)',
+                  '-fsanitize-coverage=<(asan_coverage)',
                 ],
               }],
             ],
@@ -5075,16 +5082,6 @@
                 ],
               },
             ],
-            'conditions': [
-              ['asan==1', {
-                'variables': {
-                 'asan_saves_file': 'asan.saves',
-                },
-                'xcode_settings': {
-                  'CHROMIUM_STRIP_SAVE_FILE': '<(asan_saves_file)',
-                },
-              }],
-            ],
             'target_conditions': [
               ['mac_pie==1 and release_valgrind_build==0', {
                 # Turn on position-independence (ASLR) for executables. When
@@ -5115,23 +5112,23 @@
                       'DEBUG_INFORMATION_FORMAT': 'dwarf-with-dsym',
                       'DEPLOYMENT_POSTPROCESSING': 'YES',
                       'STRIP_INSTALLED_PRODUCT': 'YES',
-                      'target_conditions': [
-                        ['_type=="shared_library" or _type=="loadable_module"', {
-                          # The Xcode default is to strip debugging symbols
-                          # only (-S).  Local symbols should be stripped as
-                          # well, which will be handled by -x.  Xcode will
-                          # continue to insert -S when stripping even when
-                          # additional flags are added with STRIPFLAGS.
-                          'STRIPFLAGS': '-x',
-                        }],  # _type=="shared_library" or _type=="loadable_module"
-                        ['_type=="executable"', {
-                          'conditions': [
-                            ['asan==1', {
-                              'STRIPFLAGS': '-s $(CHROMIUM_STRIP_SAVE_FILE)',
-                            }]
-                          ],
-                        }],  # _type=="executable" and asan==1
-                      ],  # target_conditions
+                      'conditions': [
+                        # Only strip non-ASan builds.
+                        ['asan==0', {
+                          'target_conditions': [
+                            ['_type=="shared_library" or _type=="loadable_module"', {
+                              # The Xcode default is to strip debugging symbols
+                              # only (-S).  Local symbols should be stripped as
+                              # well, which will be handled by -x.  Xcode will
+                              # continue to insert -S when stripping even when
+                              # additional flags are added with STRIPFLAGS.
+                              'STRIPFLAGS': '-x',
+                            }],  # _type=="shared_library" or _type=="loadable_module"
+                          ],  # target_conditions
+                        }, {  # asan != 0
+                          'STRIPFLAGS': '-S',
+                        }],
+                      ],
                     },  # xcode_settings
                   },  # configuration "Release"
                 },  # configurations
@@ -5159,6 +5156,9 @@
       },  # target_defaults
     }],  # OS=="mac"
     ['OS=="ios"', {
+      'includes': [
+        'ios/coverage.gypi',
+      ],
       'target_defaults': {
         'xcode_settings' : {
           'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
@@ -5294,6 +5294,11 @@
                 'VCLinkerTool': {
                   # Set /LTCG for the official builds.
                   'LinkTimeCodeGeneration': '1',
+                  'AdditionalOptions': [
+                    # Set the number of LTCG code-gen threads to eight.
+                    # The default is four. This gives a 5-10% link speedup.
+                    '/cgthreads:8',
+                  ],
                 },
               },
               'target_conditions': [
@@ -5544,52 +5549,6 @@
                 ],
               },
             }],
-            ['asan==1', {
-              # ASan on Windows is a work in progress and very experimental.
-              # See crbug.com/345874.
-              'VCCLCompilerTool': {
-                'AdditionalOptions': [
-                  '-fsanitize=address',
-                ],
-                'AdditionalIncludeDirectories': [
-                  # MSVC needs to be able to find the sanitizer headers when
-                  # invoked via /fallback. This is critical for using macros
-                  # like ASAN_UNPOISON_MEMORY_REGION in files where we fall
-                  # back.
-                  '<(DEPTH)/<(make_clang_dir)/lib/clang/3.6.0/include_sanitizer',
-                ],
-              },
-              'VCLinkerTool': {
-                'AdditionalLibraryDirectories': [
-                  # TODO(hans): If make_clang_dir is absolute, this breaks.
-                  '<(DEPTH)/<(make_clang_dir)/lib/clang/3.6.0/lib/windows',
-                ],
-              },
-              'target_conditions': [
-                ['component=="shared_library"', {
-                  'VCLinkerTool': {
-                    'AdditionalDependencies': [
-                       'clang_rt.asan_dynamic-i386.lib',
-                       'clang_rt.asan_dynamic_runtime_thunk-i386.lib',
-                    ],
-                  },
-                }],
-                ['_type=="executable" and component=="static_library"', {
-                  'VCLinkerTool': {
-                    'AdditionalDependencies': [
-                       'clang_rt.asan-i386.lib',
-                    ],
-                  },
-                }],
-                ['(_type=="shared_library" or _type=="loadable_module") and component=="static_library"', {
-                  'VCLinkerTool': {
-                    'AdditionalDependencies': [
-                       'clang_rt.asan_dll_thunk-i386.lib',
-                    ],
-                  },
-                }],
-              ],
-            }],
           ],
         },
       },
@@ -5624,12 +5583,61 @@
                   '/ignore:4221',
                   '/nxcompat',
                 ],
-                'conditions': [
-                  ['syzyasan==0', {
-                    'AdditionalOptions': ['/largeaddressaware'],
-                  }],
-                ],
               },
+              'conditions': [
+                ['syzyasan==0', {
+                  'VCLinkerTool': {
+                    'AdditionalOptions': ['/largeaddressaware'],
+                  },
+                }],
+                ['asan==1', {
+                  # TODO(asan/win): Move this down into the general
+                  # win-target_defaults section once the 64-bit asan runtime
+                  # exists.  See crbug.com/345874.
+                  'VCCLCompilerTool': {
+                    'AdditionalOptions': [
+                      '-fsanitize=address',
+                    ],
+                    'AdditionalIncludeDirectories': [
+                      # MSVC needs to be able to find the sanitizer headers when
+                      # invoked via /fallback. This is critical for using macros
+                      # like ASAN_UNPOISON_MEMORY_REGION in files where we fall
+                      # back.
+                      '<(DEPTH)/<(make_clang_dir)/lib/clang/3.7.0/include_sanitizer',
+                    ],
+                  },
+                  'VCLinkerTool': {
+                    'AdditionalLibraryDirectories': [
+                      # TODO(hans): If make_clang_dir is absolute, this breaks.
+                      '<(DEPTH)/<(make_clang_dir)/lib/clang/3.7.0/lib/windows',
+                    ],
+                  },
+                  'target_conditions': [
+                    ['component=="shared_library"', {
+                      'VCLinkerTool': {
+                        'AdditionalDependencies': [
+                           'clang_rt.asan_dynamic-i386.lib',
+                           'clang_rt.asan_dynamic_runtime_thunk-i386.lib',
+                        ],
+                      },
+                    }],
+                    ['_type=="executable" and component=="static_library"', {
+                      'VCLinkerTool': {
+                        'AdditionalDependencies': [
+                           'clang_rt.asan-i386.lib',
+                        ],
+                      },
+                    }],
+                    ['(_type=="shared_library" or _type=="loadable_module") and component=="static_library"', {
+                      'VCLinkerTool': {
+                        'AdditionalDependencies': [
+                           'clang_rt.asan_dll_thunk-i386.lib',
+                        ],
+                      },
+                    }],
+                  ],
+                }],
+              ],
             },
           },
           'x64_Base': {
@@ -5779,18 +5787,39 @@
           ['_toolset=="target"', {
             'cflags': [
               '-flto',
+            ],
+          }],
+        ],
+      },
+    }],
+    ['use_lto==1 and clang==0', {
+      'target_defaults': {
+        'target_conditions': [
+          ['_toolset=="target"', {
+            'cflags': [
               '-ffat-lto-objects',
             ],
           }],
         ],
       },
     }],
-    ['use_lto==1 or use_lto_o2==1', {
+    ['(use_lto==1 or use_lto_o2==1) and clang==0', {
       'target_defaults': {
         'target_conditions': [
           ['_toolset=="target"', {
             'ldflags': [
               '-flto=32',
+            ],
+          }],
+        ],
+      },
+    }],
+    ['(use_lto==1 or use_lto_o2==1) and clang==1', {
+      'target_defaults': {
+        'target_conditions': [
+          ['_toolset=="target"', {
+            'ldflags': [
+              '-flto',
             ],
           }],
         ],

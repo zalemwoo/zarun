@@ -23,7 +23,7 @@ void Usage() {
 
 int main(int argc, char** argv) {
   base::AtExitManager at_exit;
-  CommandLine::Init(argc, argv);
+  base::CommandLine::Init(argc, argv);
   base::i18n::InitializeICU();
 #ifdef V8_USE_EXTERNAL_STARTUP_DATA
   gin::IsolateHolder::LoadV8Snapshot();

@@ -22,27 +22,27 @@ namespace {
 
 // static
 void ProcessOpenCallback(gin::Arguments* args) {
-  std::vector<std::string> strargs;
-  if (!args->GetNext(&strargs)) {
-    return args->ThrowError();
-  }
+  /* std::vector<std::string> strargs; */
+  /* if (!args->GetNext(&strargs)) { */
+  /*   return args->ThrowError(); */
+  /* } */
 
-  base::CommandLine cmdline(strargs);
-  base::LaunchOptions options;
-  base::ProcessHandle process_handle;
+  /* base::CommandLine cmdline(strargs); */
+  /* base::LaunchOptions options; */
+  /* base::ProcessHandle process_handle; */
 
-  bool ret = base::LaunchProcess(cmdline, options, &process_handle);
+  /* bool ret = base::LaunchProcess(cmdline, options, &process_handle); */
 
-  if (!ret) {
-    args->isolate()->ThrowException(v8::Exception::Error(
-        gin::StringToV8(args->isolate(), std::string("IOError"))));
-    return;
-  }
+  /* if (!ret) { */
+  /*   args->isolate()->ThrowException(v8::Exception::Error( */
+  /*       gin::StringToV8(args->isolate(), std::string("IOError")))); */
+  /*   return; */
+  /* } */
 
-  gin::Handle<zarun::ProcessWrapper> process = zarun::ProcessWrapper::Create(
-      ScriptContext::FromV8Context(args->isolate()->GetCurrentContext()),
-      process_handle);
-  args->Return(process);
+  /* gin::Handle<zarun::ProcessWrapper> process = zarun::ProcessWrapper::Create( */
+  /*     ScriptContext::FromV8Context(args->isolate()->GetCurrentContext()), */
+  /*     process_handle); */
+  /* args->Return(process); */
 }
 
 }  // namespace

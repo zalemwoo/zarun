@@ -72,7 +72,7 @@ void ZarunShell::Run() {
       base::CommandLine::ForCurrentProcess();
 
   base::CommandLine::StringVector argv = command_line->GetArgs();
-  for (CommandLine::StringVector::const_iterator it = argv.begin();
+  for (base::CommandLine::StringVector::const_iterator it = argv.begin();
        it != argv.end(); ++it) {
     backend_application_->RunScript(base::FilePath(*it));
   }

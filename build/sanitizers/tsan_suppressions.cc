@@ -149,10 +149,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/285242
 "race:media::PulseAudioOutputStream::SetVolume\n"
 
-// http://crbug.com/290964
-"race:PostponeInterruptsScope\n"
-"race:v8::internal::StackGuard::RequestInstallCode\n"
-
 // http://crbug.com/296883
 "race:net::URLFetcherCore::Stop\n"
 
@@ -309,6 +305,15 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/417193
 // Suppressing both AudioContext.{cpp,h}.
 "race:modules/webaudio/AudioContext\n"
+
+// https://code.google.com/p/skia/issues/detail?id=3294
+"race:SkBaseMutex::acquire\n"
+
+// https://crbug.com/430533
+"race:TileTaskGraphRunner::Run\n"
+
+// https://crbug.com/448203
+"race:blink::RemoteFrame::detach\n"
 
 // End of suppressions.
 ;  // Please keep this semicolon.

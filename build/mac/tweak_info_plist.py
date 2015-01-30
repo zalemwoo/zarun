@@ -77,7 +77,7 @@ def _AddVersionKeys(plist, version=None):
   else:
     # Pull in the Chrome version number.
     VERSION_TOOL = os.path.join(TOP, 'build/util/version.py')
-    VERSION_FILE = os.path.join(TOP, 'VERSION')
+    VERSION_FILE = os.path.join(TOP, 'chrome/VERSION')
 
     (stdout, retval1) = _GetOutput([VERSION_TOOL, '-f', VERSION_FILE, '-t',
                                     '@MAJOR@.@MINOR@.@BUILD@.@PATCH@'])

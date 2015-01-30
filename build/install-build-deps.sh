@@ -73,10 +73,10 @@ if ! which lsb_release > /dev/null; then
 fi
 
 lsb_release=$(lsb_release --codename --short)
-ubuntu_codenames="(precise|quantal|raring|saucy|trusty)"
+ubuntu_codenames="(precise|quantal|raring|saucy|trusty|utopic)"
 if [ 0 -eq "${do_unsupported-0}" ] && [ 0 -eq "${do_quick_check-0}" ] ; then
   if [[ ! $lsb_release =~ $ubuntu_codenames ]]; then
-    echo "ERROR: Only Ubuntu 12.04 (precise) through 14.04 (trusty) are"\
+    echo "ERROR: Only Ubuntu 12.04 (precise) through 14.10 (utopic) are"\
         "currently supported" >&2
     exit 1
   fi
@@ -304,9 +304,11 @@ else
   nacl_list=
 fi
 
+# The `sort -r -s -t: -k2` sorts all the :i386 packages to the front, to avoid
+# confusing dpkg-query (crbug.com/446172).
 packages="$(
   echo "${dev_list} ${lib_list} ${dbg_list} ${lib32_list} ${arm_list}"\
-       "${nacl_list}" | tr " " "\n" | sort -u | tr "\n" " "
+       "${nacl_list}" | tr " " "\n" | sort -u | sort -r -s -t: -k2 | tr "\n" " "
 )"
 
 if [ 1 -eq "${do_quick_check-0}" ] ; then

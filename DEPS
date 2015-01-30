@@ -19,32 +19,32 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'libcxx_revision': 'a7628463dc34c6c94cfc10b5b4b6a99627a2aaa2',
-  'libcxxabi_revision': '63cbbb329969436e3efbf0b7ad7105d0e7a6316d',
+  'libcxx_revision': 'a0baeaba8b8fee4d91241471affe224ba0f66a68',
+  'libcxxabi_revision': '139d54a741df994836ad026e9a7b9d0c0f53764e',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
   'build_revision': '461a1f8cc3a4dfc9fd3c1329816cf7f720c8d2bc',
-  'buildtools_revision': '8c3455d87569d01a698dd53c09f748c9fc6ff689',
-  'base_revision': '54da47e40d24881452a1d686f76dbee00f9de9ed',
-  'net_revision': '88a53df131f7eb36e65c257ff99e928f03323148',
-  'crypto_revision': '6c86e2c6de535b061d695aacb254fa50e8abbee6',
-  'sqlite_revision': '0dc369ea1e8b37a031fe715642504fc6e94c430c',
-  'zlib_revision': '10dd686e77ff174530435aaed24160de9afb882d',
+  'buildtools_revision': '451dcd05a5b34936f5be67b2472cd63aaa508401',
+  'base_revision': '2f0c1f0b3e0b94946b2093c86d57dc9c10a312b7',
+  'net_revision': 'df102f4630181921c436e065a328e3e468662e2b',
+  'crypto_revision': 'e873652b6eaaaebaadd22d560d10862bee85a605',
+  'sqlite_revision': '47f19be5c0ead0759e60006d39d593166cc8fbc0',
+  'zlib_revision': 'afd8c4593c010c045902f6c0501718f1823064a3',
 
   'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
   'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
-  'swarming_revision': '1f8ba359e84dc7f26b1ba286dfb4e28674efbff4',
-  "angle_revision": "560eef1627abdef65f71021b906e57dc609f47fa",
-  'pdfium_revision': '173f919d0ec99a1a973c9d3a82b474f761d5bce1',
-  'boringssl_revision': '4e0a7e5a1d222395afab19335c685ed9f1dfb9d5',
+  'swarming_revision': 'd863df38343f8057dbddfe5543addcf19a49ce0f',
+  "angle_revision": "bc393df9cd8ae893da686533644da29a8c4911ae",
+  'pdfium_revision': 'eef005055d6aafc2cc6066af37ce47d8b15ec7cd',
+  'boringssl_revision': 'a87de9b39b5a9b1d6e9ed6d18167946397581df1',
   'lss_revision': '952107fa7cea0daaabead28c0e92d579bee517eb',
-  'nss_revision': '258342ecf9c65105189092ef6339dc4e7779a7ae',
+  'nss_revision': 'bb4e75a43d007518ae7d618665ea2f25b0c60b63',
 
   'zarun_git': 'https://github.com/zalemwoo',
   'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
-  'gin_revision': 'fcefd1721f384c1836e5a4fe71195eaae5b461d9',
+  'gin_revision': 'fe52de0c4847e24839ca805db8ba7c3808fd7639',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
 }
 
@@ -87,7 +87,7 @@ deps = {
     Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + Var('zlib_revision'),
 
   'src/tools/grit':
-    Var('chromium_git') + '/external/grit-i18n.git' + '@' + '740badd5e3e44434a9a47b5d16749daac1e8ea80', # from svn revision 176
+    Var('chromium_git') + '/external/grit-i18n.git' + '@' + 'a5890a8118c0c80cc0560e6d8d5cf65e5d725509',
 
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + '487c0b6ae8b44932e45347211bca0e8387718436', # from svn revision 1998
@@ -96,7 +96,7 @@ deps = {
     Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
 
   'src/tools/clang':
-    Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + 'a7bf977931de9c904335bd0e0ae2b11860dc510b',
+    Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + '0825693c3460f23b1d78ad272999f850447ad333',
 
   'src/tools/valgrind':
     Var('chromium_git') + '/chromium/src/tools/valgrind.git' + '@' + Var('valgrind_revision'),
