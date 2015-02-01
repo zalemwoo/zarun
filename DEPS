@@ -19,8 +19,11 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
+  'zarun_git': 'https://github.com/zalemwoo',
+  
   'libcxx_revision': 'a0baeaba8b8fee4d91241471affe224ba0f66a68',
   'libcxxabi_revision': '139d54a741df994836ad026e9a7b9d0c0f53764e',
+  'clang_revision': '0825693c3460f23b1d78ad272999f850447ad333',
   'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
   'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
@@ -42,7 +45,6 @@ vars = {
   'lss_revision': '952107fa7cea0daaabead28c0e92d579bee517eb',
   'nss_revision': 'bb4e75a43d007518ae7d618665ea2f25b0c60b63',
 
-  'zarun_git': 'https://github.com/zalemwoo',
   'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
   'gin_revision': 'fe52de0c4847e24839ca805db8ba7c3808fd7639',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
@@ -96,7 +98,7 @@ deps = {
     Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
 
   'src/tools/clang':
-    Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + '0825693c3460f23b1d78ad272999f850447ad333',
+    Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + Var('clang_revision'),
 
   'src/tools/valgrind':
     Var('chromium_git') + '/chromium/src/tools/valgrind.git' + '@' + Var('valgrind_revision'),
