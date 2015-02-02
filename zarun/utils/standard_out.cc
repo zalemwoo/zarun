@@ -12,6 +12,8 @@
 #include "build/build_config.h"
 #include "zarun/switches.h"
 
+#include "third_party/termcolor/include/termcolor/termcolor.hpp"
+
 #if defined(OS_WIN)
 #include <windows.h>
 #else
@@ -56,86 +58,38 @@ void EnsureInitialized() {
 #endif
 }
 
-void WriteToStdOut(const std::string& output) {
-  size_t written_bytes = fwrite(output.data(), 1, output.size(), stdout);
-  DCHECK_EQ(output.size(), written_bytes);
-}
-
 }  // namespace
 
 namespace zarun {
 namespace util {
 
-#if defined(OS_WIN)
-
 void OutputString(const std::string& output, TextDecoration dec) {
   EnsureInitialized();
   if (is_console) {
     switch (dec) {
       case DECORATION_NONE:
         break;
-      case DECORATION_DIM:
-        ::SetConsoleTextAttribute(hstdout, FOREGROUND_INTENSITY);
-        break;
       case DECORATION_RED:
-        ::SetConsoleTextAttribute(hstdout,
-                                  FOREGROUND_RED | FOREGROUND_INTENSITY);
+          std::cout << termcolor::red;
         break;
       case DECORATION_GREEN:
-        // Keep green non-bold.
-        ::SetConsoleTextAttribute(hstdout, FOREGROUND_GREEN);
+        std::cout << termcolor::green;
         break;
       case DECORATION_BLUE:
-        ::SetConsoleTextAttribute(hstdout,
-                                  FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+        std::cout << termcolor::blue;
         break;
       case DECORATION_YELLOW:
-        ::SetConsoleTextAttribute(hstdout, FOREGROUND_RED | FOREGROUND_GREEN);
+        std::cout << termcolor::yellow;
         break;
     }
   }
 
-  DWORD written = 0;
-  ::WriteFile(hstdout, output.c_str(), static_cast<DWORD>(output.size()),
-              &written, NULL);
-
-  if (is_console)
-    ::SetConsoleTextAttribute(hstdout, default_attributes);
-}
-
-#else
-
-void OutputString(const std::string& output, TextDecoration dec) {
-  EnsureInitialized();
-  if (is_console) {
-    switch (dec) {
-      case DECORATION_NONE:
-        break;
-      case DECORATION_DIM:
-        WriteToStdOut("\e[2m");
-        break;
-      case DECORATION_RED:
-        WriteToStdOut("\e[31m\e[1m");
-        break;
-      case DECORATION_GREEN:
-        WriteToStdOut("\e[32m");
-        break;
-      case DECORATION_BLUE:
-        WriteToStdOut("\e[34m\e[1m");
-        break;
-      case DECORATION_YELLOW:
-        WriteToStdOut("\e[33m\e[1m");
-        break;
-    }
-  }
-
-  WriteToStdOut(output.data());
+  std::cout << output.data() ;
 
   if (is_console && dec != DECORATION_NONE)
-    WriteToStdOut("\e[0m");
+    std::cout << termcolor::reset;
 }
 
-#endif
 }
 }  // namespcae zarun::util
 

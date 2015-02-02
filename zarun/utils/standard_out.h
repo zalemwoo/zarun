@@ -14,7 +14,6 @@ namespace util {
 
 enum TextDecoration {
   DECORATION_NONE = 0,
-  DECORATION_DIM,
   DECORATION_RED,
   DECORATION_GREEN,
   DECORATION_BLUE,
