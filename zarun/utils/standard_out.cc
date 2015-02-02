@@ -24,11 +24,6 @@
 namespace {
 
 bool initialized = false;
-
-#if defined(OS_WIN)
-HANDLE hstdout;
-WORD default_attributes;
-#endif
 bool is_console = false;
 
 void EnsureInitialized() {
@@ -46,10 +41,9 @@ void EnsureInitialized() {
 #if defined(OS_WIN)
   // On Windows, we can't force the color on. If the output handle isn't a
   // console, there's nothing we can do about it.
-  hstdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
+  HANDLE hstdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
   CONSOLE_SCREEN_BUFFER_INFO info;
   is_console = !!::GetConsoleScreenBufferInfo(hstdout, &info);
-  default_attributes = info.wAttributes;
 #else
   if (cmdline->HasSwitch(zarun::switches::kColor))
     is_console = true;
@@ -70,7 +64,7 @@ void OutputString(const std::string& output, TextDecoration dec) {
       case DECORATION_NONE:
         break;
       case DECORATION_RED:
-          std::cout << termcolor::red;
+        std::cout << termcolor::red;
         break;
       case DECORATION_GREEN:
         std::cout << termcolor::green;
@@ -86,8 +80,9 @@ void OutputString(const std::string& output, TextDecoration dec) {
 
   std::cout << output.data() ;
 
-  if (is_console && dec != DECORATION_NONE)
+  if (is_console && dec != DECORATION_NONE) {
     std::cout << termcolor::reset;
+  }
 }
 
 }
