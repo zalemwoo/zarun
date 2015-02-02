@@ -48,6 +48,7 @@ vars = {
   'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
   'gin_revision': 'fe52de0c4847e24839ca805db8ba7c3808fd7639',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
+  'termcolor_revision': '48f0b6eaffc8cf8aa63180e91d43e4c167756374',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -156,6 +157,9 @@ deps = {
 
   'src/third_party/linenoise':
     Var('zarun_git') + '/linenoise.git' + '@' +  Var('linenoise_revision'),
+
+  'src/third_party/termcolor':
+    Var('zarun_git') + '/termcolor.git' + '@' +  Var('termcolor_revision'),
 }
 
 
