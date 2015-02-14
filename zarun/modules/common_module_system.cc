@@ -10,7 +10,6 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/debug/trace_event.h"
 #include "base/stl_util.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
@@ -241,8 +240,6 @@ v8::Local<v8::Value> CommonModuleSystem::CallModuleMethod(
     const std::string& method_name,
     int argc,
     v8::Handle<v8::Value> argv[]) {
-  TRACE_EVENT2("v8", "v8.callModuleMethod", "module_name", module_name,
-               "method_name", method_name);
 
   v8::EscapableHandleScope handle_scope(isolate());
   v8::Context::Scope context_scope(context()->v8_context());

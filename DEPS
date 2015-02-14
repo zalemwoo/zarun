@@ -21,29 +21,33 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'zarun_git': 'https://github.com/zalemwoo',
   
-  'libcxx_revision': 'a0baeaba8b8fee4d91241471affe224ba0f66a68',
-  'libcxxabi_revision': '139d54a741df994836ad026e9a7b9d0c0f53764e',
-  'clang_revision': '0825693c3460f23b1d78ad272999f850447ad333',
-  'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
-  'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
+  'libcxx_revision': '6cf8ebb3b63999561a125d977a25df3bcf05c0e3',
+  'libcxxabi_revision': 'cd9a5144f0d32d2a5ac04f80f1e06a19e7e0b647',
+  'clang_revision': 'd5f568673280ba9180bbf0b913b571786c9f352a',
+#  'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
+#  'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
-  'build_revision': '461a1f8cc3a4dfc9fd3c1329816cf7f720c8d2bc',
-  'buildtools_revision': '451dcd05a5b34936f5be67b2472cd63aaa508401',
-  'base_revision': '2f0c1f0b3e0b94946b2093c86d57dc9c10a312b7',
-  'net_revision': 'df102f4630181921c436e065a328e3e468662e2b',
-  'crypto_revision': 'e873652b6eaaaebaadd22d560d10862bee85a605',
-  'sqlite_revision': '47f19be5c0ead0759e60006d39d593166cc8fbc0',
+  'build_revision': 'e8a433670f3a380a5d4316f4504dcf141dec5a05',
+  'buildtools_revision': '5c5e924788fe40f7d6e0a3841ac572de2475e689',
+  'base_revision': '3dbca2f3f824dd667d90533938df44685abbe718',
+  'net_revision': '052766e80fba7e9c919cda3216a970105d889a5c',
+  'crypto_revision': 'fcf4398c70205a4b0911914e3adec94ca4bd88a9',
+  'sqlite_revision': 'e35e9749c8ccfe5bd5163ac264146b96c53e563e',
   'zlib_revision': 'afd8c4593c010c045902f6c0501718f1823064a3',
 
-  'valgrind_revision': '9e90806645c0629b87b0894a151f8108d45646d8',
+  'valgrind_revision': '12ad17c17b5099d5e6cd271a52b6caaad09640d2',
   'valgrind_deps_revision': '59886873b4b8258a8e0f098c23e1958e0d0c0a26',
 
-  'swarming_revision': 'd863df38343f8057dbddfe5543addcf19a49ce0f',
-  "angle_revision": "bc393df9cd8ae893da686533644da29a8c4911ae",
-  'pdfium_revision': 'eef005055d6aafc2cc6066af37ce47d8b15ec7cd',
+#  'swarming_revision': 'd863df38343f8057dbddfe5543addcf19a49ce0f',
+#  "angle_revision": "bc393df9cd8ae893da686533644da29a8c4911ae",
+#  'pdfium_revision': 'eef005055d6aafc2cc6066af37ce47d8b15ec7cd',
   'boringssl_revision': 'a87de9b39b5a9b1d6e9ed6d18167946397581df1',
-  'lss_revision': '952107fa7cea0daaabead28c0e92d579bee517eb',
-  'nss_revision': 'bb4e75a43d007518ae7d618665ea2f25b0c60b63',
+#  'lss_revision': '952107fa7cea0daaabead28c0e92d579bee517eb',
+#  'nss_revision': 'bb4e75a43d007518ae7d618665ea2f25b0c60b63',
+  'khronos_revision': '5ff9764c9d1e74c31691fefc150d4d919157288a',
+
+  'mojo_revision': 'd32e1b379f51861fdeaf95c7beaf12803fd22c48',
+  'third_party_mojo_revision': 'c9b8bb7093e150cad280ccd9b7b8533839f59872',
 
   'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
   'gin_revision': 'fe52de0c4847e24839ca805db8ba7c3808fd7639',
@@ -95,8 +99,8 @@ deps = {
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + '487c0b6ae8b44932e45347211bca0e8387718436', # from svn revision 1998
 
-  'src/tools/swarming_client':
-    Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
+#  'src/tools/swarming_client':
+#    Var('chromium_git') + '/external/swarming.client.git' + '@' +  Var('swarming_revision'),
 
   'src/tools/clang':
     Var('chromium_git') + '/chromium/src/tools/clang.git' + '@' + Var('clang_revision'),
@@ -148,6 +152,15 @@ deps = {
 
 #  'src/third_party/pdfium':
 #   'https://pdfium.googlesource.com/pdfium.git' + '@' +  Var('pdfium_revision'),
+
+  'src/mojo':
+    Var('chromium_git') + '/chromium/src/mojo.git' + '@' +  Var('mojo_revision'),
+
+  'src/third_party/mojo/src':
+    Var('chromium_git') + '/external/mojo.git' + '@' +  Var('third_party_mojo_revision'),
+   
+  'src/third_party/khronos':
+    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' +  Var('khronos_revision'),
    
   'src/v8':
     Var('zarun_git') + '/v8-git-mirror.git' + '@' +  Var('v8_revision'),

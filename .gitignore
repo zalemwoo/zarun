@@ -443,5 +443,8 @@ v8.log
 /net
 /crypto
 /third_party/zlib
+/mojo
+/third_party/mojo
+/third_party/khronos
 /third_party/linenoise
 /third_party/termcolor
