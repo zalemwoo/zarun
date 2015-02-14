@@ -49,7 +49,7 @@ vars = {
   'mojo_revision': 'd32e1b379f51861fdeaf95c7beaf12803fd22c48',
   'third_party_mojo_revision': 'c9b8bb7093e150cad280ccd9b7b8533839f59872',
 
-  'v8_revision': 'cc2b2f487bfa07c4f8f33ac574a4580ad9ec0374', # 3.32.7
+  'v8_revision': '2db40955e94d6ae946b1e12aca8bf25a4b3185df', # 4.2.70
   'gin_revision': 'fe52de0c4847e24839ca805db8ba7c3808fd7639',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
   'termcolor_revision': '63fc95fc9167be01212173cf32b3de0dfc6ba1b8',
