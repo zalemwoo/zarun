@@ -8,6 +8,7 @@ namespace switches {
 // alongside the definition of their values in the .cc file and, as needed,
 // in zarun_shell Usage() function.
 extern const char kColor[];
+extern const char kHelp[];
 extern const char kRepl[];
 extern const char kNoColor[];
 }

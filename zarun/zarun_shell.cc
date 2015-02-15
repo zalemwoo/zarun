@@ -17,7 +17,7 @@ namespace zarun {
 namespace {
 
 static const std::string kDefaultV8Options =
-    "--harmony --es_staging --expose_gc";
+    "--es_staging --harmony --harmony-shipping --expose_gc";
 
 base::LazyInstance<zarun::ZarunShell> zarun_shell = LAZY_INSTANCE_INITIALIZER;
 
@@ -32,7 +32,8 @@ ZarunShell& ZarunShell::GetZarunShell() {
 ZarunShell::ZarunShell() {
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
-  if (command_line->HasSwitch(zarun::switches::kRepl)) {
+  if ((command_line->GetArgs().empty()) ||
+      (command_line->HasSwitch(zarun::switches::kRepl))) {
     shell_mode_ = ShellMode::Repl;
   }
   Init();

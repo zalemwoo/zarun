@@ -16,9 +16,12 @@
 
 void Usage() {
   std::cerr << "Zarun, for study base/gin/mojo/v8... from chromium codebase.\n";
-  std::cerr << "Usage: zarun"
-            << " [--" << zarun::switches::kRepl << "]"
-            << " ...\n";
+  std::cerr << "Usage: zarun \n"
+            << "       [--" << zarun::switches::kRepl
+            << "]: run in REPL mode.\n"
+            << "       [--" << zarun::switches::kHelp
+            << "]: show usage and exit.\n"
+            << "       ...\n";
 }
 
 int main(int argc, char** argv) {
@@ -32,8 +35,7 @@ int main(int argc, char** argv) {
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
 
-  if (!command_line->HasSwitch(zarun::switches::kRepl) &&
-      command_line->GetArgs().empty()) {
+  if (command_line->HasSwitch(zarun::switches::kHelp)) {
     Usage();
     return 0;
   }
