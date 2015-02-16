@@ -4,6 +4,7 @@ global.os = requireNative("os");
 global.sys_info = requireNative("sys_info");
 global.subprocess = requireNative("subprocess");
 global.util = require("node_util");
+require("traceur");
 global.console = console;
 global.print = console.log;
 global.define = define;

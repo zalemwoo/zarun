@@ -66,6 +66,7 @@ action("js2c") {
   sources = [
     "modules/js/bootstrap.js",
     "modules/js/node_util.js",
+    "modules/js/traceur.js",
   ]
 
   outputs = [
