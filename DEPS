@@ -19,7 +19,8 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'zarun_git': 'https://github.com/zalemwoo',
+  'githab_git': 'https://github.com/zalemwoo',
+  'gitlab_git': 'http://gitlab.wwatwh.com:10080',
   
   'libcxx_revision': '1beaff680ee20c76e304824fc9240e6247e5a81e',
   'libcxxabi_revision': 'f0098574639866eebc5f277a6b00304fffece0c7',
@@ -51,6 +52,7 @@ vars = {
 
   'v8_revision': '2db40955e94d6ae946b1e12aca8bf25a4b3185df', # 4.2.70
   'gin_revision': 'bf03fbc4b57b95cd11974a4b79c30e735eb5bcf3',
+  'sql_revision': 'eb1cdfdff64a0e47942f978579b725e9b3067448',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
   'termcolor_revision': '63fc95fc9167be01212173cf32b3de0dfc6ba1b8',
 }
@@ -163,16 +165,19 @@ deps = {
     Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' +  Var('khronos_revision'),
    
   'src/v8':
-    Var('zarun_git') + '/v8-git-mirror.git' + '@' +  Var('v8_revision'),
+    Var('githab_git') + '/v8-git-mirror.git' + '@' +  Var('v8_revision'),
+    
+  'src/sql':
+    Var('gitlab_git') + '/chromium/chromium.src.sql.git' + '@' +  Var('sql_revision'),
     
   'src/gin':
-    Var('zarun_git') + '/gin.git' + '@' +  Var('gin_revision'),
+    Var('githab_git') + '/gin.git' + '@' +  Var('gin_revision'),
 
   'src/third_party/linenoise':
-    Var('zarun_git') + '/linenoise.git' + '@' +  Var('linenoise_revision'),
+    Var('githab_git') + '/linenoise.git' + '@' +  Var('linenoise_revision'),
 
   'src/third_party/termcolor':
-    Var('zarun_git') + '/termcolor.git' + '@' +  Var('termcolor_revision'),
+    Var('githab_git') + '/termcolor.git' + '@' +  Var('termcolor_revision'),
 }
 
 

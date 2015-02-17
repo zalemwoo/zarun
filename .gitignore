@@ -440,6 +440,7 @@ v8.log
 
 /base
 /gin
+/sql
 /net
 /crypto
 /third_party/zlib
