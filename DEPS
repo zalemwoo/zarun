@@ -50,7 +50,7 @@ vars = {
   'mojo_revision': 'd32e1b379f51861fdeaf95c7beaf12803fd22c48',
   'third_party_mojo_revision': 'c9b8bb7093e150cad280ccd9b7b8533839f59872',
 
-  'v8_revision': '2db40955e94d6ae946b1e12aca8bf25a4b3185df', # 4.2.70
+  'v8_revision': '055b865a326cdf6a28d2bbb0f197b36e09069fc1', # 4.2.73
   'gin_revision': 'bf03fbc4b57b95cd11974a4b79c30e735eb5bcf3',
   'sql_revision': 'eb1cdfdff64a0e47942f978579b725e9b3067448',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
@@ -165,7 +165,7 @@ deps = {
     Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' +  Var('khronos_revision'),
    
   'src/v8':
-    Var('githab_git') + '/v8-git-mirror.git' + '@' +  Var('v8_revision'),
+    Var('gitlab_git') + '/chromium/v8.git' + '@' +  Var('v8_revision'),
     
   'src/sql':
     Var('gitlab_git') + '/chromium/chromium.src.sql.git' + '@' +  Var('sql_revision'),
