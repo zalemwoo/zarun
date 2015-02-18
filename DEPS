@@ -28,8 +28,9 @@ vars = {
 #  'sfntly_revision': '1bdaae8fc788a5ac8936d68bf24f37d977a13dac',
 #  'skia_revision': 'bc97c9378bf8b89cc17280a2a04a5c3a9405e6ab',
 
-#  'build_revision': 'e8a433670f3a380a5d4316f4504dcf141dec5a05',
+  'build_revision': 'b56943aa0de00535eecc1611c8f5c61631033201',
   'buildtools_revision': '5c5e924788fe40f7d6e0a3841ac572de2475e689',
+  'gtest_revision': 'd4eaf3c5d0994eb0112c17aa3c732022eb9fdf6b',
   'base_revision': '9d73d5f6241cdc89817a1c49835f03528f284fc1',
   'net_revision': '4332822af288a44af960052ef48a33340d23e762',
   'crypto_revision': 'fcf4398c70205a4b0911914e3adec94ca4bd88a9',
@@ -65,6 +66,9 @@ allowed_hosts = [
 ]
 
 deps = {
+  'src/build':
+    Var('chromium_git') + '/chromium/src/build.git' + '@' +  Var('build_revision'),
+
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
@@ -72,7 +76,7 @@ deps = {
     Var('chromium_git') + '/external/open-vcdiff.git' + '@' + '438f2a5be6d809bc21611a94cd37bfc8c28ceb33', # from svn revision 41
 
   'src/testing/gtest':
-    Var('chromium_git') + '/external/googletest.git' + '@' + '8245545b6dc9c4703e6496d1efd19e975ad2b038', 
+    Var('chromium_git') + '/external/gtest.git' + '@' +  Var('gtest_revision'),
 
   'src/testing/gmock':
     Var('chromium_git') + '/external/gmock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',

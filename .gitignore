@@ -46,6 +46,7 @@ v8.log
 /ash/ash_unittests_run.xml
 /base/base_unittests_run.xml
 /breakpad/src/
+/build
 /build/Debug
 /build/Debug_x64
 /build/gomacc.lock
@@ -449,3 +450,5 @@ v8.log
 /third_party/khronos
 /third_party/linenoise
 /third_party/termcolor
+
+**/.zarun_history
