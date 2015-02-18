@@ -54,6 +54,7 @@ vars = {
   'v8_revision': '055b865a326cdf6a28d2bbb0f197b36e09069fc1', # 4.2.73
   'gin_revision': 'bf03fbc4b57b95cd11974a4b79c30e735eb5bcf3',
   'sql_revision': 'eb1cdfdff64a0e47942f978579b725e9b3067448',
+  'url_revision': '448fb381d2d0845db3fdd1e9e28ff653698c1f8a',
   'linenoise_revision': '0d9bd4eb1cad04588e078d18d57e2b47810d8083',
   'termcolor_revision': '63fc95fc9167be01212173cf32b3de0dfc6ba1b8',
 }
@@ -175,7 +176,10 @@ deps = {
     Var('gitlab_git') + '/chromium/chromium.src.sql.git' + '@' +  Var('sql_revision'),
     
   'src/gin':
-    Var('githab_git') + '/gin.git' + '@' +  Var('gin_revision'),
+    Var('gitlab_git') + '/chromium/chromium.src.gin.git' + '@' +  Var('gin_revision'),
+    
+  'src/url':
+    Var('gitlab_git') + '/chromium/chromium.src.url.git' + '@' +  Var('url_revision'),
 
   'src/third_party/linenoise':
     Var('githab_git') + '/linenoise.git' + '@' +  Var('linenoise_revision'),

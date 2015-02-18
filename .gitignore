@@ -441,6 +441,7 @@ v8.log
 
 /base
 /gin
+/url
 /sql
 /net
 /crypto
